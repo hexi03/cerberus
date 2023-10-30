@@ -1,0 +1,657 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="Хранилище CerberusDBModel" Provider="Npgsql" ProviderManifestToken="15.2" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="Departments">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int4" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="name" Type="varchar" MaxLength="50" />
+        </EntityType>
+        <EntityType Name="FactorySites">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int4" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="name" Type="varchar" MaxLength="50" />
+          <Property Name="department_id" Type="int4" />
+        </EntityType>
+        <EntityType Name="FactorySiteWareHouseClaims">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int4" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="factorysite_id" Type="int4" />
+          <Property Name="warehouse_id" Type="int4" />
+        </EntityType>
+        <EntityType Name="GroupDepartmentClaims">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int4" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="role_id" Type="text" />
+          <Property Name="department_id" Type="int4" />
+        </EntityType>
+        <EntityType Name="GroupFactorySiteClaims">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int4" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="role_id" Type="text" />
+          <Property Name="factorysite_id" Type="int4" />
+        </EntityType>
+        <EntityType Name="GroupWareHouseClaims">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int4" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="role_id" Type="text" />
+          <Property Name="warehouse_id" Type="int4" />
+        </EntityType>
+        <EntityType Name="ItemsRegistry">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int4" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="text" Nullable="false" />
+          <Property Name="Amount" Type="text" Nullable="false" />
+          <Property Name="Batch" Type="text" />
+        </EntityType>
+        <EntityType Name="ProductionRegistry">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int4" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="production_id" Type="int4" Nullable="false" />
+          <Property Name="requirement_id" Type="int4" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Reports">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int4" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="report_type" Type="varchar" MaxLength="50" />
+          <Property Name="creator_id" Type="text" />
+          <Property Name="serialized" Type="text" />
+        </EntityType>
+        <EntityType Name="WareHouses">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int4" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="name" Type="varchar" MaxLength="50" />
+          <Property Name="department_id" Type="int4" />
+        </EntityType>
+        <Association Name="factorysite_warehouse_factorysite_id_fkey">
+          <End Role="FactorySites" Type="Self.FactorySites" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="FactorySiteWareHouseClaims" Type="Self.FactorySiteWareHouseClaims" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="FactorySites">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="FactorySiteWareHouseClaims">
+              <PropertyRef Name="factorysite_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="factorysite_warehouse_warehouse_id_fkey">
+          <End Role="WareHouses" Type="Self.WareHouses" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="FactorySiteWareHouseClaims" Type="Self.FactorySiteWareHouseClaims" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="WareHouses">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="FactorySiteWareHouseClaims">
+              <PropertyRef Name="warehouse_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="factorysites_department_id_fkey">
+          <End Role="Departments" Type="Self.Departments" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="FactorySites" Type="Self.FactorySites" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Departments">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="FactorySites">
+              <PropertyRef Name="department_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="group_departments_department_id_fkey">
+          <End Role="Departments" Type="Self.Departments" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="GroupDepartmentClaims" Type="Self.GroupDepartmentClaims" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Departments">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="GroupDepartmentClaims">
+              <PropertyRef Name="department_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="group_factorysite_factorysite_id_fkey">
+          <End Role="FactorySites" Type="Self.FactorySites" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="GroupFactorySiteClaims" Type="Self.GroupFactorySiteClaims" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="FactorySites">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="GroupFactorySiteClaims">
+              <PropertyRef Name="factorysite_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="group_warehouse_warehouse_id_fkey">
+          <End Role="WareHouses" Type="Self.WareHouses" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="GroupWareHouseClaims" Type="Self.GroupWareHouseClaims" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="WareHouses">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="GroupWareHouseClaims">
+              <PropertyRef Name="warehouse_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="ProductionRegistry_production_id_fkey">
+          <End Role="ItemsRegistry" Type="Self.ItemsRegistry" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="ProductionRegistry" Type="Self.ProductionRegistry" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ItemsRegistry">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="ProductionRegistry">
+              <PropertyRef Name="production_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="ProductionRegistry_requirement_id_fkey">
+          <End Role="ItemsRegistry" Type="Self.ItemsRegistry" Multiplicity="1" />
+          <End Role="ProductionRegistry" Type="Self.ProductionRegistry" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ItemsRegistry">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="ProductionRegistry">
+              <PropertyRef Name="requirement_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="warehouses_department_id_fkey">
+          <End Role="Departments" Type="Self.Departments" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="WareHouses" Type="Self.WareHouses" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Departments">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="WareHouses">
+              <PropertyRef Name="department_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="Хранилище CerberusDBModelContainer">
+          <EntitySet Name="Departments" EntityType="Self.Departments" Schema="public" store:Type="Tables" />
+          <EntitySet Name="FactorySites" EntityType="Self.FactorySites" Schema="public" store:Type="Tables" />
+          <EntitySet Name="FactorySiteWareHouseClaims" EntityType="Self.FactorySiteWareHouseClaims" Schema="public" store:Type="Tables" />
+          <EntitySet Name="GroupDepartmentClaims" EntityType="Self.GroupDepartmentClaims" Schema="public" store:Type="Tables" />
+          <EntitySet Name="GroupFactorySiteClaims" EntityType="Self.GroupFactorySiteClaims" Schema="public" store:Type="Tables" />
+          <EntitySet Name="GroupWareHouseClaims" EntityType="Self.GroupWareHouseClaims" Schema="public" store:Type="Tables" />
+          <EntitySet Name="ItemsRegistry" EntityType="Self.ItemsRegistry" Schema="public" store:Type="Tables" />
+          <EntitySet Name="ProductionRegistry" EntityType="Self.ProductionRegistry" Schema="public" store:Type="Tables" />
+          <EntitySet Name="Reports" EntityType="Self.Reports" Schema="public" store:Type="Tables" />
+          <EntitySet Name="WareHouses" EntityType="Self.WareHouses" Schema="public" store:Type="Tables" />
+          <AssociationSet Name="factorysite_warehouse_factorysite_id_fkey" Association="Self.factorysite_warehouse_factorysite_id_fkey">
+            <End Role="FactorySites" EntitySet="FactorySites" />
+            <End Role="FactorySiteWareHouseClaims" EntitySet="FactorySiteWareHouseClaims" />
+          </AssociationSet>
+          <AssociationSet Name="factorysite_warehouse_warehouse_id_fkey" Association="Self.factorysite_warehouse_warehouse_id_fkey">
+            <End Role="WareHouses" EntitySet="WareHouses" />
+            <End Role="FactorySiteWareHouseClaims" EntitySet="FactorySiteWareHouseClaims" />
+          </AssociationSet>
+          <AssociationSet Name="factorysites_department_id_fkey" Association="Self.factorysites_department_id_fkey">
+            <End Role="Departments" EntitySet="Departments" />
+            <End Role="FactorySites" EntitySet="FactorySites" />
+          </AssociationSet>
+          <AssociationSet Name="group_departments_department_id_fkey" Association="Self.group_departments_department_id_fkey">
+            <End Role="Departments" EntitySet="Departments" />
+            <End Role="GroupDepartmentClaims" EntitySet="GroupDepartmentClaims" />
+          </AssociationSet>
+          <AssociationSet Name="group_factorysite_factorysite_id_fkey" Association="Self.group_factorysite_factorysite_id_fkey">
+            <End Role="FactorySites" EntitySet="FactorySites" />
+            <End Role="GroupFactorySiteClaims" EntitySet="GroupFactorySiteClaims" />
+          </AssociationSet>
+          <AssociationSet Name="group_warehouse_warehouse_id_fkey" Association="Self.group_warehouse_warehouse_id_fkey">
+            <End Role="WareHouses" EntitySet="WareHouses" />
+            <End Role="GroupWareHouseClaims" EntitySet="GroupWareHouseClaims" />
+          </AssociationSet>
+          <AssociationSet Name="ProductionRegistry_production_id_fkey" Association="Self.ProductionRegistry_production_id_fkey">
+            <End Role="ItemsRegistry" EntitySet="ItemsRegistry" />
+            <End Role="ProductionRegistry" EntitySet="ProductionRegistry" />
+          </AssociationSet>
+          <AssociationSet Name="ProductionRegistry_requirement_id_fkey" Association="Self.ProductionRegistry_requirement_id_fkey">
+            <End Role="ItemsRegistry" EntitySet="ItemsRegistry" />
+            <End Role="ProductionRegistry" EntitySet="ProductionRegistry" />
+          </AssociationSet>
+          <AssociationSet Name="warehouses_department_id_fkey" Association="Self.warehouses_department_id_fkey">
+            <End Role="Departments" EntitySet="Departments" />
+            <End Role="WareHouses" EntitySet="WareHouses" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="CerberusDBModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="Department">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="name" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="FactorySites" Relationship="Self.factorysites_department_id_fkey" FromRole="Departments" ToRole="FactorySites" />
+          <NavigationProperty Name="GroupDepartmentClaims" Relationship="Self.group_departments_department_id_fkey" FromRole="Departments" ToRole="GroupDepartmentClaims" />
+          <NavigationProperty Name="WareHouses" Relationship="Self.warehouses_department_id_fkey" FromRole="Departments" ToRole="WareHouses" />
+        </EntityType>
+        <EntityType Name="FactorySite">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="name" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="department_id" Type="Int32" />
+          <NavigationProperty Name="Department" Relationship="Self.factorysites_department_id_fkey" FromRole="FactorySites" ToRole="Departments" />
+          <NavigationProperty Name="FactorySiteWareHouseClaims" Relationship="Self.factorysite_warehouse_factorysite_id_fkey" FromRole="FactorySites" ToRole="FactorySiteWareHouseClaims" />
+          <NavigationProperty Name="GroupFactorySiteClaims" Relationship="Self.group_factorysite_factorysite_id_fkey" FromRole="FactorySites" ToRole="GroupFactorySiteClaims" />
+        </EntityType>
+        <EntityType Name="FactorySiteWareHouseClaim">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="factorysite_id" Type="Int32" />
+          <Property Name="warehouse_id" Type="Int32" />
+          <NavigationProperty Name="FactorySite" Relationship="Self.factorysite_warehouse_factorysite_id_fkey" FromRole="FactorySiteWareHouseClaims" ToRole="FactorySites" />
+          <NavigationProperty Name="Warehouse" Relationship="Self.factorysite_warehouse_warehouse_id_fkey" FromRole="FactorySiteWareHouseClaims" ToRole="WareHouses" />
+        </EntityType>
+        <EntityType Name="GroupDepartmentClaim">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="role_id" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="department_id" Type="Int32" />
+          <NavigationProperty Name="Department" Relationship="Self.group_departments_department_id_fkey" FromRole="GroupDepartmentClaims" ToRole="Departments" />
+        </EntityType>
+        <EntityType Name="GroupFactorySiteClaim">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="role_id" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="factorysite_id" Type="Int32" />
+          <NavigationProperty Name="FactorySite" Relationship="Self.group_factorysite_factorysite_id_fkey" FromRole="GroupFactorySiteClaims" ToRole="FactorySites" />
+        </EntityType>
+        <EntityType Name="GroupWareHouseClaim">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="role_id" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="warehouse_id" Type="Int32" />
+          <NavigationProperty Name="Warehouse" Relationship="Self.group_warehouse_warehouse_id_fkey" FromRole="GroupWareHouseClaims" ToRole="WareHouses" />
+        </EntityType>
+        <EntityType Name="ItemsRegistry">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Amount" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Batch" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="ProductionRegistries" Relationship="Self.ProductionRegistry_production_id_fkey" FromRole="ItemsRegistry" ToRole="ProductionRegistry" />
+          <NavigationProperty Name="ProductionRegistries1" Relationship="Self.ProductionRegistry_requirement_id_fkey" FromRole="ItemsRegistry" ToRole="ProductionRegistry" />
+        </EntityType>
+        <EntityType Name="ProductionRegistry">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="production_id" Type="Int32" Nullable="false" />
+          <Property Name="requirement_id" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="ItemsRegistry" Relationship="Self.ProductionRegistry_production_id_fkey" FromRole="ProductionRegistry" ToRole="ItemsRegistry" />
+          <NavigationProperty Name="ItemsRegistry1" Relationship="Self.ProductionRegistry_requirement_id_fkey" FromRole="ProductionRegistry" ToRole="ItemsRegistry" />
+        </EntityType>
+        <EntityType Name="Report">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="report_type" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="creator_id" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="serialized" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityType Name="Warehouse">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="name" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="department_id" Type="Int32" />
+          <NavigationProperty Name="Department" Relationship="Self.warehouses_department_id_fkey" FromRole="WareHouses" ToRole="Departments" />
+          <NavigationProperty Name="FactorySiteWareHouseClaims" Relationship="Self.factorysite_warehouse_warehouse_id_fkey" FromRole="WareHouses" ToRole="FactorySiteWareHouseClaims" />
+          <NavigationProperty Name="GroupWareHouseClaims" Relationship="Self.group_warehouse_warehouse_id_fkey" FromRole="WareHouses" ToRole="GroupWareHouseClaims" />
+        </EntityType>
+        <Association Name="factorysites_department_id_fkey">
+          <End Role="Departments" Type="Self.Department" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="FactorySites" Type="Self.FactorySite" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Departments">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="FactorySites">
+              <PropertyRef Name="department_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="group_departments_department_id_fkey">
+          <End Role="Departments" Type="Self.Department" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="GroupDepartmentClaims" Type="Self.GroupDepartmentClaim" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Departments">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="GroupDepartmentClaims">
+              <PropertyRef Name="department_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="warehouses_department_id_fkey">
+          <End Role="Departments" Type="Self.Department" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="WareHouses" Type="Self.Warehouse" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Departments">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="WareHouses">
+              <PropertyRef Name="department_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="factorysite_warehouse_factorysite_id_fkey">
+          <End Role="FactorySites" Type="Self.FactorySite" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="FactorySiteWareHouseClaims" Type="Self.FactorySiteWareHouseClaim" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="FactorySites">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="FactorySiteWareHouseClaims">
+              <PropertyRef Name="factorysite_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="group_factorysite_factorysite_id_fkey">
+          <End Role="FactorySites" Type="Self.FactorySite" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="GroupFactorySiteClaims" Type="Self.GroupFactorySiteClaim" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="FactorySites">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="GroupFactorySiteClaims">
+              <PropertyRef Name="factorysite_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="factorysite_warehouse_warehouse_id_fkey">
+          <End Role="WareHouses" Type="Self.Warehouse" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="FactorySiteWareHouseClaims" Type="Self.FactorySiteWareHouseClaim" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="WareHouses">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="FactorySiteWareHouseClaims">
+              <PropertyRef Name="warehouse_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="group_warehouse_warehouse_id_fkey">
+          <End Role="WareHouses" Type="Self.Warehouse" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="GroupWareHouseClaims" Type="Self.GroupWareHouseClaim" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="WareHouses">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="GroupWareHouseClaims">
+              <PropertyRef Name="warehouse_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="ProductionRegistry_production_id_fkey">
+          <End Role="ItemsRegistry" Type="Self.ItemsRegistry" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="ProductionRegistry" Type="Self.ProductionRegistry" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ItemsRegistry">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="ProductionRegistry">
+              <PropertyRef Name="production_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="ProductionRegistry_requirement_id_fkey">
+          <End Role="ItemsRegistry" Type="Self.ItemsRegistry" Multiplicity="1" />
+          <End Role="ProductionRegistry" Type="Self.ProductionRegistry" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ItemsRegistry">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="ProductionRegistry">
+              <PropertyRef Name="requirement_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="CerberusDBEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="Departments" EntityType="Self.Department" />
+          <EntitySet Name="FactorySites" EntityType="Self.FactorySite" />
+          <EntitySet Name="FactorySiteWareHouseClaims" EntityType="Self.FactorySiteWareHouseClaim" />
+          <EntitySet Name="GroupDepartmentClaims" EntityType="Self.GroupDepartmentClaim" />
+          <EntitySet Name="GroupFactorySiteClaims" EntityType="Self.GroupFactorySiteClaim" />
+          <EntitySet Name="GroupWareHouseClaims" EntityType="Self.GroupWareHouseClaim" />
+          <EntitySet Name="ItemsRegistries" EntityType="Self.ItemsRegistry" />
+          <EntitySet Name="ProductionRegistries" EntityType="Self.ProductionRegistry" />
+          <EntitySet Name="Reports" EntityType="Self.Report" />
+          <EntitySet Name="WareHouses" EntityType="Self.Warehouse" />
+          <AssociationSet Name="factorysites_department_id_fkey" Association="Self.factorysites_department_id_fkey">
+            <End Role="Departments" EntitySet="Departments" />
+            <End Role="FactorySites" EntitySet="FactorySites" />
+          </AssociationSet>
+          <AssociationSet Name="group_departments_department_id_fkey" Association="Self.group_departments_department_id_fkey">
+            <End Role="Departments" EntitySet="Departments" />
+            <End Role="GroupDepartmentClaims" EntitySet="GroupDepartmentClaims" />
+          </AssociationSet>
+          <AssociationSet Name="warehouses_department_id_fkey" Association="Self.warehouses_department_id_fkey">
+            <End Role="Departments" EntitySet="Departments" />
+            <End Role="WareHouses" EntitySet="WareHouses" />
+          </AssociationSet>
+          <AssociationSet Name="factorysite_warehouse_factorysite_id_fkey" Association="Self.factorysite_warehouse_factorysite_id_fkey">
+            <End Role="FactorySites" EntitySet="FactorySites" />
+            <End Role="FactorySiteWareHouseClaims" EntitySet="FactorySiteWareHouseClaims" />
+          </AssociationSet>
+          <AssociationSet Name="group_factorysite_factorysite_id_fkey" Association="Self.group_factorysite_factorysite_id_fkey">
+            <End Role="FactorySites" EntitySet="FactorySites" />
+            <End Role="GroupFactorySiteClaims" EntitySet="GroupFactorySiteClaims" />
+          </AssociationSet>
+          <AssociationSet Name="factorysite_warehouse_warehouse_id_fkey" Association="Self.factorysite_warehouse_warehouse_id_fkey">
+            <End Role="WareHouses" EntitySet="WareHouses" />
+            <End Role="FactorySiteWareHouseClaims" EntitySet="FactorySiteWareHouseClaims" />
+          </AssociationSet>
+          <AssociationSet Name="group_warehouse_warehouse_id_fkey" Association="Self.group_warehouse_warehouse_id_fkey">
+            <End Role="WareHouses" EntitySet="WareHouses" />
+            <End Role="GroupWareHouseClaims" EntitySet="GroupWareHouseClaims" />
+          </AssociationSet>
+          <AssociationSet Name="ProductionRegistry_production_id_fkey" Association="Self.ProductionRegistry_production_id_fkey">
+            <End Role="ItemsRegistry" EntitySet="ItemsRegistries" />
+            <End Role="ProductionRegistry" EntitySet="ProductionRegistries" />
+          </AssociationSet>
+          <AssociationSet Name="ProductionRegistry_requirement_id_fkey" Association="Self.ProductionRegistry_requirement_id_fkey">
+            <End Role="ItemsRegistry" EntitySet="ItemsRegistries" />
+            <End Role="ProductionRegistry" EntitySet="ProductionRegistries" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="Хранилище CerberusDBModelContainer" CdmEntityContainer="CerberusDBEntities">
+          <EntitySetMapping Name="Departments">
+            <EntityTypeMapping TypeName="CerberusDBModel.Department">
+              <MappingFragment StoreEntitySet="Departments">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="name" ColumnName="name" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="FactorySites">
+            <EntityTypeMapping TypeName="CerberusDBModel.FactorySite">
+              <MappingFragment StoreEntitySet="FactorySites">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="name" ColumnName="name" />
+                <ScalarProperty Name="department_id" ColumnName="department_id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="FactorySiteWareHouseClaims">
+            <EntityTypeMapping TypeName="CerberusDBModel.FactorySiteWareHouseClaim">
+              <MappingFragment StoreEntitySet="FactorySiteWareHouseClaims">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="factorysite_id" ColumnName="factorysite_id" />
+                <ScalarProperty Name="warehouse_id" ColumnName="warehouse_id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="GroupDepartmentClaims">
+            <EntityTypeMapping TypeName="CerberusDBModel.GroupDepartmentClaim">
+              <MappingFragment StoreEntitySet="GroupDepartmentClaims">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="role_id" ColumnName="role_id" />
+                <ScalarProperty Name="department_id" ColumnName="department_id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="GroupFactorySiteClaims">
+            <EntityTypeMapping TypeName="CerberusDBModel.GroupFactorySiteClaim">
+              <MappingFragment StoreEntitySet="GroupFactorySiteClaims">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="role_id" ColumnName="role_id" />
+                <ScalarProperty Name="factorysite_id" ColumnName="factorysite_id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="GroupWareHouseClaims">
+            <EntityTypeMapping TypeName="CerberusDBModel.GroupWareHouseClaim">
+              <MappingFragment StoreEntitySet="GroupWareHouseClaims">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="role_id" ColumnName="role_id" />
+                <ScalarProperty Name="warehouse_id" ColumnName="warehouse_id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ItemsRegistries">
+            <EntityTypeMapping TypeName="CerberusDBModel.ItemsRegistry">
+              <MappingFragment StoreEntitySet="ItemsRegistry">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="Amount" ColumnName="Amount" />
+                <ScalarProperty Name="Batch" ColumnName="Batch" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ProductionRegistries">
+            <EntityTypeMapping TypeName="CerberusDBModel.ProductionRegistry">
+              <MappingFragment StoreEntitySet="ProductionRegistry">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="production_id" ColumnName="production_id" />
+                <ScalarProperty Name="requirement_id" ColumnName="requirement_id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Reports">
+            <EntityTypeMapping TypeName="CerberusDBModel.Report">
+              <MappingFragment StoreEntitySet="Reports">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="report_type" ColumnName="report_type" />
+                <ScalarProperty Name="creator_id" ColumnName="creator_id" />
+                <ScalarProperty Name="serialized" ColumnName="serialized" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="WareHouses">
+            <EntityTypeMapping TypeName="CerberusDBModel.Warehouse">
+              <MappingFragment StoreEntitySet="WareHouses">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="name" ColumnName="name" />
+                <ScalarProperty Name="department_id" ColumnName="department_id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="Нет" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

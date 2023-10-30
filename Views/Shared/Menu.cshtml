@@ -1,0 +1,69 @@
+﻿<div id="sidebar">
+    <ul class="tree">
+        <li>
+            <details open>
+                <summary><a href="@Url.Action("Index", "Departments")">Отделы</a></summary>
+                <ul>
+                    @using (var context = new cerberus.Models.CerberusDBEntities())
+                    {
+                        var departments = context.Departments.ToList();
+
+                        foreach (var department in departments)
+                        {
+
+                            <li>
+                                
+                                <details open>
+                                    <summary>
+                                        <a href="@Url.Action("Details", "Departments", new { id = department.id })">@department.name</a>
+                                    </summary>
+                                    <ul>
+                                        <li>
+
+                                            <details open>
+                                                <summary>
+                                                    <a href="@Url.Action("Index", "FactorySites" , new { id=department.id })">Производственные участки</a>
+                                                </summary>
+                                                <ul>
+
+
+                                                    @foreach (var factorySite in context.FactorySites.Where(fs => fs.department_id == department.id))
+                                                    {
+                                                        <li>
+
+                                                            <a href="@Url.Action("Details", "FactorySites", new { id = factorySite.id })">@factorySite.name</a>
+
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            </details>
+                                        </li>
+                                        <li>
+                                            <details open>
+                                                <summary>
+                                                    <a href="@Url.Action("Index", "Warehouses", new { id = department.id })">Склады</a>
+                                                </summary>
+                                                <ul>
+
+                                                    @foreach (var warehouse in context.WareHouses.Where(wh => wh.department_id == department.id))
+                                                    {
+
+                                                        <li>
+
+                                                            <a href="@Url.Action("Details", "Warehouses", new { id = warehouse.id })">@warehouse.name</a>
+
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            </details>
+                                        </li>
+                                        </ul>
+</details>
+                            </li>
+                        }
+                    }
+                </ul>
+            </details>
+        </li>
+    </ul>
+</div>

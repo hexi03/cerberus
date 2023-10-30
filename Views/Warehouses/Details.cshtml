@@ -1,0 +1,52 @@
+﻿@model cerberus.Models.Warehouse
+
+ 
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Details</title>
+</head>
+<body>
+    <div>
+        <h4>Warehouse @Model.name</h4>
+
+        <div>
+
+            <a href="@Url.Action("CreateWHReplenishmentWorkShiftReport", "Reports", new { id = Model.id })">Создать отчет о приемке ПП</a>
+            <a href="@Url.Action("CreateWHReleaseReport", "Reports", new { id = Model.id })">Создать отчет о выдаче</a>
+            <a href="@Url.Action("CreateWHInventarisationReport", "Reports", new { id = Model.id })">Создать отчет об инвентаризации</a>
+
+            <a href="@Url.Action("CreateWHReplenishmentReport", "Reports", new { id = Model.id })">Создать отчет о приемке</a>
+            <a href="@Url.Action("CreateWHShipmentReport", "Reports",new { id = Model.id })">Создать отчет об отгрузке</a>
+
+
+        </div>
+        <hr />
+        <dl class="dl-horizontal">
+            <dt>
+                @Html.DisplayNameFor(model => model.name)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.name)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.Department.name)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.Department.name)
+            </dd>
+
+        </dl>
+    </div>
+    <p>
+        @Html.ActionLink("Edit", "Edit", new { id = Model.id }) |
+        @Html.ActionLink("Back to List", "Index")
+    </p>
+</body>
+</html>

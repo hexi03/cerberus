@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="79b625d96438465f9b62c3e0b284c7ae" Name="Diagram1">
+        <EntityTypeShape EntityType="CerberusDBModel.Department" Width="1.5" PointX="0.75" PointY="5.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="CerberusDBModel.FactorySite" Width="1.5" PointX="3" PointY="2.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="CerberusDBModel.FactorySiteWareHouseClaim" Width="1.5" PointX="5.25" PointY="2.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="CerberusDBModel.GroupDepartmentClaim" Width="1.5" PointX="3" PointY="5.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="CerberusDBModel.GroupFactorySiteClaim" Width="1.5" PointX="5.25" PointY="5.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="CerberusDBModel.GroupWareHouseClaim" Width="1.5" PointX="5.25" PointY="8.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="CerberusDBModel.ItemsRegistry" Width="1.5" PointX="7.75" PointY="0.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="CerberusDBModel.ProductionRegistry" Width="1.5" PointX="10" PointY="1" IsExpanded="true" />
+        <EntityTypeShape EntityType="CerberusDBModel.Report" Width="1.5" PointX="7.75" PointY="4.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="CerberusDBModel.Warehouse" Width="1.5" PointX="3" PointY="8" IsExpanded="true" />
+        <AssociationConnector Association="CerberusDBModel.factorysites_department_id_fkey" ManuallyRouted="false" />
+        <AssociationConnector Association="CerberusDBModel.group_departments_department_id_fkey" ManuallyRouted="false" />
+        <AssociationConnector Association="CerberusDBModel.warehouses_department_id_fkey" ManuallyRouted="false" />
+        <AssociationConnector Association="CerberusDBModel.factorysite_warehouse_factorysite_id_fkey" ManuallyRouted="false" />
+        <AssociationConnector Association="CerberusDBModel.group_factorysite_factorysite_id_fkey" ManuallyRouted="false" />
+        <AssociationConnector Association="CerberusDBModel.factorysite_warehouse_warehouse_id_fkey" ManuallyRouted="false" />
+        <AssociationConnector Association="CerberusDBModel.group_warehouse_warehouse_id_fkey" ManuallyRouted="false" />
+        <AssociationConnector Association="CerberusDBModel.ProductionRegistry_production_id_fkey" ManuallyRouted="false" />
+        <AssociationConnector Association="CerberusDBModel.ProductionRegistry_requirement_id_fkey" ManuallyRouted="false" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

@@ -1,0 +1,30 @@
+﻿<div class="grid-container item-list-container overlayMenu modal">
+    @{
+        var grid = new WebGrid(source: (new cerberus.Models.CerberusDBEntities()).ItemsRegistries, canPage: true, rowsPerPage: 30, ajaxUpdateContainerId: "grid");
+    }
+    @grid.GetHtml(tableStyle: "table table-bordered",
+                  headerStyle: "grid-header",
+                  alternatingRowStyle: "grid-alternating-row",
+                  selectedRowStyle: "grid-selected-row",
+                  rowStyle: "grid-row item-button-row",
+                  mode: WebGridPagerModes.All,
+                  firstText: "<<",
+                  previousText: "<",
+                  nextText: ">",
+                  lastText: ">>",
+                  columns: grid.Columns(
+                    grid.Column(columnName: "Id", header: "ID", style: "item-list-id"),
+                    grid.Column(columnName: "Name", header: "Наименование", style: "item-list-name"),
+                    grid.Column(columnName: "Amount", header: "Единицы"),
+                    grid.Column(columnName: "Batch", header: "Партия")
+                  )
+                  )
+
+    <div id="grid">
+        @grid.GetHtml()
+    </div>
+    <div id="gridPager" class="pager">
+        @grid.Pager()
+    </div>
+    <button class="item-list-hide-btn">Скрыть</button>
+</div>
