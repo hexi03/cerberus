@@ -1,4 +1,4 @@
-﻿@model IEnumerable<cerberus.Models.ItemsRegistry>
+﻿@model IEnumerable<cerberus.Models.edmx.ItemsRegistry>
 
  
 
@@ -16,13 +16,13 @@
     <table class="table">
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Name)
+                @Html.DisplayNameFor(model => model.name)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Amount)
+                @Html.DisplayNameFor(model => model.units)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Batch)
+                @Html.DisplayNameFor(model => model.batch)
             </th>
             <th></th>
         </tr>
@@ -30,18 +30,18 @@
     @foreach (var item in Model) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.Name)
+                @Html.DisplayFor(modelItem => item.name)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Amount)
+                @Html.DisplayFor(modelItem => item.units)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Batch)
+                @Html.DisplayFor(modelItem => item.batch)
             </td>
             <td>
-                @Html.ActionLink("Edit", "Edit", new { id=item.Id }) |
-                @Html.ActionLink("Details", "Details", new { id=item.Id }) |
-                @Html.ActionLink("Delete", "Delete", new { id=item.Id })
+                @Html.ActionLink("Edit", "Edit", new { id=item.id }) |
+                @Html.ActionLink("Details", "Details", new { id=item.id }) |
+                @Html.ActionLink("Delete", "Delete", new { id=item.id })
             </td>
         </tr>
     }

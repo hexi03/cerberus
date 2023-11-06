@@ -1,4 +1,4 @@
-﻿@model cerberus.Models.FactorySite
+﻿@model cerberus.Models.edmx.FactorySite
 
  
 
@@ -9,7 +9,7 @@
     <div>
 
         <a href="@Url.Action("CreateFSWorkShiftReport", "Reports", new { id = Model.id })">Создать отчет о смене</a>
-        
+        <a href="@Url.Action("CreateFSSupplyRequirementReport", "Reports", new { id = Model.id })">Создать отчет о смене</a>
 
 
     </div>

@@ -1,0 +1,48 @@
+﻿@model cerberus.DTO.ApplicationUserDTO
+
+@{
+    ViewBag.Title = "Create User";
+}
+
+<h2>Create User</h2>
+
+@using (Html.BeginForm("UserCreate", "GroupUser", FormMethod.Post))
+{
+    @Html.Label("User Name:")
+    @Html.TextBoxFor(model => model.Name)
+
+    @Html.Label("Password:")
+    @Html.PasswordFor(model => model.Password)
+
+    <div id="roleContainer">
+        <button type="button" id="addRoleButton" class="btn btn-primary">Add Role</button>
+    </div>
+
+    <input type="submit" value="Create" />
+}
+
+@Html.ActionLink("Back to List", "Index")
+
+<div class="roleVariantStorage visually-hidden">
+    <option value="">Select Roles</option>
+    @foreach (var role in ViewBag.Roles)
+    {
+        <option value="@role.Name">@role.Name</option>
+    }
+</div>
+@section scripts {
+    
+    <script>
+        $(function () {
+            $("#addRoleButton").click(function () {
+                var roleRow = '<div class="roleRow">' +
+                    '<label for="Roles">User Roles:</label>' +
+                    '<select class="form-control" name="Roles['+ ($(this).parent().length - 1) +']">' +
+                    $('.roleVariantStorage').html()
+                    '</select>' +
+                    '</div>';
+                $("#roleContainer").append(roleRow);
+            });
+        });
+    </script>
+}

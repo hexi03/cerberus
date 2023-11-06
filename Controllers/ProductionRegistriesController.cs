@@ -8,9 +8,16 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using cerberus.Models;
+using cerberus.Models.edmx;
+using cerberus.DTO;
+using Microsoft.Ajax.Utilities;
 
 namespace cerberus.Controllers
 {
+
+
+    [ProvideMenu]
+
     public class ProductionRegistriesController : Controller
     {
         private CerberusDBEntities db = new CerberusDBEntities();
@@ -18,100 +25,144 @@ namespace cerberus.Controllers
         // GET: ProductionRegistries
         public async Task<ActionResult> Index()
         {
-            var productionRegistries = db.ProductionRegistries.Include(p => p.ItemsRegistry).Include(p => p.ItemsRegistry1);
-            return View(await productionRegistries.ToListAsync());
+            var products = db.ProductionRegistries
+                .Include(p => p.ItemsRegistry)
+                .Include(p => p.ItemsRegistry1).GroupBy(p => p.ItemsRegistry).ToList().Select(pr => new ProductionRegistryItem
+                {
+                    production_item = pr.Key,
+                    requirement_items = pr.Select(p => new { p.ItemsRegistry1, p.count }).ToDictionary(p => p.ItemsRegistry1, p => p.count)
+                }).ToList();
+                
+
+            return View(products);
         }
 
         // GET: ProductionRegistries/Details/5
-        public async Task<ActionResult> Details(int? id)
+        public async Task<ActionResult> Details(int id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            ProductionRegistry productionRegistry = await db.ProductionRegistries.FindAsync(id);
-            if (productionRegistry == null)
-            {
-                return HttpNotFound();
-            }
-            return View(productionRegistry);
+
+            if (!db.ItemsRegistries.Any(p => p.id == id)) { return RedirectToAction("Index"); }
+
+            ProductionRegistryItem item = db.ProductionRegistries
+                .Include(p => p.ItemsRegistry)
+                .Include(p => p.ItemsRegistry1).Where(p => p.production_id == id).GroupBy(p => p.ItemsRegistry).ToList().Select(pr => new ProductionRegistryItem
+                {
+                    production_item = pr.Key,
+                    requirement_items = pr.Select(p => new { p.ItemsRegistry1, p.count }).ToDictionary(p => p.ItemsRegistry1, p => p.count)
+                }).First();
+
+
+            return View(item);
         }
 
         // GET: ProductionRegistries/Create
+        [HttpGet]
         public ActionResult Create()
         {
-            ViewBag.production_id = new SelectList(db.ItemsRegistries, "Id", "Name");
-            ViewBag.requirement_id = new SelectList(db.ItemsRegistries, "Id", "Name");
-            return View();
+            return View(new ProductionRegistryItem { 
+                
+            });
         }
 
         // POST: ProductionRegistries/Create
-        // Чтобы защититься от атак чрезмерной передачи данных, включите определенные свойства, для которых следует установить привязку. Дополнительные 
-        // сведения см. в разделе https://go.microsoft.com/fwlink/?LinkId=317598.
+
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Create([Bind(Include = "Id,production_id,requirement_id")] ProductionRegistry productionRegistry)
+        public async Task<ActionResult> Create(ProductionRegistryItem productionRegistryItem)
         {
             if (ModelState.IsValid)
             {
-                db.ProductionRegistries.Add(productionRegistry);
+                if (!(db.ItemsRegistries
+                    .Any(p => p.id == productionRegistryItem.production_id))) {
+                    return RedirectToAction("Index");
+                }
+
+                if (!productionRegistryItem.requirement_ids.Select(p => (Key: Convert.ToInt32(p.Key),Value: Convert.ToInt32(p.Value))).All(p1 => db.ItemsRegistries.Any(p => p.id == p1.Key))) { return RedirectToAction("Index"); }
+                productionRegistryItem.requirement_ids.Select(p => (Key: Convert.ToInt32(p.Key), Value: Convert.ToInt32(p.Value))).ForEach(p1 =>
+                    db.ProductionRegistries.Add(new ProductionRegistry
+                    {
+                        production_id = productionRegistryItem.production_id,
+                        requirement_id = p1.Key,
+                        count = Convert.ToInt32(p1.Value)
+                    })
+                );
                 await db.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
 
-            ViewBag.production_id = new SelectList(db.ItemsRegistries, "Id", "Name", productionRegistry.production_id);
-            ViewBag.requirement_id = new SelectList(db.ItemsRegistries, "Id", "Name", productionRegistry.requirement_id);
-            return View(productionRegistry);
+            productionRegistryItem.requirement_items = db.ItemsRegistries.ToDictionary(p => p, p => 1);
+            return View(productionRegistryItem);
         }
 
         // GET: ProductionRegistries/Edit/5
-        public async Task<ActionResult> Edit(int? id)
+        public async Task<ActionResult> Edit(int id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            ProductionRegistry productionRegistry = await db.ProductionRegistries.FindAsync(id);
-            if (productionRegistry == null)
-            {
-                return HttpNotFound();
-            }
-            ViewBag.production_id = new SelectList(db.ItemsRegistries, "Id", "Name", productionRegistry.production_id);
-            ViewBag.requirement_id = new SelectList(db.ItemsRegistries, "Id", "Name", productionRegistry.requirement_id);
-            return View(productionRegistry);
+            if (!db.ItemsRegistries.Any(p => p.id == id)) { return RedirectToAction("Index"); }
+            ProductionRegistryItem item = db.ProductionRegistries
+                .Include(p => p.ItemsRegistry)
+                .Include(p => p.ItemsRegistry1).Where(p => p.production_id == id).GroupBy(p => p.ItemsRegistry).ToList().Select(pr => new ProductionRegistryItem
+                {
+                    production_item = pr.Key,
+                    requirement_items = pr.Select(p => new { p.ItemsRegistry1, p.count }).ToDictionary(p => p.ItemsRegistry1, p => p.count)
+                }).First();
+            return View(item);
         }
 
         // POST: ProductionRegistries/Edit/5
-        // Чтобы защититься от атак чрезмерной передачи данных, включите определенные свойства, для которых следует установить привязку. Дополнительные 
-        // сведения см. в разделе https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit([Bind(Include = "Id,production_id,requirement_id")] ProductionRegistry productionRegistry)
+        public async Task<ActionResult> Edit(ProductionRegistryItem productionRegistryItem)
         {
             if (ModelState.IsValid)
             {
-                db.Entry(productionRegistry).State = EntityState.Modified;
+                if (!db.ItemsRegistries.Any(p => p.id == productionRegistryItem.production_id)) { return RedirectToAction("Index"); }
+                if (!productionRegistryItem.requirement_ids.Select(p => (Key: Convert.ToInt32(p.Key), Value: Convert.ToInt32(p.Value))).All(p1 => db.ItemsRegistries.Any(p => p.id == p1.Key))) { return RedirectToAction("Index"); }
+
+                db.ProductionRegistries.Where(p => p.production_id == productionRegistryItem.production_id).ForEach(p =>
+                {
+                    db.ProductionRegistries.Remove(p);
+                });
+                await db.SaveChangesAsync();
+                productionRegistryItem.requirement_ids.Select(p => (Key: Convert.ToInt32(p.Key), Value: Convert.ToInt32(p.Value))).ForEach(p1 =>
+                    db.ProductionRegistries.Add(new ProductionRegistry
+                    {
+                        production_id = productionRegistryItem.production_id,
+                        requirement_id = p1.Key,
+                        count = Convert.ToInt32(p1.Value)
+                    })
+                );
                 await db.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
-            ViewBag.production_id = new SelectList(db.ItemsRegistries, "Id", "Name", productionRegistry.production_id);
-            ViewBag.requirement_id = new SelectList(db.ItemsRegistries, "Id", "Name", productionRegistry.requirement_id);
-            return View(productionRegistry);
+
+            return View(productionRegistryItem);
         }
 
         // GET: ProductionRegistries/Delete/5
-        public async Task<ActionResult> Delete(int? id)
+        public async Task<ActionResult> Delete(int id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            ProductionRegistry productionRegistry = await db.ProductionRegistries.FindAsync(id);
-            if (productionRegistry == null)
-            {
-                return HttpNotFound();
-            }
-            return View(productionRegistry);
+            if (!db.ItemsRegistries.Any(p => p.id == id)) { return RedirectToAction("Index"); }
+            ProductionRegistryItem item = db.ProductionRegistries
+                .Include(p => p.ItemsRegistry)
+                .Include(p => p.ItemsRegistry1).Where(p => p.production_id == id).GroupBy(p => p.ItemsRegistry).ToList().Select(pr => new ProductionRegistryItem
+                {
+                    production_item = pr.Key,
+                    requirement_items = pr.Select(p => new { p.ItemsRegistry1, p.count }).ToDictionary(p => p.ItemsRegistry1, p => p.count)
+                }).First();
+            return View(item);
         }
 
         // POST: ProductionRegistries/Delete/5
@@ -119,8 +170,12 @@ namespace cerberus.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> DeleteConfirmed(int id)
         {
-            ProductionRegistry productionRegistry = await db.ProductionRegistries.FindAsync(id);
-            db.ProductionRegistries.Remove(productionRegistry);
+            if (!db.ItemsRegistries.Any(p => p.id == id)) { return RedirectToAction("Index"); }
+            
+            db.ProductionRegistries.Where(p => p.production_id == id).ForEach(p =>
+            {
+                db.ProductionRegistries.Remove(p);
+            });
             await db.SaveChangesAsync();
             return RedirectToAction("Index");
         }

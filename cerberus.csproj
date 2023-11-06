@@ -232,12 +232,16 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\IdentityConfig.cs" />
+    <Compile Include="App_Start\RoleConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\Startup.Auth.cs" />
+    <Compile Include="App_Start\UserConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Consts.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\DepartmentsController.cs" />
     <Compile Include="Controllers\FactorySitesController.cs" />
+    <Compile Include="Controllers\GroupUserController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ItemsRegistriesController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
@@ -245,7 +249,13 @@
     <Compile Include="Controllers\ReportsController.cs" />
     <Compile Include="Controllers\StatisticsController.cs" />
     <Compile Include="Controllers\WarehousesController.cs" />
+    <Compile Include="DTO\ApplicationUserDTO.cs" />
+    <Compile Include="DTO\DepartmentRolesDTO.cs" />
+    <Compile Include="DTO\FactorySiteRolesDTO.cs" />
+    <Compile Include="DTO\FactorySiteSupplyDTO.cs" />
+    <Compile Include="DTO\ProductionRegistryItem.cs" />
     <Compile Include="DTO\WareHouseDTO.cs" />
+    <Compile Include="DTO\WareHouseRolesDTO.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -254,65 +264,73 @@
       <DependentUpon>202310281449428_InitialCreate.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="misc.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
-    <Compile Include="Models\Department.cs">
+    <Compile Include="Models\Authorize403Attribute.cs" />
+    <Compile Include="Models\DepartmentAuthorizeAttribute.cs" />
+    <Compile Include="Models\edmx\Department.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\FactorySite.cs">
+    <Compile Include="Models\edmx\FactorySite.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\FactorySiteWareHouseClaim.cs">
+    <Compile Include="Models\edmx\FactorySiteWareHouseClaim.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\GroupDepartmentClaim.cs">
+    <Compile Include="Models\edmx\GroupDepartmentClaim.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\GroupFactorySiteClaim.cs">
+    <Compile Include="Models\edmx\GroupFactorySiteClaim.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\GroupWareHouseClaim.cs">
+    <Compile Include="Models\edmx\GroupWareHouseClaim.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\edmx\ItemsRegistry.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\edmx\ProductionRegistry.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\edmx\Report.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\edmx\Warehouse.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\FactorySiteAuthorizeAttribute.cs" />
+    <Compile Include="Models\FactorySiteWareHouseClaim.cs" />
+    <Compile Include="Models\GroupDepartmentClaim.cs" />
+    <Compile Include="Models\GroupFactorySiteClaim.cs" />
+    <Compile Include="Models\GroupWareHouseClaim.cs" />
     <Compile Include="Models\IdentityModels.cs" />
-    <Compile Include="Models\ItemsRegistry.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
+    <Compile Include="Models\ItemRegistry.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
-    <Compile Include="Models\Model1.Context.cs">
+    <Compile Include="Models\edmx\Model1.Context.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Model1.Context.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\Model1.cs">
+    <Compile Include="Models\edmx\Model1.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\Model1.Designer.cs">
+    <Compile Include="Models\edmx\Model1.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Model1.edmx</DependentUpon>
     </Compile>
-    <Compile Include="Models\ProductionRegistry.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Report.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
+    <Compile Include="Models\MenuAttribute.cs" />
+    <Compile Include="Models\Report.cs" />
     <Compile Include="Models\Reports\FSSupplyRequirementReport.cs" />
     <Compile Include="Models\Reports\FSWorkShiftReport.cs" />
-    <Compile Include="Models\Reports\MInventarisationPlanReport.cs" />
-    <Compile Include="Models\Reports\MSalesReport.cs" />
-    <Compile Include="Models\Reports\MWorkPlanReport.cs" />
-    <Compile Include="Models\Reports\MProductmentsReport.cs" />
     <Compile Include="Models\Reports\WHShipmentReport.cs" />
     <Compile Include="Models\Reports\WHInventarisationReport.cs" />
     <Compile Include="Models\Reports\WHReleaseReport.cs" />
     <Compile Include="Models\Reports\WHReplenishmentReport.cs" />
     <Compile Include="Models\Reports\WHWorkShiftReplenishmentReport.cs" />
-    <Compile Include="Models\Warehouse.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
+    <Compile Include="Models\WareHouseAuthorizeAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
   </ItemGroup>
@@ -336,12 +354,12 @@
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
-    <Content Include="Models\Model1.Context.tt">
+    <Content Include="Models\edmx\Model1.Context.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <DependentUpon>Model1.edmx</DependentUpon>
       <LastGenOutput>Model1.Context.cs</LastGenOutput>
     </Content>
-    <Content Include="Models\Model1.tt">
+    <Content Include="Models\edmx\Model1.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <DependentUpon>Model1.edmx</DependentUpon>
       <LastGenOutput>Model1.cs</LastGenOutput>
@@ -352,11 +370,11 @@
     <Content Include="Scripts\bootstrap.esm.min.js" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
-    <EntityDeploy Include="Models\Model1.edmx">
+    <EntityDeploy Include="Models\edmx\Model1.edmx">
       <Generator>EntityModelCodeGenerator</Generator>
       <LastGenOutput>Model1.Designer.cs</LastGenOutput>
     </EntityDeploy>
-    <Content Include="Models\Model1.edmx.diagram">
+    <Content Include="Models\edmx\Model1.edmx.diagram">
       <DependentUpon>Model1.edmx</DependentUpon>
     </Content>
     <None Include="Scripts\jquery-3.7.1.intellisense.js" />
@@ -388,12 +406,10 @@
     <Content Include="Views\Account\Login.cshtml" />
     <Content Include="Views\Account\ResetPassword.cshtml" />
     <Content Include="Views\Account\ResetPasswordConfirmation.cshtml" />
-    <Content Include="Views\Manage\AddPhoneNumber.cshtml" />
     <Content Include="Views\Manage\ChangePassword.cshtml" />
     <Content Include="Views\Manage\Index.cshtml" />
     <Content Include="Views\Manage\ManageLogins.cshtml" />
     <Content Include="Views\Manage\SetPassword.cshtml" />
-    <Content Include="Views\Manage\VerifyPhoneNumber.cshtml" />
     <Content Include="Views\Shared\Lockout.cshtml" />
     <Content Include="Views\Shared\_LoginPartial.cshtml" />
     <Content Include="Views\Reports\Create.cshtml" />
@@ -406,11 +422,6 @@
     <Content Include="Views\ItemsRegistries\Details.cshtml" />
     <Content Include="Views\ItemsRegistries\Edit.cshtml" />
     <Content Include="Views\ItemsRegistries\Index.cshtml" />
-    <Content Include="Views\ProductionRegistries\Create.cshtml" />
-    <Content Include="Views\ProductionRegistries\Delete.cshtml" />
-    <Content Include="Views\ProductionRegistries\Details.cshtml" />
-    <Content Include="Views\ProductionRegistries\Edit.cshtml" />
-    <Content Include="Views\ProductionRegistries\Index.cshtml" />
     <Content Include="Views\Departments\Create.cshtml" />
     <Content Include="Views\Departments\Delete.cshtml" />
     <Content Include="Views\Departments\Details.cshtml" />
@@ -422,6 +433,24 @@
     <Content Include="Views\FactorySites\Edit.cshtml" />
     <Content Include="Views\FactorySites\Index.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
+    <Content Include="Views\ProductionRegistries\Create.cshtml" />
+    <Content Include="Views\ProductionRegistries\Delete.cshtml" />
+    <Content Include="Views\ProductionRegistries\Details.cshtml" />
+    <Content Include="Views\ProductionRegistries\Edit.cshtml" />
+    <Content Include="Views\ProductionRegistries\Index.cshtml" />
+    <Content Include="Views\GroupUser\Index.cshtml" />
+    <Content Include="Views\GroupUser\GroupDetails.cshtml" />
+    <Content Include="Views\GroupUser\GroupCreate.cshtml" />
+    <Content Include="Views\GroupUser\UserDetails.cshtml" />
+    <Content Include="Views\GroupUser\UserCreate.cshtml" />
+    <Content Include="Views\GroupUser\UserEdit.cshtml" />
+    <Content Include="Views\GroupUser\UserDelete.cshtml" />
+    <Content Include="Views\GroupUser\GroupDelete.cshtml" />
+    <Content Include="Views\GroupUser\UserDeleteConfirmed.cshtml" />
+    <Content Include="Views\GroupUser\GroupDeleteConfirmed.cshtml" />
+    <Content Include="Views\Departments\ManageAccess.cshtml" />
+    <Content Include="Views\FactorySites\ManageAccess.cshtml" />
+    <Content Include="Views\FactorySites\ManageSupply.cshtml" />
     <None Include="Views\Shared\Menu.cshtml" />
     <Content Include="Views\Warehouses\Create.cshtml" />
     <Content Include="Views\Warehouses\Delete.cshtml" />
@@ -435,6 +464,9 @@
     <Content Include="Views\Shared\Reports\FSWorkShiftReportForm.cshtml" />
     <Content Include="Views\Shared\ItemList.cshtml" />
     <Content Include="Views\Shared\Reports\WHReplenishmentWorkShiftReportForm.cshtml" />
+    <Content Include="Views\Shared\_LayoutLogin.cshtml" />
+    <Content Include="Views\Warehouses\ManageAccess.cshtml" />
+    <Content Include="Views\Shared\Reports\FSSupplyRequirementReportForm.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -7,28 +7,32 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace cerberus.Models
+namespace cerberus.Models.edmx
 {
     using System;
     using System.Collections.Generic;
     
-    public partial class FactorySite
+    public partial class Department
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public FactorySite()
+        public Department()
         {
-            this.FactorySiteWareHouseClaims = new HashSet<FactorySiteWareHouseClaim>();
-            this.GroupFactorySiteClaims = new HashSet<GroupFactorySiteClaim>();
+            this.Reports = new HashSet<Report>();
+            this.FactorySites = new HashSet<FactorySite>();
+            this.GroupDepartmentClaims = new HashSet<GroupDepartmentClaim>();
+            this.WareHouses = new HashSet<Warehouse>();
         }
     
-        public int? id { get; set; }
+        public int id { get; set; }
         public string name { get; set; }
-        public Nullable<int> department_id { get; set; }
     
-        public virtual Department Department { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<FactorySiteWareHouseClaim> FactorySiteWareHouseClaims { get; set; }
+        public virtual ICollection<Report> Reports { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<GroupFactorySiteClaim> GroupFactorySiteClaims { get; set; }
+        public virtual ICollection<FactorySite> FactorySites { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<GroupDepartmentClaim> GroupDepartmentClaims { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Warehouse> WareHouses { get; set; }
     }
 }

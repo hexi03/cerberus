@@ -1,0 +1,22 @@
+﻿
+@model Microsoft.AspNet.Identity.EntityFramework.IdentityRole
+
+@{
+    ViewBag.Title = "Delete Group";
+}
+
+<h2>Delete Group</h2>
+
+<div>
+    <dl class="dl-horizontal">
+        <dt>Group Name:</dt>
+        <dd>@Model.Name</dd>
+    </dl>
+</div>
+
+@using (Html.BeginForm("GroupDeleteConfirmed", "GroupUser", new { id = Model.Name }, FormMethod.Post))
+{
+    <input type="submit" value="Delete" />
+}
+
+@Html.ActionLink("Cancel", "Index")

@@ -7,28 +7,28 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace cerberus.Models
+namespace cerberus.Models.edmx
 {
     using System;
     using System.Collections.Generic;
     
-    public partial class ItemsRegistry
+    public partial class FactorySite
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public ItemsRegistry()
+        public FactorySite()
         {
-            this.ProductionRegistries = new HashSet<ProductionRegistry>();
-            this.ProductionRegistries1 = new HashSet<ProductionRegistry>();
+            this.FactorySiteWareHouseClaims = new HashSet<FactorySiteWareHouseClaim>();
+            this.GroupFactorySiteClaims = new HashSet<GroupFactorySiteClaim>();
         }
     
-        public int? Id { get; set; }
-        public string Name { get; set; }
-        public string Amount { get; set; }
-        public string Batch { get; set; }
+        public int id { get; set; }
+        public string name { get; set; }
+        public int department_id { get; set; }
     
+        public virtual Department Department { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<ProductionRegistry> ProductionRegistries { get; set; }
+        public virtual ICollection<FactorySiteWareHouseClaim> FactorySiteWareHouseClaims { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<ProductionRegistry> ProductionRegistries1 { get; set; }
+        public virtual ICollection<GroupFactorySiteClaim> GroupFactorySiteClaims { get; set; }
     }
 }

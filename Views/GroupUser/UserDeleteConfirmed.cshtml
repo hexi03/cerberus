@@ -1,0 +1,12 @@
+﻿
+@model cerberus.Models.ApplicationUser
+
+@{
+    ViewBag.Title = "User Deleted";
+}
+
+<h2>User Deleted</h2>
+
+<p>The user "@Model.UserName" has been successfully deleted.</p>
+
+@Html.ActionLink("Back to List", "Index")

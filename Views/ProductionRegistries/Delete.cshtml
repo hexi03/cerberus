@@ -1,8 +1,5 @@
-﻿@model cerberus.Models.ProductionRegistry
+﻿@model cerberus.DTO.ProductionRegistryItem
 
-@{
-    Layout = null;
-}
 
 <!DOCTYPE html>
 
@@ -18,20 +15,13 @@
         <hr />
         <dl class="dl-horizontal">
             <dt>
-                @Html.DisplayNameFor(model => model.ItemsRegistry.Name)
+                @Html.DisplayNameFor(model => model.production_item.name)
             </dt>
     
             <dd>
-                @Html.DisplayFor(model => model.ItemsRegistry.Name)
+                @Html.DisplayFor(model => model.production_item.name)
             </dd>
     
-            <dt>
-                @Html.DisplayNameFor(model => model.ItemsRegistry1.Name)
-            </dt>
-    
-            <dd>
-                @Html.DisplayFor(model => model.ItemsRegistry1.Name)
-            </dd>
     
         </dl>
     

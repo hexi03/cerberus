@@ -8,9 +8,12 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using cerberus.Models;
+using cerberus.Models.edmx;
 
 namespace cerberus.Controllers
 {
+    [ProvideMenu]
+    [Authorize403Attribute]
     public class ItemsRegistriesController : Controller
     {
         private CerberusDBEntities db = new CerberusDBEntities();
@@ -47,7 +50,7 @@ namespace cerberus.Controllers
         // сведения см. в разделе https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Create([Bind(Include = "Id,Name,Amount,Batch")] ItemsRegistry itemsRegistry)
+        public async Task<ActionResult> Create(ItemsRegistry itemsRegistry)
         {
             if (ModelState.IsValid)
             {
@@ -79,7 +82,7 @@ namespace cerberus.Controllers
         // сведения см. в разделе https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit([Bind(Include = "Id,Name,Amount,Batch")] ItemsRegistry itemsRegistry)
+        public async Task<ActionResult> Edit(ItemsRegistry itemsRegistry)
         {
             if (ModelState.IsValid)
             {

@@ -1,0 +1,50 @@
+﻿
+@{
+    ViewBag.Title = "Group User Management";
+}
+
+<h2>Group User Management</h2>
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <table class="table">
+                <tr>
+                    <th>Group Name</th>
+                    <th>Action</th>
+                </tr>
+                @foreach (var role in ViewBag.Roles)
+                {
+                    <tr>
+                        <td>@role.Name</td>
+                        <td>
+                            @Html.ActionLink("Details", "GroupDetails", new { id = role.Name }) |
+                            @Html.ActionLink("Delete", "GroupDelete", new { id = role.Name })
+                        </td>
+                    </tr>
+                }
+            </table>
+            @Html.ActionLink("Create New Group", "GroupCreate")
+        </div>
+        <div class="col">
+            <table class="table">
+                <tr>
+                    <th>User Name</th>
+                    <th>Action</th>
+                </tr>
+                @foreach (var user in ViewBag.Users)
+                {
+                    <tr>
+                        <td>@user.UserName</td>
+                        <td>
+                            @Html.ActionLink("Details", "UserDetails", new { id = user.UserName }) |
+                            @Html.ActionLink("Edit", "UserEdit", new { id = user.UserName }) |
+                            @Html.ActionLink("Delete", "UserDelete", new { id = user.UserName })
+                        </td>
+                    </tr>
+                }
+            </table>
+            @Html.ActionLink("Create New User", "UserCreate")
+        </div>
+    </div>
+</div>
+   

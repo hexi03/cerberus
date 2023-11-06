@@ -1,0 +1,38 @@
+﻿@model cerberus.Models.Reports.FSSupplyRequirementReport
+
+@using (Html.BeginForm("CreateFSSupplyRequirementReport", "Reports", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { role = "form" }))
+{
+    @Html.AntiForgeryToken()
+
+<div class="form-horizontal">
+    <h4>Report</h4>
+    <hr />
+
+    <input name="factorysite_id" type="hidden" value="@ViewBag.factorysite_id">
+
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.target_warehouse_id, "target_warehouse_id", htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.DropDownList("target_warehouse_id", (SelectList)ViewBag.WHVariants, htmlAttributes: new { @class = "form-control" })
+            @Html.ValidationMessageFor(model => model.target_warehouse_id, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="keyValuePairs item-list-controlable-container" data-dname="items">
+
+        <button type="button" class="addKeyValuePair">+</button>
+    </div>
+
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <input type="submit" value="Create" class="btn btn-default" />
+        </div>
+    </div>
+</div>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>

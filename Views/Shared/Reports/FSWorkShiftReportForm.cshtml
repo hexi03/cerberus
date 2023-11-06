@@ -1,6 +1,6 @@
 ﻿@model cerberus.Models.Reports.FSWorkShiftReport
 
-@using (Html.BeginForm("Reports", "CreateFSWorkShiftReport", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { role = "form" }))
+@using (Html.BeginForm("CreateFSWorkShiftReport", "Reports", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { role = "form" }))
 {
     @Html.AntiForgeryToken()
 
@@ -9,13 +9,12 @@
     <hr />
 
     <input name="factorysite_id" type="hidden" value="@ViewBag.factorysite_id">
-    <input name="report_type" type="hidden" value="@cerberus.Models.Report.Types.FSWorkShift.ToString()">
 
 
     <div class="form-group">
         @Html.LabelFor(model => model.target_warehouse_id, "target_warehouse_id", htmlAttributes: new { @class = "control-label col-md-2" })
         <div class="col-md-10">
-            @Html.DropDownList("WHVariants", null, htmlAttributes: new { @class = "form-control" })
+            @Html.DropDownList("target_warehouse_id", (SelectList)ViewBag.WHVariants, htmlAttributes: new { @class = "form-control" })
             @Html.ValidationMessageFor(model => model.target_warehouse_id, "", new { @class = "text-danger" })
         </div>
     </div>

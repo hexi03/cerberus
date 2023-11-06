@@ -1,10 +1,10 @@
 ﻿<div class="grid-container item-list-container overlayMenu modal">
     @{
-        var grid = new WebGrid(source: (new cerberus.Models.CerberusDBEntities()).ItemsRegistries, canPage: true, rowsPerPage: 30, ajaxUpdateContainerId: "grid");
+        var grid = new WebGrid(source: (new cerberus.Models.edmx.CerberusDBEntities()).ItemsRegistries, canPage: true, rowsPerPage: 30, ajaxUpdateContainerId: "grid");
     }
     @grid.GetHtml(tableStyle: "table table-bordered",
                   headerStyle: "grid-header",
-                  alternatingRowStyle: "grid-alternating-row",
+                  alternatingRowStyle: "grid-alternating-row item-button-row",
                   selectedRowStyle: "grid-selected-row",
                   rowStyle: "grid-row item-button-row",
                   mode: WebGridPagerModes.All,
@@ -15,7 +15,7 @@
                   columns: grid.Columns(
                     grid.Column(columnName: "Id", header: "ID", style: "item-list-id"),
                     grid.Column(columnName: "Name", header: "Наименование", style: "item-list-name"),
-                    grid.Column(columnName: "Amount", header: "Единицы"),
+                    grid.Column(columnName: "Units", header: "Единицы"),
                     grid.Column(columnName: "Batch", header: "Партия")
                   )
                   )

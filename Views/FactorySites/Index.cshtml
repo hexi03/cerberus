@@ -1,4 +1,4 @@
-﻿@model IEnumerable<cerberus.Models.FactorySite>
+﻿@model IEnumerable<cerberus.Models.edmx.FactorySite>
 
  
     <p>
@@ -33,9 +33,11 @@
                 @Html.DisplayFor(modelItem => item.Department.name)
             </td>
             <td>
-                @Html.ActionLink("Edit", "Edit", new { id=item.id }) |
-                @Html.ActionLink("Details", "Details", new { id=item.id }) |
-                @Html.ActionLink("Delete", "Delete", new { id=item.id })
+                @Html.ActionLink("Edit", "Edit", new { id = item.id }) |
+                @Html.ActionLink("Details", "Details", new { id = item.id }) |
+                @Html.ActionLink("Delete", "Delete", new { id = item.id }) |
+                @Html.ActionLink("Manage Supply", "ManageSupply", new { id = item.id }) |
+                @Html.ActionLink("Manage Access", "ManageAccess", new { id = item.id })
             </td>
         </tr>
     }

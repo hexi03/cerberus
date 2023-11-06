@@ -1,67 +1,76 @@
 ﻿<div id="sidebar">
     <ul class="tree">
         <li>
+            <a href="@Url.Action("Index", "GroupUser")">Управление пользователями и группами</a>
+        </li>
+        <li>
+            <a href="@Url.Action("Index", "ItemsRegistries")">Реестр обьектов</a>
+        </li>
+        <li>
+            <a href="@Url.Action("Index", "ProductionRegistries")">Реестр производственных издержек</a>
+        </li>
+
+        <li>
             <details open>
                 <summary><a href="@Url.Action("Index", "Departments")">Отделы</a></summary>
                 <ul>
-                    @using (var context = new cerberus.Models.CerberusDBEntities())
+
+
+
+                    @foreach (cerberus.Models.edmx.Department department in ViewBag.UserDepartments)
                     {
-                        var departments = context.Departments.ToList();
 
-                        foreach (var department in departments)
-                        {
+                        <li>
 
-                            <li>
-                                
-                                <details open>
-                                    <summary>
-                                        <a href="@Url.Action("Details", "Departments", new { id = department.id })">@department.name</a>
-                                    </summary>
-                                    <ul>
-                                        <li>
+                            <details open>
+                                <summary>
+                                    <a href="@Url.Action("Details", "Departments", new { id = department.id })">@department.name</a>
+                                </summary>
+                                <ul>
+                                    <li>
 
-                                            <details open>
-                                                <summary>
-                                                    <a href="@Url.Action("Index", "FactorySites" , new { id=department.id })">Производственные участки</a>
-                                                </summary>
-                                                <ul>
+                                        <details open>
+                                            <summary>
+                                                <a href="@Url.Action("Index", "FactorySites" , new { id=department.id })">Производственные участки</a>
+                                            </summary>
+                                            <ul>
 
 
-                                                    @foreach (var factorySite in context.FactorySites.Where(fs => fs.department_id == department.id))
-                                                    {
-                                                        <li>
+                                                @foreach (cerberus.Models.edmx.FactorySite factorySite in ((IList<cerberus.Models.edmx.FactorySite>)(ViewBag.UserFactorySites)).Where(fs => fs.department_id == department.id))
+                                                {
+                                                    <li>
 
-                                                            <a href="@Url.Action("Details", "FactorySites", new { id = factorySite.id })">@factorySite.name</a>
+                                                        <a href="@Url.Action("Details", "FactorySites", new { id = factorySite.id })">@factorySite.name</a>
 
-                                                        </li>
-                                                    }
-                                                </ul>
-                                            </details>
-                                        </li>
-                                        <li>
-                                            <details open>
-                                                <summary>
-                                                    <a href="@Url.Action("Index", "Warehouses", new { id = department.id })">Склады</a>
-                                                </summary>
-                                                <ul>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        </details>
+                                    </li>
+                                    <li>
+                                        <details open>
+                                            <summary>
+                                                <a href="@Url.Action("Index", "Warehouses", new { id = department.id })">Склады</a>
+                                            </summary>
+                                            <ul>
 
-                                                    @foreach (var warehouse in context.WareHouses.Where(wh => wh.department_id == department.id))
-                                                    {
+                                                @foreach (cerberus.Models.edmx.Warehouse warehouse in ((IList<cerberus.Models.edmx.Warehouse>)(ViewBag.UserWareHouses)).Where(fs => fs.department_id == department.id))
+                                                {
 
-                                                        <li>
+                                                    <li>
 
-                                                            <a href="@Url.Action("Details", "Warehouses", new { id = warehouse.id })">@warehouse.name</a>
+                                                        <a href="@Url.Action("Details", "Warehouses", new { id = warehouse.id })">@warehouse.name</a>
 
-                                                        </li>
-                                                    }
-                                                </ul>
-                                            </details>
-                                        </li>
-                                        </ul>
-</details>
-                            </li>
-                        }
+                                                    </li>
+                                                }
+                                            </ul>
+                                        </details>
+                                    </li>
+                                </ul>
+                            </details>
+                        </li>
                     }
+
                 </ul>
             </details>
         </li>

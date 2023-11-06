@@ -9,6 +9,7 @@ using System.Web.Mvc;
 
 namespace cerberus.Controllers
 {
+    [ProvideMenu]
     public class HomeController : Controller
     {
         public ActionResult Index()

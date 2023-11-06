@@ -13,13 +13,16 @@ using Microsoft.AspNet.Identity;
 using System.Text.RegularExpressions;
 using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.AspNet.Identity.Owin;
+using cerberus.Models.edmx;
 
 namespace cerberus.Controllers
 {
+    [ProvideMenu]
+    [Authorize403Attribute]
     public class ReportsController : Controller
     {
         private CerberusDBEntities db = new CerberusDBEntities();
-
+        private ApplicationUserManager userManager = new ApplicationUserManager(new UserStore<ApplicationUser>(new ApplicationDbContext()));
 
         // GET: Reports
         public async Task<ActionResult> Index()
@@ -49,66 +52,95 @@ namespace cerberus.Controllers
         // Чтобы защититься от атак чрезмерной передачи данных, включите определенные свойства, для которых следует установить привязку. Дополнительные 
         // сведения см. в разделе https://go.microsoft.com/fwlink/?LinkId=317598.
 
-        public async Task<ActionResult> CreateWHReplenishmentReport(int id, int productments_id)
+        public async Task<ActionResult> CreateWHReplenishmentReport(int id)
         {
 
             ViewBag.warehouse_id = id;
-            ViewBag.productments_id = productments_id;
+
 
 
             return View("~/Views/Shared/Reports/WHReplenishmentReportForm.cshtml");
         }
 
  
-        public async Task<ActionResult> CreateWHInventarisationReport(int id, int inventarisation_plan_id)
+        public async Task<ActionResult> CreateWHInventarisationReport(int id)
         {
             ViewBag.warehouse_id = id;
-            ViewBag.inventarisation_plan_id = inventarisation_plan_id;
             return View("~/Views/Shared/Reports/WHInventarisationReportForm.cshtml");
         }
 
 
-        public async Task<ActionResult> CreateWHReleaseReport(int id, int sales_id)
+        public async Task<ActionResult> CreateWHReleaseReport(int id)
         {
+
+            var user_id = User.Identity.GetUserId();
+
+            var group_ids = await userManager.GetRolesAsync(user_id);
+
+            var warehouse_list = GroupWareHouseClaim.get_group_warehouses(db, group_ids);
+
+            if (!warehouse_list.Any(e => e.id == id))
+            {
+                return RedirectToAction("Index");
+            }
+
+            var department_id = (await db.WareHouses.FindAsync(id)).department_id;
             ViewBag.warehouse_id = id;
-            ViewBag.sales_id = sales_id;
+            //ViewBag.supply_requirement_id = supply_requirement_id;
+            ViewBag.SupplyRequirementReportVariants = FSSupplyRequirementReport.get_unsatisfied(db, department_id).ToList();
+
             return View("~/Views/Shared/Reports/WHReleaseReportForm.cshtml");
         }
 
 
-        public async Task<ActionResult> CreateWHShipmentReport(int id, int supply_requirement_id)
+        public async Task<ActionResult> CreateWHShipmentReport(int id)
         {
+
             ViewBag.warehouse_id = id;
-            ViewBag.supply_requirement_id = supply_requirement_id;
             return View("~/Views/Shared/Reports/WHShipmentReportForm.cshtml");
         }
 
 
-        public async Task<ActionResult> CreateWHReplenishmentWorkShiftReport(int id,int work_shift_id)
+        public async Task<ActionResult> CreateWHReplenishmentWorkShiftReport(int id)
         {
+            var user_id = User.Identity.GetUserId();
+
+            var group_ids = await userManager.GetRolesAsync(user_id);
+
+            var warehouse_list = GroupWareHouseClaim.get_group_warehouses(db, group_ids);
+
+            if (!warehouse_list.Any(e => e.id == id))
+            {
+                return RedirectToAction("Index");
+            }
+
+            var department_id = (await db.WareHouses.FindAsync(id)).department_id;
             ViewBag.warehouse_id = id;
-            ViewBag.work_shift_id = work_shift_id;
+            //ViewBag.supply_requirement_id = supply_requirement_id;
+            ViewBag.WorkShiftReportVariants = FSWorkShiftReport.get_unsatisfied(db,department_id).ToList();
+
             return View("~/Views/Shared/Reports/WHReplenishmentWorkShiftReportForm.cshtml");
         }
 
  
 
-        public async Task<ActionResult> CreateFSWorkShiftReport(int id, int work_plan_id)
+        public async Task<ActionResult> CreateFSWorkShiftReport(int id)
         {
             ViewBag.factorysite_id = id;
-            ViewBag.work_plan_id = work_plan_id;
+
             ViewBag.WHVariants = new SelectList(await FactorySiteWareHouseClaim.get_warehouses(ViewBag.factorysite_id), "id", "name");
             return View("~/Views/Shared/Reports/FSWorkShiftReportForm.cshtml");
         }
 
-        public async Task<ActionResult> CreateFSSupplyRequirementReport(int id, int workplan_report_id)
+        public async Task<ActionResult> CreateFSSupplyRequirementReport(int id)
         {
             ViewBag.factorysite_id = id;
-            ViewBag.workplan_report_id = workplan_report_id;
+
             ViewBag.WHVariants = new SelectList(await FactorySiteWareHouseClaim.get_warehouses(ViewBag.factorysite_id), "id", "name");
             return View("~/Views/Shared/Reports/FSSupplyRequirementReportForm.cshtml");
         }
 
+        /*
         public async Task<ActionResult> CreateMWorkPlanReport(int id)
         {
             ViewBag.department_id = id;
@@ -136,7 +168,7 @@ namespace cerberus.Controllers
             ViewBag.WHVariants = new SelectList(db.WareHouses, "id", "name");
             return View("~/Views/Shared/Reports/MInventarisationPlanReportForm.cshtml");
         }
-
+        */
 
 
 
@@ -156,35 +188,28 @@ namespace cerberus.Controllers
         {
             
             var user_id = User.Identity.GetUserId();
-            var userManager = HttpContext.GetOwinContext().GetUserManager<ApplicationUserManager>();
+            
             var group_ids = await userManager.GetRolesAsync(user_id);
 
-            var warehouse_list = db.GroupWareHouseClaims.get_group_warehouses(group_ids);
+            var warehouse_list = GroupWareHouseClaim.get_group_warehouses(db, group_ids);
 
             if (!warehouse_list.Any(e => e.id == report.warehouse_id)) {
                 return RedirectToAction("Index");
             }
 
             
-            if (!db.Reports.Any(e => e.id == report.producements_id))
-            {
-                return RedirectToAction("Index");
-            }
 
-            var department_id = (await warehouse_list.FindAsync(report.warehouse_id)).department_id;
-            if (!department_id.HasValue)
-            {
-                return RedirectToAction("Index");
-            }
+            var department_id = (await db.WareHouses.FindAsync(report.warehouse_id)).department_id;
 
 
             report.creator_id = user_id;
-            report.department_id = department_id.GetValueOrDefault();
+            report.department_id = department_id;
             report.report_type = Report.Types.WHReplenishment.ToString();
 
             if (ModelState.IsValid)
             {
-                Report.save(report.to_generic());
+                Report.save(db, report.to_generic());
+                await db.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
             
@@ -196,32 +221,27 @@ namespace cerberus.Controllers
         public async Task<ActionResult> CreateWHInventarisationReport(WHInventarisationReport report)
         {
             var user_id = User.Identity.GetUserId();
-            var userManager = HttpContext.GetOwinContext().GetUserManager<ApplicationUserManager>();
+            
             var group_ids = await userManager.GetRolesAsync(user_id);
 
-            var warehouse_list = db.GroupWareHouseClaims.get_group_warehouses(group_ids);
+            var warehouse_list = GroupWareHouseClaim.get_group_warehouses(db, group_ids);
 
             if (!warehouse_list.Any(e => e.id == report.warehouse_id))
             {
                 return RedirectToAction("Index");
             }
 
-            if (!db.Reports.Any(e => e.id == report.inventarisation_plan_id))
-            {
-                return RedirectToAction("Index");
-            }
 
-            var department_id = (await warehouse_list.FindAsync(report.warehouse_id)).department_id;
-            if (!department_id.HasValue)
-            {
-                return RedirectToAction("Index");
-            }
+            var department_id = (await db.WareHouses.FindAsync(report.warehouse_id)).department_id;
+
+
             report.creator_id = user_id;
-            report.department_id = department_id.GetValueOrDefault();
+            report.department_id = department_id;
             report.report_type = Report.Types.WHInventarisation.ToString();
             if (ModelState.IsValid)
             {
-                Report.save(report.to_generic());
+                Report.save(db, report.to_generic());
+                await db.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
 
@@ -233,10 +253,10 @@ namespace cerberus.Controllers
         public async Task<ActionResult> CreateWHReleaseReport(WHReleaseReport report)
         {
             var user_id = User.Identity.GetUserId();
-            var userManager = HttpContext.GetOwinContext().GetUserManager<ApplicationUserManager>();
+            
             var group_ids = await userManager.GetRolesAsync(user_id);
 
-            var warehouse_list = db.GroupWareHouseClaims.get_group_warehouses(group_ids);
+            var warehouse_list = GroupWareHouseClaim.get_group_warehouses(db, group_ids);
 
             if (!warehouse_list.Any(e => e.id == report.warehouse_id))
             {
@@ -248,18 +268,16 @@ namespace cerberus.Controllers
                 return RedirectToAction("Index");
             }
 
+            var department_id = (await db.WareHouses.FindAsync(report.warehouse_id)).department_id;
 
-            var department_id = (await warehouse_list.FindAsync(report.warehouse_id)).department_id;
-            if (!department_id.HasValue)
-            {
-                return RedirectToAction("Index");
-            }
+
             report.creator_id = user_id;
-            report.department_id = department_id.GetValueOrDefault();
+            report.department_id = department_id;
             report.report_type = Report.Types.WHRelease.ToString();
             if (ModelState.IsValid)
             {
-                Report.save(report.to_generic());
+                Report.save(db, report.to_generic());
+                await db.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
 
@@ -272,33 +290,27 @@ namespace cerberus.Controllers
         public async Task<ActionResult> CreateWHShipmentReport(WHShipmentReport report)
         {
             var user_id = User.Identity.GetUserId();
-            var userManager = HttpContext.GetOwinContext().GetUserManager<ApplicationUserManager>();
+            
             var group_ids = await userManager.GetRolesAsync(user_id);
 
-            var warehouse_list = db.GroupWareHouseClaims.get_group_warehouses(group_ids);
+            var warehouse_list = GroupWareHouseClaim.get_group_warehouses(db, group_ids);
 
             if (!warehouse_list.Any(e => e.id == report.warehouse_id))
             {
                 return RedirectToAction("Index");
             }
 
-            if (!db.Reports.Any(e => e.id == report.sales_id))
-            {
-                return RedirectToAction("Index");
-            }
+
+            var department_id = (await db.WareHouses.FindAsync(report.warehouse_id)).department_id;
 
 
-            var department_id = (await warehouse_list.FindAsync(report.warehouse_id)).department_id;
-            if (!department_id.HasValue)
-            {
-                return RedirectToAction("Index");
-            }
             report.creator_id = user_id;
-            report.department_id = department_id.GetValueOrDefault();
+            report.department_id = department_id;
             report.report_type = Report.Types.WHShipment.ToString();
             if (ModelState.IsValid)
             {
-                Report.save(report.to_generic());  
+                Report.save(db, report.to_generic());
+                await db.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
 
@@ -310,32 +322,26 @@ namespace cerberus.Controllers
         public async Task<ActionResult> CreateWHWorkShiftReplenishmentReport(WHWorkShiftReplenishmentReport report)
         {
             var user_id = User.Identity.GetUserId();
-            var userManager = HttpContext.GetOwinContext().GetUserManager<ApplicationUserManager>();
+            
             var group_ids = await userManager.GetRolesAsync(user_id);
 
-            var warehouse_list = db.GroupWareHouseClaims.get_group_warehouses(group_ids);
+            var warehouse_list = GroupWareHouseClaim.get_group_warehouses(db, group_ids);
 
             if (!warehouse_list.Any(e => e.id == report.warehouse_id))
             {
                 return RedirectToAction("Index");
             }
 
-            if (!db.Reports.Any(e => e.id == report.workshift_id))
-            {
-                return RedirectToAction("Index");
-            }
+            var department_id = (await db.WareHouses.FindAsync(report.warehouse_id)).department_id;
 
-            var department_id = (await warehouse_list.FindAsync(report.warehouse_id)).department_id;
-            if (!department_id.HasValue)
-            {
-                return RedirectToAction("Index");
-            }
+
             report.creator_id = user_id;
-            report.department_id = department_id.GetValueOrDefault();
+            report.department_id = department_id;
             report.report_type = Report.Types.WHWorkShiftReplenishment.ToString();
             if (ModelState.IsValid)
             {
-                Report.save(report.to_generic());
+                Report.save(db, report.to_generic());
+                await db.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
 
@@ -347,39 +353,34 @@ namespace cerberus.Controllers
         public async Task<ActionResult> CreateFSWorkShiftReport(FSWorkShiftReport report)
         {
             var user_id = User.Identity.GetUserId();
-            var userManager = HttpContext.GetOwinContext().GetUserManager<ApplicationUserManager>();
+            
             var group_ids = await userManager.GetRolesAsync(user_id);
 
-            var factorisites_list = db.GroupFactorySiteClaims.get_group_factorysites(group_ids);
+            var factorisites_list = GroupFactorySiteClaim.get_group_factorysites(db, group_ids);
 
             if (!factorisites_list.Any(e => e.id == report.factorysite_id))
             {
                 return RedirectToAction("Index");
             }
 
-            if (!db.Reports.Any(e => e.id == report.workplan_id))
-            {
-                return RedirectToAction("Index");
-            }
 
             if (!(await FactorySiteWareHouseClaim.get_warehouses(report.factorysite_id)).Any(e => e.id == report.target_warehouse_id))
             {
                 return RedirectToAction("Index");
             }
 
-            var department_id = (await factorisites_list.FindAsync(report.factorysite_id)).department_id;
-            if (!department_id.HasValue)
-            {
-                return RedirectToAction("Index");
-            }
+            var department_id = (await db.FactorySites.FindAsync(report.factorysite_id)).department_id;
+
+
             report.creator_id = user_id;
-            report.department_id = department_id.GetValueOrDefault();
+            report.department_id = department_id;
             report.report_type = Report.Types.FSWorkShift.ToString();
             
                 
             if (ModelState.IsValid)
             {
-                Report.save(report.to_generic());
+                Report.save(db, report.to_generic());
+                await db.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
 
@@ -391,17 +392,12 @@ namespace cerberus.Controllers
         public async Task<ActionResult> CreateFSSupplyRequirementReport(FSSupplyRequirementReport report)
         {
             var user_id = User.Identity.GetUserId();
-            var userManager = HttpContext.GetOwinContext().GetUserManager<ApplicationUserManager>();
+            
             var group_ids = await userManager.GetRolesAsync(user_id);
 
-            var factorisites_list = db.GroupFactorySiteClaims.get_group_factorysites(group_ids);
+            var factorisites_list = GroupFactorySiteClaim.get_group_factorysites(db, group_ids);
 
             if (!factorisites_list.Any(e => e.id == report.factorysite_id))
-            {
-                return RedirectToAction("Index");
-            }
-
-            if (!db.Reports.Any(e => e.id == report.workplan_id))
             {
                 return RedirectToAction("Index");
             }
@@ -411,34 +407,34 @@ namespace cerberus.Controllers
                 return RedirectToAction("Index");
             }
 
-            var department_id = (await factorisites_list.FindAsync(report.factorysite_id)).department_id;
-            if (!department_id.HasValue)
-            {
-                return RedirectToAction("Index");
-            }
+            var department_id = (await db.FactorySites.FindAsync(report.factorysite_id)).department_id;
+
+
             report.creator_id = user_id;
-            report.department_id = department_id.GetValueOrDefault();
+            report.department_id = department_id;
             report.report_type = Report.Types.FSSupplyRequirement.ToString();
 
 
             if (ModelState.IsValid)
             {
-                Report.save(report.to_generic());
+                Report.save(db, report.to_generic());
+                await db.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
 
             return View(report);
         }
 
+        /*
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> CreateMWorkPlanReport(MWorkPlanReport report)
         {
             var user_id = User.Identity.GetUserId();
-            var userManager = HttpContext.GetOwinContext().GetUserManager<ApplicationUserManager>();
+            
             var group_ids = await userManager.GetRolesAsync(user_id);
 
-            var departments_list = db.GroupDepartmentClaims.get_group_departments(group_ids);
+            var departments_list = GroupDepartmentClaim.get_group_departments(group_ids);
 
             if (!departments_list.Any(e => e.id == report.department_id))
             {
@@ -470,10 +466,10 @@ namespace cerberus.Controllers
         public async Task<ActionResult> CreateMProductmentsReport(MProductmentsReport report)
         {
             var user_id = User.Identity.GetUserId();
-            var userManager = HttpContext.GetOwinContext().GetUserManager<ApplicationUserManager>();
+            
             var group_ids = await userManager.GetRolesAsync(user_id);
 
-            var departments_list = db.GroupDepartmentClaims.get_group_departments(group_ids);
+            var departments_list = GroupDepartmentClaim.get_group_departments(group_ids);
 
             if (!departments_list.Any(e => e.id == report.department_id))
             {
@@ -505,10 +501,10 @@ namespace cerberus.Controllers
         public async Task<ActionResult> CreateMSalesReport(MSalesReport report)
         {
             var user_id = User.Identity.GetUserId();
-            var userManager = HttpContext.GetOwinContext().GetUserManager<ApplicationUserManager>();
+            
             var group_ids = await userManager.GetRolesAsync(user_id);
 
-            var departments_list = db.GroupDepartmentClaims.get_group_departments(group_ids);
+            var departments_list = GroupDepartmentClaim.get_group_departments(group_ids);
 
             if (!departments_list.Any(e => e.id == report.department_id))
             {
@@ -540,10 +536,10 @@ namespace cerberus.Controllers
         public async Task<ActionResult> CreateMInventarisationPlanReport(MInventarisationPlanReport report)
         {
             var user_id = User.Identity.GetUserId();
-            var userManager = HttpContext.GetOwinContext().GetUserManager<ApplicationUserManager>();
+            
             var group_ids = await userManager.GetRolesAsync(user_id);
 
-            var departments_list = db.GroupDepartmentClaims.get_group_departments(group_ids);
+            var departments_list = GroupDepartmentClaim.get_group_departments(group_ids);
 
             if (!departments_list.Any(e => e.id == report.department_id))
             {
@@ -568,7 +564,7 @@ namespace cerberus.Controllers
 
             return View(report);
         }
-
+        */
 
 
 

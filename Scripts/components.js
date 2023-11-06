@@ -1,4 +1,13 @@
-﻿
+﻿function generateRandomUUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0,
+            v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
+
+
+let item_list_current_container = null;
 $(document).ready(function () {
 
     //KEYVALUE FORM
@@ -8,8 +17,8 @@ $(document).ready(function () {
 
     function updateHiddenFields(g_cont) {
 
-        g_cont.find(".keyValuePairContainer").each(function (index) {
-            let dict_name = $(this).data("dname");
+        g_cont.parent().find(".keyValuePairContainer").each(function (index) {
+            let dict_name = $(this).parent().data("dname");
             let container = $(this);
 
             let key = container.find(".key").val();
@@ -17,7 +26,7 @@ $(document).ready(function () {
             let hidden_kv = $(this).find(".hiddenKV");
             if (value != "" && key != "") {
                 hidden_kv.attr("name", dict_name + "[" + key + "]");
-                hidden_kv.attr("value", value);
+                hidden_kv.val(value);
             }
             
 
@@ -46,6 +55,11 @@ $(document).ready(function () {
         updateHiddenFields($(this).parent());
     });
 
+    keyValuePairsContainer.find(".keyValuePairContainer").find(".key, .value").on("change", function (event) {
+        event.stopPropagation();
+        updateHiddenFields($(this).parent());
+    });
+
     keyValuePairsContainer.on("click", ".removeKeyValuePair", function (event) {
         event.stopPropagation();
         $(this).parent().remove();
@@ -71,7 +85,7 @@ $(document).ready(function () {
 
 
     //ITEM LIST
-    var item_list_current_container = null;
+    
 
     $(".item-list-controlable-container").on("click", ".item-list-controlable-section .item-list-show.showMenu", function (event) {
         event.stopPropagation();
@@ -79,14 +93,16 @@ $(document).ready(function () {
         $(".overlayMenu").fadeIn();
     });
 
-    $(".item-list-container .item-button-row").on("click", function (event) {
+    $(".item-list-container").on("click", ".item-button-row", function (event) {
         event.stopPropagation();
-        item_list_current_container.find("item-list-target-value").attr("value", $(this).find("td.item-list-id")[0].html());
-        item_list_current_container.find("item-list-target-content").attr("value", $(this).find("td.item-list-name")[0].html());
-
-        item_list_current_container.find("item-list-target-content").val().change();
-        item_list_current_container.find("item-list-target-value").val().change();
-        $(".overlayMenu").fadeIn();
+        
+        item_list_current_container.find(".item-list-target-value").val($(this).find("td.item-list-id").text());
+        console.log($(this).find("td.item-list-id").text());
+        item_list_current_container.find(".item-list-target-content").val($(this).find("td.item-list-name").text());
+        console.log($(this).find("td.item-list-name").text());
+        item_list_current_container.find(".item-list-target-content").trigger('change');
+        item_list_current_container.find(".item-list-target-value").trigger('change');
+        $(".overlayMenu").fadeOut();
     });
 
 

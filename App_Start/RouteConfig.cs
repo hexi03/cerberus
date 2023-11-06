@@ -57,6 +57,12 @@ namespace cerberus
                 defaults: new { controller = "FactorySites", id = UrlParameter.Optional }
             );
 
+            routes.MapRoute(
+                name: "GroupUser",
+                url: "GroupUser/{action}/{id}",
+                defaults: new { controller = "GroupUser", id = UrlParameter.Optional }
+            );
+
 
         }
     }

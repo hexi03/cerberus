@@ -1,0 +1,71 @@
+﻿
+@model cerberus.DTO.FactorySiteSupplyDTO
+
+@{
+    ViewBag.Title = "Edit User";
+}
+
+<h2>Edit User</h2>
+
+@using (Html.BeginForm("ManageSupply", "FactorySites", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" value="@Model.factorySite.id" hidden>
+
+    <div id="warehouseContainer">
+        <label for="Warehouses">Warehouses:</label>
+        <button type="button" id="addWarehouseButton" class="btn btn-primary">Add Warehouse</button>
+
+        @for (var i = 0; i < Model.warehouses.Count(); i++)
+        {
+            var curr_wh = Model.warehouses[i];
+            <div class="whRow">
+
+                <select class="form-control" name="warehouse_ids[@Guid.NewGuid().ToString()]">
+                    <option value="">Select Warehouse</option>
+                    @foreach (var wareHouse in ViewBag.WareHouses)
+                    {
+                        <option value="@wareHouse.id" @(wareHouse.id == curr_wh.id ? "selected" : "")>@wareHouse.name</option>
+                    }
+                </select>
+                <button class="removeWarehouse">Удалить</button>
+            </div>
+        }
+    </div>
+
+    
+
+    <input type="submit" value="Save" />
+}
+
+@Html.ActionLink("Back to List", "Index", new {id = Model.factorySite.department_id })
+
+<div class="warehouseVariantStorage visually-hidden">
+    @foreach (var wareHouse in ViewBag.WareHouses)
+    {
+        <option value="@wareHouse.id">@wareHouse.name</option>
+    }
+</div>
+
+@section scripts {
+    <script>
+        $(function () {
+            $("#addWarehouseButton").click(function () {
+                var whRow = '<div class="whRow">' +
+                    '<select class="form-control" name="warehouse_ids[' + generateRandomUUID() + ']">' +
+                    $('.warehouseVariantStorage').html() +
+                    '</select>' +
+                    '<button class="removeWarehouse">Удалить</button>'
+                    '</div>';
+                $("#warehouseContainer").append(whRow);
+            });
+
+            $("#warehouseContainer").on("click", ".removeWarehouse", function (event) {
+                event.stopPropagation();
+                $(this).parent().remove();
+            });
+        });
+
+        
+    </script>
+}

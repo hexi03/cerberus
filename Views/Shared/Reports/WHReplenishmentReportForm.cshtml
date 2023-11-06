@@ -1,13 +1,12 @@
 ﻿@model cerberus.Models.Reports.WHReplenishmentReport
 
-@using (Html.BeginForm("Reports", "CreateWHReplenishmentReport", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { role = "form" }))
+@using (Html.BeginForm("CreateWHReplenishmentReport", "Reports", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { role = "form" }))
 {
     @Html.AntiForgeryToken()
 
 <div class="form-horizontal">
     <h4>Report</h4>
     <hr />
-    <input name="report_type" type="hidden" value="@cerberus.Models.Report.Types.WHReplenishment.ToString()">
     <input name="warehouse_id" type="hidden" value="@ViewBag.warehouse_id">
 
     <div class="keyValuePairs item-list-controlable-container" data-dname="items">

@@ -1,4 +1,5 @@
-﻿using cerberus.Models;
+﻿using cerberus.App_Start;
+using cerberus.Models;
 using Microsoft.Owin;
 using Owin;
 using System.Web.Services.Description;
@@ -11,6 +12,8 @@ namespace cerberus
         public void Configuration(IAppBuilder app)
         {
             ConfigureAuth(app);
+            RoleConfig.Configure(app);
+            UserConfig.Configure(app);
         }
     }
 }

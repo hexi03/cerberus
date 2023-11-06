@@ -7,16 +7,17 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace cerberus.Models
+namespace cerberus.Models.edmx
 {
     using System;
     using System.Collections.Generic;
     
     public partial class ProductionRegistry
     {
-        public int? Id { get; set; }
         public int production_id { get; set; }
         public int requirement_id { get; set; }
+        public int id { get; set; }
+        public int count { get; set; }
     
         public virtual ItemsRegistry ItemsRegistry { get; set; }
         public virtual ItemsRegistry ItemsRegistry1 { get; set; }

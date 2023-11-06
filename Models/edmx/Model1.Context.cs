@@ -7,7 +7,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace cerberus.Models
+namespace cerberus.Models.edmx
 {
     using System;
     using System.Data.Entity;
@@ -32,8 +32,8 @@ namespace cerberus.Models
         public virtual DbSet<GroupFactorySiteClaim> GroupFactorySiteClaims { get; set; }
         public virtual DbSet<GroupWareHouseClaim> GroupWareHouseClaims { get; set; }
         public virtual DbSet<ItemsRegistry> ItemsRegistries { get; set; }
-        public virtual DbSet<ProductionRegistry> ProductionRegistries { get; set; }
         public virtual DbSet<Report> Reports { get; set; }
         public virtual DbSet<Warehouse> WareHouses { get; set; }
+        public virtual DbSet<ProductionRegistry> ProductionRegistries { get; set; }
     }
 }

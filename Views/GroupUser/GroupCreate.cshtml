@@ -1,0 +1,16 @@
+﻿
+@{
+    ViewBag.Title = "Create Group";
+}
+
+<h2>Create Group</h2>
+
+@using (Html.BeginForm("GroupCreate", "GroupUser", FormMethod.Post))
+{
+    @Html.Label("Group Name:")
+    @Html.TextBox("id")
+
+    <input type="submit" value="Create" />
+}
+
+@Html.ActionLink("Back to List", "Index")

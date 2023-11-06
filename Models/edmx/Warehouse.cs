@@ -7,29 +7,28 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace cerberus.Models
+namespace cerberus.Models.edmx
 {
     using System;
     using System.Collections.Generic;
     
-    public partial class Department
+    public partial class Warehouse
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public Department()
+        public Warehouse()
         {
-            this.FactorySites = new HashSet<FactorySite>();
-            this.GroupDepartmentClaims = new HashSet<GroupDepartmentClaim>();
-            this.WareHouses = new HashSet<Warehouse>();
+            this.FactorySiteWareHouseClaims = new HashSet<FactorySiteWareHouseClaim>();
+            this.GroupWareHouseClaims = new HashSet<GroupWareHouseClaim>();
         }
     
-        public int? id { get; set; }
+        public int id { get; set; }
         public string name { get; set; }
+        public int department_id { get; set; }
     
+        public virtual Department Department { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<FactorySite> FactorySites { get; set; }
+        public virtual ICollection<FactorySiteWareHouseClaim> FactorySiteWareHouseClaims { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<GroupDepartmentClaim> GroupDepartmentClaims { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Warehouse> WareHouses { get; set; }
+        public virtual ICollection<GroupWareHouseClaim> GroupWareHouseClaims { get; set; }
     }
 }

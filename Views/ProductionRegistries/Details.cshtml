@@ -1,8 +1,4 @@
-﻿@model cerberus.Models.ProductionRegistry
-
-@{
-    Layout = null;
-}
+﻿@model cerberus.DTO.ProductionRegistryItem
 
 <!DOCTYPE html>
 
@@ -17,25 +13,34 @@
         <hr />
         <dl class="dl-horizontal">
             <dt>
-                @Html.DisplayNameFor(model => model.ItemsRegistry.Name)
+                @Html.DisplayNameFor(model => model.production_item.name)
             </dt>
-    
+
             <dd>
-                @Html.DisplayFor(model => model.ItemsRegistry.Name)
+                @Html.DisplayFor(model => model.production_item.name)
             </dd>
-    
-            <dt>
-                @Html.DisplayNameFor(model => model.ItemsRegistry1.Name)
-            </dt>
-    
-            <dd>
-                @Html.DisplayFor(model => model.ItemsRegistry1.Name)
-            </dd>
-    
+            @foreach (var req in Model.requirement_items)
+            {
+                <dt>
+                    @Html.DisplayNameFor(model => req.Key.name)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => req.Key.name)
+                </dd>
+
+                <dt>
+                    Количество
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => req.Value)
+                </dd>
+            }
         </dl>
     </div>
     <p>
-        @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
+        @Html.ActionLink("Edit", "Edit", new { id = Model.production_item.id }) |
         @Html.ActionLink("Back to List", "Index")
     </p>
 </body>
