@@ -17,9 +17,11 @@ namespace cerberus.Models
         public string Parameter { get; set; } = "id";
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
-            
-
-            int department_id = Convert.ToInt32(filterContext.RouteData.Values[Parameter]);
+            int department_id;
+            if (filterContext.RouteData.Values.ContainsKey(Parameter))
+                department_id = Convert.ToInt32(filterContext.RouteData.Values[Parameter]);
+            else
+                department_id = Convert.ToInt32(filterContext.RequestContext.HttpContext.Request.Form[Parameter]);
             var cont = (Controller)filterContext.Controller;
             using (var context = new CerberusDBEntities())
             {

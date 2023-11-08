@@ -25,7 +25,7 @@ namespace cerberus.Controllers
         private ApplicationUserManager userManager = new ApplicationUserManager(new UserStore<ApplicationUser>(new ApplicationDbContext()));
         private RoleManager<IdentityRole> roleManager = new RoleManager<IdentityRole>(new RoleStore<IdentityRole>(ApplicationDbContext.Create()));
         // GET: Departments
-        [DepartmentAuthorize(level = GroupDepartmentClaim.Levels.Partial)]
+
         public async Task<ActionResult> Index()
         {
             var user_id = User.Identity.GetUserId();

@@ -51,47 +51,31 @@ namespace cerberus.Controllers
         // POST: Reports/Create
         // Чтобы защититься от атак чрезмерной передачи данных, включите определенные свойства, для которых следует установить привязку. Дополнительные 
         // сведения см. в разделе https://go.microsoft.com/fwlink/?LinkId=317598.
-
+        [WareHouseAuthorize]
         public async Task<ActionResult> CreateWHReplenishmentReport(int id)
         {
-
             ViewBag.warehouse_id = id;
-
-
-
             return View("~/Views/Shared/Reports/WHReplenishmentReportForm.cshtml");
         }
 
- 
+        [WareHouseAuthorize]
         public async Task<ActionResult> CreateWHInventarisationReport(int id)
         {
             ViewBag.warehouse_id = id;
             return View("~/Views/Shared/Reports/WHInventarisationReportForm.cshtml");
         }
 
-
+        [WareHouseAuthorize]
         public async Task<ActionResult> CreateWHReleaseReport(int id)
         {
-
-            var user_id = User.Identity.GetUserId();
-
-            var group_ids = await userManager.GetRolesAsync(user_id);
-
-            var warehouse_list = GroupWareHouseClaim.get_group_warehouses(db, group_ids);
-
-            if (!warehouse_list.Any(e => e.id == id))
-            {
-                return RedirectToAction("Index");
-            }
-
             var department_id = (await db.WareHouses.FindAsync(id)).department_id;
             ViewBag.warehouse_id = id;
-            //ViewBag.supply_requirement_id = supply_requirement_id;
             ViewBag.SupplyRequirementReportVariants = FSSupplyRequirementReport.get_unsatisfied(db, department_id).ToList();
 
             return View("~/Views/Shared/Reports/WHReleaseReportForm.cshtml");
         }
 
+        [WareHouseAuthorize]
 
         public async Task<ActionResult> CreateWHShipmentReport(int id)
         {
@@ -100,30 +84,17 @@ namespace cerberus.Controllers
             return View("~/Views/Shared/Reports/WHShipmentReportForm.cshtml");
         }
 
-
+        [WareHouseAuthorize]
         public async Task<ActionResult> CreateWHReplenishmentWorkShiftReport(int id)
         {
-            var user_id = User.Identity.GetUserId();
-
-            var group_ids = await userManager.GetRolesAsync(user_id);
-
-            var warehouse_list = GroupWareHouseClaim.get_group_warehouses(db, group_ids);
-
-            if (!warehouse_list.Any(e => e.id == id))
-            {
-                return RedirectToAction("Index");
-            }
-
             var department_id = (await db.WareHouses.FindAsync(id)).department_id;
             ViewBag.warehouse_id = id;
-            //ViewBag.supply_requirement_id = supply_requirement_id;
             ViewBag.WorkShiftReportVariants = FSWorkShiftReport.get_unsatisfied(db,department_id).ToList();
-
             return View("~/Views/Shared/Reports/WHReplenishmentWorkShiftReportForm.cshtml");
         }
 
- 
 
+        [FactorySiteAuthorize]
         public async Task<ActionResult> CreateFSWorkShiftReport(int id)
         {
             ViewBag.factorysite_id = id;
@@ -132,6 +103,7 @@ namespace cerberus.Controllers
             return View("~/Views/Shared/Reports/FSWorkShiftReportForm.cshtml");
         }
 
+        [FactorySiteAuthorize]
         public async Task<ActionResult> CreateFSSupplyRequirementReport(int id)
         {
             ViewBag.factorysite_id = id;
@@ -184,6 +156,7 @@ namespace cerberus.Controllers
         // сведения см. в разделе https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [WareHouseAuthorize(Parameter = "warehouse_id")]
         public async Task<ActionResult> CreateWHReplenishmentReport(WHReplenishmentReport report)
         {
             
@@ -218,6 +191,7 @@ namespace cerberus.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [WareHouseAuthorize(Parameter = "warehouse_id")]
         public async Task<ActionResult> CreateWHInventarisationReport(WHInventarisationReport report)
         {
             var user_id = User.Identity.GetUserId();
@@ -250,6 +224,7 @@ namespace cerberus.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [WareHouseAuthorize(Parameter = "warehouse_id")]
         public async Task<ActionResult> CreateWHReleaseReport(WHReleaseReport report)
         {
             var user_id = User.Identity.GetUserId();
@@ -287,6 +262,7 @@ namespace cerberus.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [WareHouseAuthorize(Parameter = "warehouse_id")]
         public async Task<ActionResult> CreateWHShipmentReport(WHShipmentReport report)
         {
             var user_id = User.Identity.GetUserId();
@@ -319,6 +295,7 @@ namespace cerberus.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [WareHouseAuthorize(Parameter = "warehouse_id")]
         public async Task<ActionResult> CreateWHWorkShiftReplenishmentReport(WHWorkShiftReplenishmentReport report)
         {
             var user_id = User.Identity.GetUserId();
@@ -350,6 +327,7 @@ namespace cerberus.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [FactorySiteAuthorize(Parameter = "factorysite_id")]
         public async Task<ActionResult> CreateFSWorkShiftReport(FSWorkShiftReport report)
         {
             var user_id = User.Identity.GetUserId();
@@ -389,6 +367,7 @@ namespace cerberus.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [FactorySiteAuthorize(Parameter = "factorysite_id")]
         public async Task<ActionResult> CreateFSSupplyRequirementReport(FSSupplyRequirementReport report)
         {
             var user_id = User.Identity.GetUserId();

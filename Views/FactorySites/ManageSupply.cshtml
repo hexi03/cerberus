@@ -21,7 +21,7 @@
             var curr_wh = Model.warehouses[i];
             <div class="whRow">
 
-                <select class="form-control" name="warehouse_ids[@Guid.NewGuid().ToString()]">
+                <select class="form-control" name="warehouse_ids[@i]">
                     <option value="">Select Warehouse</option>
                     @foreach (var wareHouse in ViewBag.WareHouses)
                     {

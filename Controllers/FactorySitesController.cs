@@ -198,6 +198,7 @@ namespace cerberus.Controllers
             });
         }
 
+
         [Authorize403(Roles = "Admin")]
         [FactorySiteAuthorize]
         [ValidateAntiForgeryToken]
@@ -235,7 +236,6 @@ namespace cerberus.Controllers
 
             var factorySite = GroupFactorySiteClaim.get_group_factorysites(db, group_ids).FirstOrDefault(p => p.id == id);
 
-
             var department = await GroupDepartmentClaim.get_group_departments(db, group_ids, GroupDepartmentClaim.Levels.Full).Where(e => e.id == factorySite.department_id).FirstOrDefaultAsync();
 
             ViewBag.WareHouses = db.WareHouses.Where(e => e.department_id == department.id).ToList();
@@ -245,9 +245,6 @@ namespace cerberus.Controllers
                 factorySite = factorySite,
                 warehouses = db.FactorySiteWareHouseClaims.Where(e => e.factorysite_id == factorySite.id).Select(e => e.Warehouse).ToList(),
             });
-
-
-
         }
 
 

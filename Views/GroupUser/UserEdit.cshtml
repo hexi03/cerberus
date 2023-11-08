@@ -18,17 +18,15 @@
 <div id="roleContainer">
     <label for="Roles">User Roles:</label>
     <button type="button" id="addRoleButton" class="btn btn-primary">Add Role</button>
-    @for (var i = 0; i < Model.Roles.Count(); i++)
+    @foreach (var selectedRole in Model.Roles)
     {
-
-        var selectedRole = Model.Roles[i];
         <div class="roleRow">
 
-            <select class="form-control" name="Roles[@Guid.NewGuid().ToString()]">
+            <select class="form-control" name="Roles[@selectedRole.Key]">
                 <option value="">Select Roles</option>
                 @foreach (var role in ViewBag.Roles)
                 {
-                    <option value="@role.Name" @(role.Name == selectedRole ? "selected" : "")>@role.Name</option>
+                    <option value="@role.Name" @(role.Name == selectedRole.Value ? "selected" : "")>@role.Name</option>
                 }
             </select>
             <button class="removeRole">Удалить</button>
