@@ -1,4 +1,5 @@
-﻿using cerberus.Models.edmx;
+﻿using cerberus.DTO.Reports;
+using cerberus.Models.edmx;
 using Microsoft.Owin.Security.Twitter.Messages;
 using System;
 using System.Collections.Generic;
@@ -13,14 +14,25 @@ namespace cerberus.Models.Reports
     {
         public int factorysite_id {get; set;}
         public int target_warehouse_id { get; set; }
-        //public int workplan_id;
-
-        public Dictionary<string, string> items { get; set; }
+        public Dictionary<int, int> items { get; set; }
 
 
         public FSSupplyRequirementReport() : base(Types.FSSupplyRequirement) {
-            items = new Dictionary<string, string>();
+            items = new Dictionary<int, int>();
         }
+
+        public static FSSupplyRequirementReport from(FSSupplyRequirementReportFormDTO dto) {
+            var res = new FSSupplyRequirementReport();
+            res.creator_id = dto.creator_id ;
+            res.department_id = dto.department_id;
+            res.timestamp = dto.timestamp;
+
+            res.factorysite_id = dto.factorysite_id;
+            res.target_warehouse_id = dto.target_warehouse_id ;
+            res.items = dto.items.ToDictionary(kv => Convert.ToInt32(kv.Key), kv => Convert.ToInt32(kv.Value));
+            return res;
+
+        } 
 
         public Report to_generic()
         {
@@ -30,8 +42,8 @@ namespace cerberus.Models.Reports
 
         public static async Task<IList<FSSupplyRequirementReport>> get_unsatisfied(CerberusDBEntities db)
         {
-            return db.Reports
-                .Where(r => r.report_type == Report.Types.FSSupplyRequirement.ToString()).ToList()
+            return Report.time_filter(db.Reports
+                .Where(r => r.report_type == Report.Types.FSSupplyRequirement.ToString())).ToList()
                 .Select(r => (FSSupplyRequirementReport)r.from_generic()).ToList()
                 .Where(
                     r =>
@@ -41,8 +53,8 @@ namespace cerberus.Models.Reports
         public static IList<FSSupplyRequirementReport> get_unsatisfied(CerberusDBEntities db, int department_id)
         {
 
-            return db.Reports
-                .Where(r => r.department_id == department_id && r.report_type == Report.Types.FSSupplyRequirement.ToString()).ToList()
+            return Report.time_filter(db.Reports
+                .Where(r => r.department_id == department_id && r.report_type == Report.Types.FSSupplyRequirement.ToString())).ToList()
                 .Select(r => (FSSupplyRequirementReport)r.from_generic()).ToList()
                 .Where(
                     r =>
@@ -59,16 +71,16 @@ namespace cerberus.Models.Reports
 
             return misc.MergeDictionariesWithSum(
                 db.Reports
-                    .Where(p => p.report_type == Report.Types.WHRelease.ToString() && p.timestamp > r.timestamp).ToList()
-                    .Select(p => (WHReleaseReport)r.from_generic()).Where(p => (p.supply_requirement_id == r.id) && (p.warehouse_id == r.target_warehouse_id))
+                    .Where(p => p.report_type == Report.Types.WHRelease.ToString() && p.timestamp > r.timestamp && p.department_id == r.department_id).ToList()
+                    .Select(p => (WHReleaseReport)p.from_generic()).Where(p => (p.supply_requirement_id == r.id) && (p.warehouse_id == r.target_warehouse_id))
                     .Aggregate(new Dictionary<int, int>(), (acc, p) =>
-                        misc.MergeDictionariesWithSum(acc, p.items.ToDictionary(kv => Convert.ToInt32(kv.Key), kv => Convert.ToInt32(kv.Value)))
-                    ),
-                r.items.ToDictionary(kv => Convert.ToInt32(kv.Key), kv => Convert.ToInt32(kv.Value))
+                        misc.MergeDictionariesWithSum(acc, p.items)
+                    ).ToDictionary(kv => kv.Key, kv => -kv.Value),
+                r.items
             );
 
-
         }
+
 
     }
     

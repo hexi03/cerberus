@@ -1,8 +1,10 @@
-﻿using cerberus.Models.edmx;
+﻿using cerberus.DTO.Reports;
+using cerberus.Models.edmx;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using System.Threading.Tasks;
 using System.Web;
 
 namespace cerberus.Models.Reports
@@ -12,14 +14,96 @@ namespace cerberus.Models.Reports
         public int warehouse_id { get; set; }
         //public int inventarisation_plan_id;
 
-        public Dictionary<string, string> items { get; set; }
+        public Dictionary<int, int> items { get; set; }
 
-        public WHInventarisationReport() : base(Types.WHInventarisation) { items = new Dictionary<string, string>(); }
+        public WHInventarisationReport() : base(Types.WHInventarisation) { items = new Dictionary<int, int>(); }
 
         public Report to_generic()
         {
             serialized = JsonSerializer.Serialize(this);
             return new Report(this);
         }
+
+        public static WHInventarisationReport from(WHInventarisationReportFormDTO dto)
+        {
+            var res = new WHInventarisationReport();
+            res.creator_id = dto.creator_id;
+            res.department_id = dto.department_id;
+            res.timestamp = dto.timestamp;
+
+            res.warehouse_id = dto.warehouse_id;
+            res.items = dto.items.ToDictionary(kv => Convert.ToInt32(kv.Key), kv => Convert.ToInt32(kv.Value));
+            return res;
+        }
+
+
+        public static async Task<IList<WHInventarisationReport>> get_unsatisfied(CerberusDBEntities db)
+        {
+            return Report.time_filter(db.Reports
+                .Where(r => r.report_type == Report.Types.WHInventarisation.ToString())).ToList()
+                .Select(r => (WHInventarisationReport)r.from_generic()).ToList()
+                .Where(
+                    r =>
+                    get_unsatisfied_item_list(db, r.id).Count() != 0
+                ).ToList();
+        }
+        public static IList<WHInventarisationReport> get_unsatisfied(CerberusDBEntities db, int department_id)
+        {
+
+            return Report.time_filter(db.Reports
+                .Where(r => r.department_id == department_id && r.report_type == Report.Types.WHInventarisation.ToString())).ToList()
+                .Select(r => (WHInventarisationReport)r.from_generic()).ToList()
+                .Where(
+                    r =>
+                    get_unsatisfied_item_list(db, r.id).Count() != 0
+                ).ToList();
+
+        }
+
+        public static IDictionary<int, int> get_unsatisfied_item_list(CerberusDBEntities db, int report_id)
+        {
+            var r_raw = db.Reports
+                .Find(report_id);
+            var r = (WHInventarisationReport)(r_raw.from_generic());
+
+            var shipments = Report.time_filter(db.Reports
+                    .Where(p => p.report_type == Report.Types.WHShipment.ToString() && p.timestamp < r.timestamp && p.department_id == r.department_id)).ToList()
+                    .Select(p => (WHShipmentReport)p.from_generic()).Where(p => (p.warehouse_id == r.warehouse_id))
+                    .Aggregate(new Dictionary<int, int>(), (acc, p) =>
+                        misc.MergeDictionariesWithSum(acc, p.items)
+                    );
+            var replenishments = Report.time_filter(db.Reports
+                    .Where(p => p.report_type == Report.Types.WHReplenishment.ToString() && p.timestamp < r.timestamp && p.department_id == r.department_id)).ToList()
+                    .Select(p => (WHReplenishmentReport)p.from_generic()).Where(p => (p.warehouse_id == r.warehouse_id))
+                    .Aggregate(new Dictionary<int, int>(), (acc, p) =>
+                        misc.MergeDictionariesWithSum(acc, p.items)
+                    );
+
+            var wh_replenishments = Report.time_filter(db.Reports
+                    .Where(p => p.report_type == Report.Types.WHWorkShiftReplenishment.ToString() && p.timestamp < r.timestamp && p.department_id == r.department_id)).ToList()
+                    .Select(p => (WHWorkShiftReplenishmentReport)p.from_generic()).Where(p => (p.warehouse_id == r.warehouse_id))
+                    .Aggregate(new Dictionary<int, int>(), (acc, p) =>
+                        misc.MergeDictionariesWithSum(acc, p.items)
+                    );
+
+            var release = Report.time_filter(db.Reports
+                    .Where(p => p.report_type == Report.Types.WHRelease.ToString() && p.timestamp < r.timestamp && p.department_id == r.department_id)).ToList()
+                    .Select(p => (WHReleaseReport)p.from_generic()).Where(p => (p.warehouse_id == r.warehouse_id))
+                    .Aggregate(new Dictionary<int, int>(), (acc, p) =>
+                        misc.MergeDictionariesWithSum(acc, p.items)
+                    );
+
+            return misc.MergeDictionariesWithSum(
+                misc.MergeDictionariesWithSum(
+                    misc.MergeDictionariesWithSum(shipments,release),
+                    misc.MergeDictionariesWithSum(wh_replenishments, replenishments).ToDictionary(kv => kv.Key, kv => -kv.Value)
+                    ),
+                r.items
+            );
+
+        }
+
+
+
     }
 }

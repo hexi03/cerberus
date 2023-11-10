@@ -1,12 +1,10 @@
-﻿using cerberus.Models.edmx;
-using Microsoft.Ajax.Utilities;
-using Microsoft.Owin.Security.Twitter.Messages;
+﻿using cerberus.DTO.Reports;
+using cerberus.Models.edmx;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
-using System.Web;
 
 namespace cerberus.Models.Reports
 {
@@ -16,14 +14,30 @@ namespace cerberus.Models.Reports
         public int target_warehouse_id { get; set; }
         //public int workplan_id;
 
-        public Dictionary<string, string> produced { get; set; }
-        public Dictionary<string, string> losses { get; set; }
-        public Dictionary<string, string> remains { get; set; }
+        public Dictionary<int, int> produced { get; set; }
+        public Dictionary<int, int> losses { get; set; }
+        public Dictionary<int, int> remains { get; set; }
 
         public FSWorkShiftReport() : base(Types.FSWorkShift) {
-            produced = new Dictionary<string, string>();
-            losses = new Dictionary<string, string>();
-            remains = new Dictionary<string, string>();
+            produced = new Dictionary<int, int>();
+            losses = new Dictionary<int, int>();
+            remains = new Dictionary<int, int>();
+        }
+
+        public static FSWorkShiftReport from(FSWorkShiftReportFormDTO dto)
+        {
+            var res = new FSWorkShiftReport();
+            res.creator_id = dto.creator_id;
+            res.department_id = dto.department_id;
+            res.timestamp = dto.timestamp;
+
+            res.factorysite_id = dto.factorysite_id;
+            res.target_warehouse_id = dto.target_warehouse_id;
+            res.produced = dto.produced.ToDictionary(kv => Convert.ToInt32(kv.Key), kv => Convert.ToInt32(kv.Value));
+            res.losses = dto.losses.ToDictionary(kv => Convert.ToInt32(kv.Key), kv => Convert.ToInt32(kv.Value));
+            res.remains = dto.remains.ToDictionary(kv => Convert.ToInt32(kv.Key), kv => Convert.ToInt32(kv.Value));
+            return res;
+
         }
 
         public Report to_generic()
@@ -32,8 +46,8 @@ namespace cerberus.Models.Reports
             return new Report(this);
         }
         public static async Task<IList<FSWorkShiftReport>> get_unsatisfied(CerberusDBEntities db) {
-            return db.Reports
-                .Where(r => r.report_type == Report.Types.FSWorkShift.ToString()).ToList()
+            return Report.time_filter(db.Reports
+                .Where(r => r.report_type == Report.Types.FSWorkShift.ToString())).ToList()
                 .Select(r => (FSWorkShiftReport)r.from_generic()).ToList()
                 .Where(
                     r =>
@@ -43,8 +57,8 @@ namespace cerberus.Models.Reports
         public static IList<FSWorkShiftReport> get_unsatisfied(CerberusDBEntities db, int department_id)
         {
 
-            return db.Reports
-                .Where(r => r.department_id == department_id && r.report_type == Report.Types.FSWorkShift.ToString()).ToList()
+            return Report.time_filter(db.Reports
+                .Where(r => r.department_id == department_id && r.report_type == Report.Types.FSWorkShift.ToString())).ToList()
                 .Select(r => (FSWorkShiftReport)r.from_generic()).ToList()
                 .Where(
                     r =>
@@ -61,17 +75,27 @@ namespace cerberus.Models.Reports
 
             return misc.MergeDictionariesWithSum(
                 db.Reports
-                    .Where(p => p.report_type == Report.Types.WHWorkShiftReplenishment.ToString() && p.timestamp > r.timestamp).ToList()
-                    .Select(p => (WHWorkShiftReplenishmentReport)r.from_generic()).Where(p => (p.workshift_id == r.id) && (p.warehouse_id == r.target_warehouse_id))
+                    .Where(p => p.report_type == Report.Types.WHWorkShiftReplenishment.ToString() && p.timestamp > r.timestamp && p.department_id == r.department_id).ToList()
+                    .Select(p => (WHWorkShiftReplenishmentReport)p.from_generic()).Where(p => (p.workshift_id == r.id) && (p.warehouse_id == r.target_warehouse_id))
                     .Aggregate(new Dictionary<int, int>(), (acc, p) =>
-                        misc.MergeDictionariesWithSum(acc, p.items.ToDictionary(kv => Convert.ToInt32(kv.Key), kv => Convert.ToInt32(kv.Value)))
-                    ),
-                r.produced.ToDictionary(kv => Convert.ToInt32(kv.Key), kv => Convert.ToInt32(kv.Value))
+                        misc.MergeDictionariesWithSum(acc, p.items)
+                    ).ToDictionary(kv => kv.Key, kv => -kv.Value),
+                r.produced
             );
-                
 
         }
 
+        public static IList<FSWorkShiftReport> get_reports_with_losses(CerberusDBEntities db)
+        {
+            return Report.time_filter(db.Reports.Where(p => p.report_type == Report.Types.FSWorkShift.ToString())).ToList()
+                    .Select(p => (FSWorkShiftReport)p.from_generic()).Where(p => p.losses.Count() > 0).ToList();
+        }
+
+        public static IList<FSWorkShiftReport> get_reports_with_remains(CerberusDBEntities db)
+        {
+            return Report.time_filter(db.Reports.Where(p => p.report_type == Report.Types.FSWorkShift.ToString())).ToList()
+                    .Select(p => (FSWorkShiftReport)p.from_generic()).Where(p => p.remains.Count() > 0).ToList();
+        }
 
     }
     

@@ -254,6 +254,14 @@
     <Compile Include="DTO\FactorySiteRolesDTO.cs" />
     <Compile Include="DTO\FactorySiteSupplyDTO.cs" />
     <Compile Include="DTO\ProductionRegistryItem.cs" />
+    <Compile Include="DTO\Reports\FSSupplyRequirementReport.cs" />
+    <Compile Include="DTO\Reports\FSWorkShiftReport.cs" />
+    <Compile Include="DTO\Reports\ReportDTO.cs" />
+    <Compile Include="DTO\Reports\WHInventarisationReport.cs" />
+    <Compile Include="DTO\Reports\WHReleaseReport.cs" />
+    <Compile Include="DTO\Reports\WHReplenishmentReport.cs" />
+    <Compile Include="DTO\Reports\WHShipmentReport.cs" />
+    <Compile Include="DTO\Reports\WHWorkShiftReplenishmentReport.cs" />
     <Compile Include="DTO\WareHouseDTO.cs" />
     <Compile Include="DTO\WareHouseRolesDTO.cs" />
     <Compile Include="Global.asax.cs">
@@ -330,6 +338,7 @@
     <Compile Include="Models\Reports\WHReleaseReport.cs" />
     <Compile Include="Models\Reports\WHReplenishmentReport.cs" />
     <Compile Include="Models\Reports\WHWorkShiftReplenishmentReport.cs" />
+    <Compile Include="Models\Warehouse.cs" />
     <Compile Include="Models\WareHouseAuthorizeAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />

@@ -14,6 +14,7 @@ using System.Text.RegularExpressions;
 using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.AspNet.Identity.Owin;
 using cerberus.Models.edmx;
+using cerberus.DTO.Reports;
 
 namespace cerberus.Controllers
 {
@@ -157,7 +158,7 @@ namespace cerberus.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [WareHouseAuthorize(Parameter = "warehouse_id")]
-        public async Task<ActionResult> CreateWHReplenishmentReport(WHReplenishmentReport report)
+        public async Task<ActionResult> CreateWHReplenishmentReport(WHReplenishmentReportFormDTO report)
         {
             
             var user_id = User.Identity.GetUserId();
@@ -181,7 +182,7 @@ namespace cerberus.Controllers
 
             if (ModelState.IsValid)
             {
-                Report.save(db, report.to_generic());
+                Report.save(db, WHReplenishmentReport.from(report).to_generic());
                 await db.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
@@ -192,7 +193,7 @@ namespace cerberus.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [WareHouseAuthorize(Parameter = "warehouse_id")]
-        public async Task<ActionResult> CreateWHInventarisationReport(WHInventarisationReport report)
+        public async Task<ActionResult> CreateWHInventarisationReport(WHInventarisationReportFormDTO report)
         {
             var user_id = User.Identity.GetUserId();
             
@@ -214,7 +215,7 @@ namespace cerberus.Controllers
             report.report_type = Report.Types.WHInventarisation.ToString();
             if (ModelState.IsValid)
             {
-                Report.save(db, report.to_generic());
+                Report.save(db, WHInventarisationReport.from(report).to_generic());
                 await db.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
@@ -225,7 +226,7 @@ namespace cerberus.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [WareHouseAuthorize(Parameter = "warehouse_id")]
-        public async Task<ActionResult> CreateWHReleaseReport(WHReleaseReport report)
+        public async Task<ActionResult> CreateWHReleaseReport(WHReleaseReportFormDTO report)
         {
             var user_id = User.Identity.GetUserId();
             
@@ -251,7 +252,7 @@ namespace cerberus.Controllers
             report.report_type = Report.Types.WHRelease.ToString();
             if (ModelState.IsValid)
             {
-                Report.save(db, report.to_generic());
+                Report.save(db, WHReleaseReport.from(report).to_generic());
                 await db.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
@@ -263,7 +264,7 @@ namespace cerberus.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [WareHouseAuthorize(Parameter = "warehouse_id")]
-        public async Task<ActionResult> CreateWHShipmentReport(WHShipmentReport report)
+        public async Task<ActionResult> CreateWHShipmentReport(WHShipmentReportFormDTO report)
         {
             var user_id = User.Identity.GetUserId();
             
@@ -285,7 +286,7 @@ namespace cerberus.Controllers
             report.report_type = Report.Types.WHShipment.ToString();
             if (ModelState.IsValid)
             {
-                Report.save(db, report.to_generic());
+                Report.save(db, WHShipmentReport.from(report).to_generic());
                 await db.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
@@ -296,7 +297,7 @@ namespace cerberus.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [WareHouseAuthorize(Parameter = "warehouse_id")]
-        public async Task<ActionResult> CreateWHWorkShiftReplenishmentReport(WHWorkShiftReplenishmentReport report)
+        public async Task<ActionResult> CreateWHWorkShiftReplenishmentReport(WHWorkShiftReplenishmentReportFormDTO report)
         {
             var user_id = User.Identity.GetUserId();
             
@@ -317,7 +318,7 @@ namespace cerberus.Controllers
             report.report_type = Report.Types.WHWorkShiftReplenishment.ToString();
             if (ModelState.IsValid)
             {
-                Report.save(db, report.to_generic());
+                Report.save(db, WHWorkShiftReplenishmentReport.from(report).to_generic());
                 await db.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
@@ -328,7 +329,7 @@ namespace cerberus.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [FactorySiteAuthorize(Parameter = "factorysite_id")]
-        public async Task<ActionResult> CreateFSWorkShiftReport(FSWorkShiftReport report)
+        public async Task<ActionResult> CreateFSWorkShiftReport(FSWorkShiftReportFormDTO report)
         {
             var user_id = User.Identity.GetUserId();
             
@@ -357,7 +358,7 @@ namespace cerberus.Controllers
                 
             if (ModelState.IsValid)
             {
-                Report.save(db, report.to_generic());
+                Report.save(db, FSWorkShiftReport.from(report).to_generic());
                 await db.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
@@ -368,7 +369,7 @@ namespace cerberus.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [FactorySiteAuthorize(Parameter = "factorysite_id")]
-        public async Task<ActionResult> CreateFSSupplyRequirementReport(FSSupplyRequirementReport report)
+        public async Task<ActionResult> CreateFSSupplyRequirementReport(FSSupplyRequirementReportFormDTO report)
         {
             var user_id = User.Identity.GetUserId();
             
@@ -396,7 +397,7 @@ namespace cerberus.Controllers
 
             if (ModelState.IsValid)
             {
-                Report.save(db, report.to_generic());
+                Report.save(db, FSSupplyRequirementReport.from(report).to_generic());
                 await db.SaveChangesAsync();
                 return RedirectToAction("Index");
             }

@@ -107,5 +107,9 @@ namespace cerberus.Models.edmx
             return q.Where(e => e.timestamp > DateTime.Today.AddMonths(Consts.REPORT_ACTUAL_TIME_DURATION));
         }
 
+
+
+
+
     }
 }
