@@ -1,52 +1,62 @@
 ﻿@model cerberus.Models.edmx.Warehouse
+@{
+    var users = ((Dictionary<string, cerberus.Models.ApplicationUser>)ViewBag.Users);
+}
 
- 
+<div class="container">
+    <h2>Информация о складе</h2>
+    <hr />
 
-<!DOCTYPE html>
-
-<html>
-<head>
-    <meta name="viewport" content="width=device-width" />
-    <title>Details</title>
-</head>
-<body>
     <div>
-        <h4>Warehouse @Model.name</h4>
+        <h4>Отдел: @Html.DisplayFor(model => model.Department.name)</h4>
+        <h4>Склад: @Html.DisplayFor(model => model.name)</h4>
+        <hr />
 
         <div>
-
             <a href="@Url.Action("CreateWHReplenishmentWorkShiftReport", "Reports", new { id = Model.id })">Создать отчет о приемке ПП</a>
             <a href="@Url.Action("CreateWHReleaseReport", "Reports", new { id = Model.id })">Создать отчет о выдаче</a>
             <a href="@Url.Action("CreateWHInventarisationReport", "Reports", new { id = Model.id })">Создать отчет об инвентаризации</a>
-
             <a href="@Url.Action("CreateWHReplenishmentReport", "Reports", new { id = Model.id })">Создать отчет о приемке</a>
-            <a href="@Url.Action("CreateWHShipmentReport", "Reports",new { id = Model.id })">Создать отчет об отгрузке</a>
-
-
+            <a href="@Url.Action("CreateWHShipmentReport", "Reports", new { id = Model.id })">Создать отчет об отгрузке</a>
         </div>
         <hr />
-        <dl class="dl-horizontal">
-            <dt>
-                @Html.DisplayNameFor(model => model.name)
-            </dt>
 
-            <dd>
-                @Html.DisplayFor(model => model.name)
-            </dd>
+        <div>
+            <h4>Отчеты</h4>
+            <table class="table">
+                <tr>
+                    <th>Тип отчета</th>
+                    <th>Ответственный</th>
+                    <th></th>
+                </tr>
 
-            <dt>
-                @Html.DisplayNameFor(model => model.Department.name)
-            </dt>
+                @foreach (var r in ((IList<cerberus.Models.Reports.WareHouseReport>)ViewBag.ReportList))
+                {
+                    <tr>
+                        <td><p>@r.get_type_as_string()</p></td>
+                        <td>@Html.DisplayFor(modelItem => users[r.creator_id].UserName)</td>
+                        <td>
+                            <a href="@Url.Action("Edit", "Reports", new { id = r.id })">Редактировать</a> |
+                            <a href="@Url.Action("Details", "Reports", new { id = r.id })">Детали</a> |
+                            <a href="@Url.Action("Delete", "Reports", new { id = r.id })">Удалить</a>
+                        </td>
+                    </tr>
+                }
+            </table>
+        </div>
+        <hr />
 
-            <dd>
-                @Html.DisplayFor(model => model.Department.name)
-            </dd>
-
-        </dl>
+        <div>
+            <h4>Состояние склада</h4>
+            @foreach (var item in ((IList<(cerberus.Models.edmx.ItemsRegistry, int)>)ViewBag.State))
+            {
+                <p>@Html.DisplayFor(model => item.Item1.name):  @Html.DisplayFor(model => item.Item2)</p>
+            }
+        </div>
     </div>
-    <p>
-        @Html.ActionLink("Edit", "Edit", new { id = Model.id }) |
-        @Html.ActionLink("Back to List", "Index")
-    </p>
-</body>
-</html>
+
+    <div class="form-actions no-color">
+        @Html.ActionLink("Редактировать", "Edit", new { id = Model.id }, new { @class = "btn btn-primary" }) |
+
+    </div>
+</div>

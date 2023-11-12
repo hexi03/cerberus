@@ -1,29 +1,30 @@
 ﻿@model IEnumerable<cerberus.Models.edmx.Department>
 
-
+<div class="container">
+    <h2>Список отделов</h2>
     <p>
-        @Html.ActionLink("Create New", "Create")
+        @Html.ActionLink("Создать новый", "Create", null, new { @class = "btn btn-primary" })
     </p>
-    <table class="table">
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.name)
-            </th>
-            <th></th>
-        </tr>
-    
-    @foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.name)
-            </td>
-            <td>
-                @Html.ActionLink("Edit", "Edit", new { id = item.id }) |
-                @Html.ActionLink("Details", "Details", new { id = item.id }) |
-                @Html.ActionLink("Delete", "Delete", new { id = item.id })|
-                @Html.ActionLink("Manage Access", "ManageAccess", new { id = item.id })
-            </td>
-        </tr>
-    }
-    
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>@Html.DisplayNameFor(model => model.name)</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => item.name)</td>
+                    <td>
+                        @Html.ActionLink("Редактировать", "Edit", new { id = item.id }, new { @class = "btn btn-warning btn-sm" }) |
+                        @Html.ActionLink("Подробности", "Details", new { id = item.id }, new { @class = "btn btn-info btn-sm" }) |
+                        @Html.ActionLink("Удалить", "Delete", new { id = item.id }, new { @class = "btn btn-danger btn-sm" }) |
+                        @Html.ActionLink("Управление доступом", "ManageAccess", new { id = item.id }, new { @class = "btn btn-primary btn-sm" })
+                    </td>
+                </tr>
+            }
+        </tbody>
     </table>
+</div>

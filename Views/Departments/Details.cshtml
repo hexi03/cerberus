@@ -1,32 +1,20 @@
 ﻿@model cerberus.Models.edmx.Department
 
+<div class="container">
+    <h2>Информация об отделе</h2>
+    <hr />
 
-
-<!DOCTYPE html>
-
-<html>
-<head>
-    <meta name="viewport" content="width=device-width" />
-    <title>Details</title>
-</head>
-<body>
     <div>
-        <h4>Department</h4>
+        <h4>Отдел</h4>
         <hr />
-        <dl class="dl-horizontal">
-            <dt>
-                @Html.DisplayNameFor(model => model.name)
-            </dt>
-    
-            <dd>
-                @Html.DisplayFor(model => model.name)
-            </dd>
-    
-        </dl>
+        <div>
+            <h5>Название:</h5>
+            <p>@Html.DisplayFor(model => model.name)</p>
+        </div>
     </div>
-    <p>
-        @Html.ActionLink("Edit", "Edit", new { id = Model.id }) |
-        @Html.ActionLink("Back to List", "Index")
-    </p>
-</body>
-</html>
+
+    <div class="form-actions no-color">
+        @Html.ActionLink("Редактировать", "Edit", new { id = Model.id }, new { @class = "btn btn-primary" }) |
+
+    </div>
+</div>

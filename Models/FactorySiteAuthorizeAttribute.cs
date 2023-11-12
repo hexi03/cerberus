@@ -16,7 +16,12 @@ namespace cerberus.Models
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
 
-            int factroysite_id = Convert.ToInt32(filterContext.RouteData.Values[Parameter]);
+            int factroysite_id;
+            if (filterContext.RouteData.Values.ContainsKey(Parameter))
+                factroysite_id = Convert.ToInt32(filterContext.RouteData.Values[Parameter]);
+            else
+                factroysite_id = Convert.ToInt32(filterContext.RequestContext.HttpContext.Request.Form[Parameter]);
+
             var cont = (Controller)filterContext.Controller;
             using (var context = new CerberusDBEntities())
             {

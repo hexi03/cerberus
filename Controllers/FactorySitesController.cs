@@ -13,6 +13,7 @@ using Microsoft.AspNet.Identity.Owin;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using cerberus.DTO;
+using cerberus.Models.Reports;
 
 namespace cerberus.Controllers
 {
@@ -48,7 +49,7 @@ namespace cerberus.Controllers
             var group_ids = await userManager.GetRolesAsync(user_id);
 
             FactorySite factorySite = GroupFactorySiteClaim.get_group_factorysites(db,group_ids).Where(fs => fs.id == id).First();
-
+            ViewBag.ReportList = await FactorySiteReport.get_reports(db, factorySite.id);
             return View(factorySite);
         }
 
@@ -98,7 +99,7 @@ namespace cerberus.Controllers
                     return RedirectToAction("Index", "Home");
             }
 
-            return RedirectToAction("Index", "Home");
+            return View(factorySite);
         }
 
         // GET: FactorySites/Edit/5
@@ -137,7 +138,7 @@ namespace cerberus.Controllers
                     return RedirectToAction("Index", "Home");
             }
             ViewBag.department_id = new SelectList(GroupDepartmentClaim.get_group_departments(db, group_ids, GroupDepartmentClaim.Levels.Full), "id", "name", factorySite.department_id);
-            return RedirectToAction("Index", "Home");
+            return View(factorySite);
         }
 
         // GET: FactorySites/Delete/5

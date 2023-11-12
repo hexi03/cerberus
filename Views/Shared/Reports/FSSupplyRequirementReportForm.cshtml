@@ -1,38 +1,70 @@
-﻿@model cerberus.Models.Reports.FSSupplyRequirementReport
+﻿@model cerberus.DTO.Reports.FSSupplyRequirementReportFormDTO
 
-@using (Html.BeginForm("CreateFSSupplyRequirementReport", "Reports", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { role = "form" }))
+@{
+    string action;
+    if (ViewBag.mode == "edit")
+    {
+        action = "Edit" + "FSSupplyRequirementReport";
+    }
+    else
+    {
+        action = "Create" + "FSSupplyRequirementReport";
+    }
+
+}
+
+@using (Html.BeginForm(action, "Reports", new { ReturnUrl = ViewBag.ReturnUrl, id = ViewBag.mode == "edit" ? ViewContext.RouteData.Values["id"] : null }, FormMethod.Post, new { role = "form" }))
 {
     @Html.AntiForgeryToken()
 
-<div class="form-horizontal">
-    <h4>Report</h4>
-    <hr />
+    <div class="container">
+        <h2>Отчет</h2>
+        <hr />
 
-    <input name="factorysite_id" type="hidden" value="@ViewBag.factorysite_id">
+        <input name="factorysite_id" type="hidden" value="@ViewBag.factorysite_id">
 
+        <div class="form-group">
+            <label for="target_warehouse_id" class="control-label col-md-2">Целевой склад</label>
+            <div class="col-md-10">
+                @if (ViewBag.mode == "edit")
+                {
+                    @Html.DropDownList("target_warehouse_id", (SelectList)ViewBag.WHVariants, htmlAttributes: new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.target_warehouse_id, "", new { @class = "text-danger" })
+                }
+                else
+                {
+                    <input name="target_warehouse_id" value="@Model.target_warehouse_id" readonly>
+                }
+            </div>
+        </div>
 
-    <div class="form-group">
-        @Html.LabelFor(model => model.target_warehouse_id, "target_warehouse_id", htmlAttributes: new { @class = "control-label col-md-2" })
-        <div class="col-md-10">
-            @Html.DropDownList("target_warehouse_id", (SelectList)ViewBag.WHVariants, htmlAttributes: new { @class = "form-control" })
-            @Html.ValidationMessageFor(model => model.target_warehouse_id, "", new { @class = "text-danger" })
+        <div class="keyValuePairs item-list-controlable-container" data-dname="items">
+            <button type="button" class="addKeyValuePair">+</button>
+            @if (Model != null)
+            {
+                foreach (var item in Model.items)
+                {
+                    <div class="keyValuePairContainer item-list-controlable-section">
+                        <input type="text" placeholder="Наименование" class="item-list-target-content item-list-show showMenu" value="@ViewBag.Items[item.Key].name" readonly />
+                        <input type="hidden" class="key item-list-target-value" value="@ViewBag.Items[item.Key].id" />
+                        <input type="text" placeholder="Количество" class="value" value="@item.Value" />
+                        <button class="removeKeyValuePair">Удалить</button>
+                        <input type="hidden" class="hiddenKV" name="items[@ViewBag.Items[item.Key].id]" value="@item.Value" />
+                    </div>
+                }
+
+            }
+            @Html.ValidationMessageFor(model => model.items, "", new { @class = "text-danger" })
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Создать" class="btn btn-primary" />
+            </div>
         </div>
     </div>
-
-    <div class="keyValuePairs item-list-controlable-container" data-dname="items">
-
-        <button type="button" class="addKeyValuePair">+</button>
-    </div>
-
-
-    <div class="form-group">
-        <div class="col-md-offset-2 col-md-10">
-            <input type="submit" value="Create" class="btn btn-default" />
-        </div>
-    </div>
-</div>
 }
 
-<div>
-    @Html.ActionLink("Back to List", "Index")
+<div class="container">
+
 </div>

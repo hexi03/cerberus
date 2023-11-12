@@ -1,28 +1,54 @@
-﻿@model cerberus.Models.Reports.WHReplenishmentReport
+﻿@model cerberus.DTO.Reports.WHReplenishmentReportFormDTO
 
-@using (Html.BeginForm("CreateWHReplenishmentReport", "Reports", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { role = "form" }))
+@{
+    string action;
+    if (ViewBag.mode == "edit")
+    {
+        action = "Edit" + "WHReplenishmentReport";
+    }
+    else
+    {
+        action = "Create" + "WHReplenishmentReport";
+    }
+
+}
+
+@using (Html.BeginForm(action, "Reports", new { ReturnUrl = ViewBag.ReturnUrl, id = ViewBag.mode == "edit" ? ViewContext.RouteData.Values["id"] : null }, FormMethod.Post, new { role = "form" }))
 {
     @Html.AntiForgeryToken()
 
-<div class="form-horizontal">
-    <h4>Report</h4>
-    <hr />
-    <input name="warehouse_id" type="hidden" value="@ViewBag.warehouse_id">
+    <div class="container">
+        <h2>Отчет о пополнении склада</h2>
+        <hr />
+        <input name="warehouse_id" type="hidden" value="@ViewBag.warehouse_id">
 
-    <div class="keyValuePairs item-list-controlable-container" data-dname="items">
+        <div class="keyValuePairs item-list-controlable-container" data-dname="items">
+            <button type="button" class="btn btn-success addKeyValuePair">Добавить</button>
 
-        <button type="button" class="addKeyValuePair">+</button>
-    </div>
+            @if (Model != null)
+            {
+                foreach (var item in Model.items)
+                {
+                    <div class="keyValuePairContainer item-list-controlable-section">
+                        <input type="text" placeholder="Наименование" class="item-list-target-content item-list-show showMenu form-control" value="@ViewBag.Items[item.Key].name" readonly />
+                        <input type="hidden" class="key item-list-target-value" value="@ViewBag.Items[item.Key].id" />
+                        <input type="text" placeholder="Количество" class="value form-control" value="@item.Value" />
+                        <button class="btn btn-danger removeKeyValuePair">Удалить</button>
+                        <input type="hidden" class="hiddenKV" name="items[@ViewBag.Items[item.Key].id]" value="@item.Value" />
+                    </div>
+                }
+            }
+            @Html.ValidationMessageFor(model => model.items, "", new { @class = "text-danger" })
+        </div>
 
-
-    <div class="form-group">
-        <div class="col-md-offset-2 col-md-10">
-            <input type="submit" value="Create" class="btn btn-default" />
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <button type="submit" class="btn btn-primary">Создать</button>
+            </div>
         </div>
     </div>
-</div>
 }
 
-<div>
-    @Html.ActionLink("Back to List", "Index")
+<div class="container">
+
 </div>

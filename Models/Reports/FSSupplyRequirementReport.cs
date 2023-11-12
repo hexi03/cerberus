@@ -10,9 +10,9 @@ using System.Web;
 
 namespace cerberus.Models.Reports
 {
-    public class FSSupplyRequirementReport : Report
+    public class FSSupplyRequirementReport : FactorySiteReport
     {
-        public int factorysite_id {get; set;}
+
         public int target_warehouse_id { get; set; }
         public Dictionary<int, int> items { get; set; }
 
@@ -28,8 +28,16 @@ namespace cerberus.Models.Reports
             res.timestamp = dto.timestamp;
 
             res.factorysite_id = dto.factorysite_id;
-            res.target_warehouse_id = dto.target_warehouse_id ;
-            res.items = dto.items.ToDictionary(kv => Convert.ToInt32(kv.Key), kv => Convert.ToInt32(kv.Value));
+            res.target_warehouse_id = dto.target_warehouse_id;
+            if (dto.items != null)
+            {
+                res.items = dto.items.ToDictionary(kv => Convert.ToInt32(kv.Key), kv => Convert.ToInt32(kv.Value));
+            }
+            else
+            {
+                res.items = new Dictionary<int, int>();
+            }
+            
             return res;
 
         } 
@@ -77,7 +85,7 @@ namespace cerberus.Models.Reports
                         misc.MergeDictionariesWithSum(acc, p.items)
                     ).ToDictionary(kv => kv.Key, kv => -kv.Value),
                 r.items
-            );
+            ).Where(pair => pair.Value != 0).ToDictionary(kv => kv.Key, kv => kv.Value);
 
         }
 

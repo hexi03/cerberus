@@ -11,24 +11,16 @@ namespace cerberus.Models.edmx
 {
     using System;
     using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations.Schema;
-
+    
     public partial class Report
     {
-        [NotMapped]
         public int id { get; set; }
-        [NotMapped]
         public string report_type { get; set; }
-        [NotMapped]
         public string creator_id { get; set; }
-        [NotMapped]
         public string serialized { get; set; }
-        [NotMapped]
         public int department_id { get; set; }
-        [NotMapped]
         public System.DateTime timestamp { get; set; }
-        [NotMapped]
-
+    
         public virtual Department Department { get; set; }
     }
 }

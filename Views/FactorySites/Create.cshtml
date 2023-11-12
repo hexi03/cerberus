@@ -1,31 +1,17 @@
 ﻿@model cerberus.Models.edmx.FactorySite
 
-
-
-<!DOCTYPE html>
-
-<html>
-<head>
-    <meta name="viewport" content="width=device-width" />
-    <title>Create</title>
-</head>
-<body>
-    @Scripts.Render("~/bundles/jquery")
-    @Scripts.Render("~/bundles/jqueryval")
-
-
-    @using (Html.BeginForm("Create", "FactorySites", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { role = "form" }))
+<div class="container">
+    @using (Html.BeginForm("Create", "FactorySites", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
     {
         @Html.AntiForgeryToken()
 
-    <div class="form-horizontal">
-        <h4>FactorySite</h4>
+        <h2>Создание FactorySite</h2>
         <hr />
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
         <div class="form-group">
-            @Html.LabelFor(model => model.name, htmlAttributes: new { @class = "control-label col-md-2" })
+            <label for="name" class="control-label col-md-2">Название:</label>
             <div class="col-md-10">
-                @Html.EditorFor(model => model.name, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.EditorFor(model => model.name, new { htmlAttributes = new { @class = "form-control", placeholder = "Введите название FactorySite" } })
                 @Html.ValidationMessageFor(model => model.name, "", new { @class = "text-danger" })
             </div>
         </div>
@@ -34,14 +20,12 @@
 
         <div class="form-group">
             <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Create" class="btn btn-default" />
+                <button type="submit" class="btn btn-primary">Создать</button>
             </div>
         </div>
-    </div>
     }
 
-    <div>
-        @Html.ActionLink("Back to List", "Index")
+    <div class="form-actions no-color">
+
     </div>
-</body>
-</html>
+</div>

@@ -1,49 +1,58 @@
-﻿
-@model cerberus.DTO.FactorySiteRolesDTO
+﻿@model cerberus.DTO.FactorySiteRolesDTO
 
 @{
-    ViewBag.Title = "Edit User";
+    ViewBag.Title = "Редактирование пользователя";
 }
 
+<div class="container">
+    <h2>Группы</h2>
 
-<h2>Groups</h2>
+    @using (Html.BeginForm("ManageAccess", "FactorySites", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@Model.factorySite.id" hidden>
 
-@using (Html.BeginForm("ManageAccess", "FactorySites", FormMethod.Post))
-{
-    @Html.AntiForgeryToken()
-    <input type="hidden" name="id" value="@Model.factorySite.id" hidden>
-
-    <div id="roleContainer">
-        <label for="Roles">User Roles:</label>
-        <button type="button" id="addRoleButton" class="btn btn-primary">Add Role</button>
-        @foreach (var selectedRole in Model.Roles)
-        {
-            <div class="roleRow">
-
-                <select class="form-control" name="Roles[@selectedRole.Key]">
-                    <option value="">Select Roles</option>
-                    @foreach (var role in ViewBag.Roles)
+        <div class="row">
+            <div class="col-md-8">
+                <label for="Roles">Роли пользователя:</label>
+                <div id="roleContainer">
+                    <button type="button" id="addRoleButton" class="btn btn-primary">Добавить роль</button>
+                    @foreach (var selectedRole in Model.Roles)
                     {
-                        <option value="@role.Name" @(role.Name == selectedRole.Value ? "selected" : "")>@role.Name</option>
+                        <div class="roleRow">
+                            <select class="form-control" name="Roles[@selectedRole.Key]">
+                                <option value="">Выберите роль</option>
+                                @foreach (var role in ViewBag.Roles)
+                                {
+                                    <option value="@role.Name" @(role.Name == selectedRole.Value ? "selected" : "")>@role.Name</option>
+                                }
+                            </select>
+                            <button class="removeRole btn btn-danger">Удалить</button>
+                        </div>
                     }
-                </select>
-                <button class="removeRole">Удалить</button>
+                </div>
             </div>
-        }
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-md-8">
+                <button type="submit" class="btn btn-success">Сохранить</button>
+            </div>
+        </div>
+    }
+
+    <div class="row mt-3">
+        <div class="col-md-8">
+
+        </div>
     </div>
 
-    
-
-    <input type="submit" value="Save" />
-}
-
-@Html.ActionLink("Back to List", "Index")
-
-<div class="roleVariantStorage visually-hidden">
-    @foreach (var role in ViewBag.Roles)
-    {
-        <option value="@role.Name">@role.Name</option>
-    }
+    <div class="roleVariantStorage visually-hidden">
+        @foreach (var role in ViewBag.Roles)
+        {
+            <option value="@role.Name">@role.Name</option>
+        }
+    </div>
 </div>
 
 @section scripts {
@@ -54,10 +63,11 @@
                     '<select class="form-control" name="Roles[' + generateRandomUUID() + ']">' +
                     $('.roleVariantStorage').html() +
                     '</select>' +
-                    '<button class="removeRole">Удалить</button>' +
+                    '<button class="removeRole btn btn-danger">Удалить</button>' +
                     '</div>';
                 $("#roleContainer").append(roleRow);
             });
+
             $("#roleContainer").on("click", ".removeRole", function (event) {
                 event.stopPropagation();
                 $(this).parent().remove();
@@ -65,3 +75,5 @@
         });
     </script>
 }
+
+

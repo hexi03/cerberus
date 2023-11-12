@@ -1,71 +1,88 @@
-﻿
-@model cerberus.DTO.FactorySiteSupplyDTO
+﻿@model cerberus.DTO.FactorySiteSupplyDTO
 
 @{
-    ViewBag.Title = "Edit User";
+    ViewBag.Title = "Редактирование пользователя";
 }
 
-<h2>Edit User</h2>
+<div class="container">
+    <h2>Редактирование пользователя</h2>
 
-@using (Html.BeginForm("ManageSupply", "FactorySites", FormMethod.Post))
-{
-    @Html.AntiForgeryToken()
-    <input type="hidden" name="id" value="@Model.factorySite.id" hidden>
+    @using (Html.BeginForm("ManageSupply", "FactorySites", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@Model.factorySite.id" hidden>
 
-    <div id="warehouseContainer">
-        <label for="Warehouses">Warehouses:</label>
-        <button type="button" id="addWarehouseButton" class="btn btn-primary">Add Warehouse</button>
+        <div class="row">
+            <div class="col-md-8">
+                <label for="Warehouses">Склады:</label>
+                <div id="warehouseContainer">
+                    <button type="button" id="addWarehouseButton" class="btn btn-primary">Добавить склад</button>
 
-        @for (var i = 0; i < Model.warehouses.Count(); i++)
-        {
-            var curr_wh = Model.warehouses[i];
-            <div class="whRow">
-
-                <select class="form-control" name="warehouse_ids[@i]">
-                    <option value="">Select Warehouse</option>
-                    @foreach (var wareHouse in ViewBag.WareHouses)
+                    @for (var i = 0; i < Model.warehouses.Count(); i++)
                     {
-                        <option value="@wareHouse.id" @(wareHouse.id == curr_wh.id ? "selected" : "")>@wareHouse.name</option>
+                        var curr_wh = Model.warehouses[i];
+                        <div class="whRow">
+                            <select class="form-control" name="warehouse_ids[@i]">
+                                <option value="">Выберите склад</option>
+                                @foreach (var wareHouse in ViewBag.WareHouses)
+                                {
+                                    <option value="@wareHouse.id" @(wareHouse.id == curr_wh.id ? "selected" : "")>@wareHouse.name</option>
+                                }
+                            </select>
+                            <button class="removeWarehouse btn btn-danger">Удалить</button>
+                        </div>
                     }
-                </select>
-                <button class="removeWarehouse">Удалить</button>
+                </div>
             </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-md-8">
+                <button type="submit" class="btn btn-success">Сохранить</button>
+            </div>
+        </div>
+    }
+
+    <div class="row mt-3">
+        <div class="col-md-8">
+
+        </div>
+    </div>
+
+    <div class="warehouseVariantStorage visually-hidden">
+        @foreach (var wareHouse in ViewBag.WareHouses)
+        {
+            <option value="@wareHouse.id">@wareHouse.name</option>
         }
     </div>
 
-    
+    @section scripts {
+        <script>
+            $(function () {
+                $("#addWarehouseButton").click(function () {
+                    var whRow = '<div class="whRow">' +
+                        '<select class="form-control" name="warehouse_ids[' + generateRandomUUID() + ']">' +
+                        $('.warehouseVariantStorage').html() +
+                        '</select>' +
+                        '<button class="removeWarehouse btn btn-danger">Удалить</button>' +
+                        '</div>';
+                    $("#warehouseContainer").append(whRow);
+                });
 
-    <input type="submit" value="Save" />
-}
+                $("#warehouseContainer").on("click", ".removeWarehouse", function (event) {
+                    event.stopPropagation();
+                    $(this).parent().remove();
+                });
+            });
 
-@Html.ActionLink("Back to List", "Index", new {id = Model.factorySite.department_id })
-
-<div class="warehouseVariantStorage visually-hidden">
-    @foreach (var wareHouse in ViewBag.WareHouses)
-    {
-        <option value="@wareHouse.id">@wareHouse.name</option>
+            function generateRandomUUID() {
+                // Генерация уникального идентификатора
+                return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                    var r = Math.random() * 16 | 0,
+                        v = c == 'x' ? r : (r & 0x3 | 0x8);
+                    return v.toString(16);
+                });
+            }
+        </script>
     }
 </div>
-
-@section scripts {
-    <script>
-        $(function () {
-            $("#addWarehouseButton").click(function () {
-                var whRow = '<div class="whRow">' +
-                    '<select class="form-control" name="warehouse_ids[' + generateRandomUUID() + ']">' +
-                    $('.warehouseVariantStorage').html() +
-                    '</select>' +
-                    '<button class="removeWarehouse">Удалить</button>'
-                    '</div>';
-                $("#warehouseContainer").append(whRow);
-            });
-
-            $("#warehouseContainer").on("click", ".removeWarehouse", function (event) {
-                event.stopPropagation();
-                $(this).parent().remove();
-            });
-        });
-
-        
-    </script>
-}

@@ -275,6 +275,7 @@
     <Compile Include="misc.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\Authorize403Attribute.cs" />
+    <Compile Include="Models\Department.cs" />
     <Compile Include="Models\DepartmentAuthorizeAttribute.cs" />
     <Compile Include="Models\edmx\Department.cs">
       <DependentUpon>Model1.tt</DependentUpon>
@@ -306,12 +307,14 @@
     <Compile Include="Models\edmx\Warehouse.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\FactorySite.cs" />
     <Compile Include="Models\FactorySiteAuthorizeAttribute.cs" />
     <Compile Include="Models\FactorySiteWareHouseClaim.cs" />
     <Compile Include="Models\GroupDepartmentClaim.cs" />
     <Compile Include="Models\GroupFactorySiteClaim.cs" />
     <Compile Include="Models\GroupWareHouseClaim.cs" />
     <Compile Include="Models\IdentityModels.cs" />
+    <Compile Include="Models\ItemListAttribute.cs" />
     <Compile Include="Models\ItemRegistry.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
     <Compile Include="Models\edmx\Model1.Context.cs">
@@ -331,8 +334,10 @@
     </Compile>
     <Compile Include="Models\MenuAttribute.cs" />
     <Compile Include="Models\Report.cs" />
+    <Compile Include="Models\Reports\FactorySiteReport.cs" />
     <Compile Include="Models\Reports\FSSupplyRequirementReport.cs" />
     <Compile Include="Models\Reports\FSWorkShiftReport.cs" />
+    <Compile Include="Models\Reports\WareHouseReport.cs" />
     <Compile Include="Models\Reports\WHShipmentReport.cs" />
     <Compile Include="Models\Reports\WHInventarisationReport.cs" />
     <Compile Include="Models\Reports\WHReleaseReport.cs" />
@@ -421,11 +426,8 @@
     <Content Include="Views\Manage\SetPassword.cshtml" />
     <Content Include="Views\Shared\Lockout.cshtml" />
     <Content Include="Views\Shared\_LoginPartial.cshtml" />
-    <Content Include="Views\Reports\Create.cshtml" />
     <Content Include="Views\Reports\Delete.cshtml" />
     <Content Include="Views\Reports\Details.cshtml" />
-    <Content Include="Views\Reports\Edit.cshtml" />
-    <Content Include="Views\Reports\Index.cshtml" />
     <Content Include="Views\ItemsRegistries\Create.cshtml" />
     <Content Include="Views\ItemsRegistries\Delete.cshtml" />
     <Content Include="Views\ItemsRegistries\Details.cshtml" />
@@ -460,6 +462,8 @@
     <Content Include="Views\Departments\ManageAccess.cshtml" />
     <Content Include="Views\FactorySites\ManageAccess.cshtml" />
     <Content Include="Views\FactorySites\ManageSupply.cshtml" />
+    <Content Include="Views\Reports\GetFSSupplyRequrementUnsatisfiedItemList.cshtml" />
+    <Content Include="Views\Reports\GetFSWorkShiftReportUnsatisfiedItemList.cshtml" />
     <None Include="Views\Shared\Menu.cshtml" />
     <Content Include="Views\Warehouses\Create.cshtml" />
     <Content Include="Views\Warehouses\Delete.cshtml" />

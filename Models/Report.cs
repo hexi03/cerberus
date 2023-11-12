@@ -64,7 +64,13 @@ namespace cerberus.Models.edmx
             }
             else
             {
-                db.Reports.AddOrUpdate(rep);
+                var e = db.Reports.Find(rep.id);
+                e.department_id = rep.department_id;
+                e.timestamp = rep.timestamp;
+                e.report_type   = rep.report_type;
+                e.creator_id = rep.creator_id;
+                e.serialized = rep.serialized;
+                db.Reports.AddOrUpdate(e);
             }
 
         }
@@ -104,7 +110,8 @@ namespace cerberus.Models.edmx
 
         public static IQueryable<Report> time_filter(IQueryable<Report> q)
         {
-            return q.Where(e => e.timestamp > DateTime.Today.AddMonths(Consts.REPORT_ACTUAL_TIME_DURATION));
+            var ts = DateTime.Today.AddMonths(Consts.REPORT_ACTUAL_TIME_DURATION);
+            return q.Where(e => e.timestamp > ts);
         }
 
 

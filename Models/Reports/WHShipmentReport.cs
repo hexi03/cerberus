@@ -8,9 +8,8 @@ using System.Web;
 
 namespace cerberus.Models.Reports
 {
-    public class WHShipmentReport : Report
+    public class WHShipmentReport : WareHouseReport
     {
-        public int warehouse_id { get; set; }
         public Dictionary<int, int> items { get; set; }
 
         public WHShipmentReport() : base(Types.WHShipment) { items = new Dictionary<int, int>(); }
@@ -29,7 +28,14 @@ namespace cerberus.Models.Reports
             res.timestamp = dto.timestamp;
 
             res.warehouse_id = dto.warehouse_id;
-            res.items = dto.items.ToDictionary(kv => Convert.ToInt32(kv.Key), kv => Convert.ToInt32(kv.Value));
+            if (dto.items != null)
+            {
+                res.items = dto.items.ToDictionary(kv => Convert.ToInt32(kv.Key), kv => Convert.ToInt32(kv.Value));
+            }
+            else
+            {
+                res.items = new Dictionary<int, int>();
+            }
             return res;
 
         }

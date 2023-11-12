@@ -1,33 +1,32 @@
 ﻿@model IEnumerable<cerberus.Models.edmx.Warehouse>
 
- 
+<div class="container">
+    <h2>Список складов</h2>
 
-<p>
-    @if (ViewContext.RouteData.Values.ContainsKey("id"))
-    {
-        @Html.ActionLink("Create New", "Create", new { id = ViewContext.RouteData.Values["id"], returnUrl = ViewBag.ReturnUrl })
-        
-    }
-    else
-    {
-        @Html.ActionLink("Create New", "Create")
-    }
+    <p>
+        @if (ViewContext.RouteData.Values.ContainsKey("id"))
+        {
+            @Html.ActionLink("Создать новый", "Create", new { id = ViewContext.RouteData.Values["id"], returnUrl = ViewBag.ReturnUrl }, new { @class = "btn btn-primary" })
+        }
+        else
+        {
+            @Html.ActionLink("Создать новый", "Create", null, new { @class = "btn btn-primary" })
+        }
+    </p>
 
-</p>
     <table class="table">
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.name)
+                Название
             </th>
-            <!--
-                <th>
-                    @Html.DisplayNameFor(model => model.Department.name)
-                </th>
-            -->
-                <th></th>
-            </tr>
+            <th>
+                Отдел
+            </th>
+            <th>Действия</th>
+        </tr>
 
-        @foreach (var item in Model) {
+        @foreach (var item in Model)
+        {
             <tr>
                 <td>
                     @Html.DisplayFor(modelItem => item.name)
@@ -36,12 +35,12 @@
                     @Html.DisplayFor(modelItem => item.Department.name)
                 </td>
                 <td>
-                    @Html.ActionLink("Edit", "Edit", new { id = item.id }) |
-                    @Html.ActionLink("Details", "Details", new { id = item.id }) |
-                    @Html.ActionLink("Delete", "Delete", new { id = item.id }) |
-                    @Html.ActionLink("Manage Access", "ManageAccess", new { id = item.id })
+                    @Html.ActionLink("Редактировать", "Edit", new { id = item.id }, new { @class = "btn btn-primary" }) |
+                    @Html.ActionLink("Детали", "Details", new { id = item.id }, new { @class = "btn btn-info" }) |
+                    @Html.ActionLink("Удалить", "Delete", new { id = item.id }, new { @class = "btn btn-danger" }) |
+                    @Html.ActionLink("Управление доступом", "ManageAccess", new { id = item.id }, new { @class = "btn btn-warning" })
                 </td>
             </tr>
         }
-
-        </table>
+    </table>
+</div>

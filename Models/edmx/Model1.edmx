@@ -84,7 +84,7 @@
           <Property Name="creator_id" Type="text" Nullable="false" />
           <Property Name="serialized" Type="text" Nullable="false" />
           <Property Name="department_id" Type="int4" Nullable="false" />
-          <Property Name="timestamp" Type="date" Nullable="false" />
+          <Property Name="timestamp" Type="timestamp" Nullable="false" />
         </EntityType>
         <EntityType Name="WareHouses">
           <Key>

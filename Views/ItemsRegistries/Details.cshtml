@@ -1,48 +1,38 @@
 ﻿@model cerberus.Models.edmx.ItemsRegistry
 
- 
+<div class="container">
+    <h2>Информация о предмете</h2>
+    <hr />
 
-<!DOCTYPE html>
-
-<html>
-<head>
-    <meta name="viewport" content="width=device-width" />
-    <title>Details</title>
-</head>
-<body>
     <div>
-        <h4>ItemsRegistry</h4>
+        <h4>Предмет</h4>
         <hr />
         <dl class="dl-horizontal">
             <dt>
-                @Html.DisplayNameFor(model => model.name)
+                <label for="name" class="control-label">Наименование:</label>
             </dt>
-    
             <dd>
                 @Html.DisplayFor(model => model.name)
             </dd>
-    
+
             <dt>
-                @Html.DisplayNameFor(model => model.units)
+                <label for="units" class="control-label">Единицы измерения:</label>
             </dt>
-    
             <dd>
                 @Html.DisplayFor(model => model.units)
             </dd>
-    
+
             <dt>
-                @Html.DisplayNameFor(model => model.batch)
+                <label for="batch" class="control-label">Партия:</label>
             </dt>
-    
             <dd>
                 @Html.DisplayFor(model => model.batch)
             </dd>
-    
         </dl>
     </div>
-    <p>
-        @Html.ActionLink("Edit", "Edit", new { id = Model.id }) |
-        @Html.ActionLink("Back to List", "Index")
-    </p>
-</body>
-</html>
+
+    <div class="form-actions no-color">
+        @Html.ActionLink("Редактировать", "Edit", new { id = Model.id }, new { @class = "btn btn-primary" }) |
+        @Html.ActionLink("Вернуться к списку", "Index", null, new { @class = "btn btn-default" })
+    </div>
+</div>

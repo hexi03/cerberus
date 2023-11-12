@@ -8,11 +8,9 @@ using System.Threading.Tasks;
 
 namespace cerberus.Models.Reports
 {
-    public class FSWorkShiftReport : Report
+    public class FSWorkShiftReport : FactorySiteReport
     {
-        public int factorysite_id { get; set; }
         public int target_warehouse_id { get; set; }
-        //public int workplan_id;
 
         public Dictionary<int, int> produced { get; set; }
         public Dictionary<int, int> losses { get; set; }
@@ -33,9 +31,33 @@ namespace cerberus.Models.Reports
 
             res.factorysite_id = dto.factorysite_id;
             res.target_warehouse_id = dto.target_warehouse_id;
-            res.produced = dto.produced.ToDictionary(kv => Convert.ToInt32(kv.Key), kv => Convert.ToInt32(kv.Value));
-            res.losses = dto.losses.ToDictionary(kv => Convert.ToInt32(kv.Key), kv => Convert.ToInt32(kv.Value));
-            res.remains = dto.remains.ToDictionary(kv => Convert.ToInt32(kv.Key), kv => Convert.ToInt32(kv.Value));
+            if (dto.produced != null)
+            {
+                res.produced = dto.produced.ToDictionary(kv => Convert.ToInt32(kv.Key), kv => Convert.ToInt32(kv.Value));
+            }
+            else {
+                res.produced = new Dictionary<int, int>();
+            }
+
+            if (dto.losses != null)
+            {
+                res.losses = dto.losses.ToDictionary(kv => Convert.ToInt32(kv.Key), kv => Convert.ToInt32(kv.Value));
+            }
+            else
+            {
+                res.losses = new Dictionary<int, int>();
+            }
+
+            if (dto.remains != null)
+            {
+                res.remains = dto.remains.ToDictionary(kv => Convert.ToInt32(kv.Key), kv => Convert.ToInt32(kv.Value));
+            }
+            else
+            {
+                res.remains = new Dictionary<int, int>();
+            }
+            
+            
             return res;
 
         }
@@ -81,7 +103,7 @@ namespace cerberus.Models.Reports
                         misc.MergeDictionariesWithSum(acc, p.items)
                     ).ToDictionary(kv => kv.Key, kv => -kv.Value),
                 r.produced
-            );
+            ).Where(pair => pair.Value != 0).ToDictionary(kv => kv.Key, kv => kv.Value);
 
         }
 

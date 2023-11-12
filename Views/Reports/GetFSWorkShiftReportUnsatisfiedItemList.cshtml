@@ -1,0 +1,10 @@
+﻿@model IList<(cerberus.Models.edmx.ItemsRegistry, int)>
+
+@{
+    Layout = null;
+}
+
+@foreach (var item in Model)
+{
+    <>@item.Item1.name ( @item.Item1.batch ): @item.Item2</>
+}

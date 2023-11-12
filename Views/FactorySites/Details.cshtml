@@ -1,39 +1,63 @@
 ﻿@model cerberus.Models.edmx.FactorySite
 
- 
+@{
+    var users = ((Dictionary<string, cerberus.Models.ApplicationUser>)ViewBag.Users);
+}
 
+<div class="container">
+    <h2>FactorySite @Model.name</h2>
 
-<div>
-    <h4>FactorySite @Model.name</h4>
+    <h4>Отдел: @Html.DisplayFor(model => model.Department.name)</h4>
+    <h4>Участок: @Html.DisplayFor(model => model.name)</h4>
     <hr />
-    <div>
 
-        <a href="@Url.Action("CreateFSWorkShiftReport", "Reports", new { id = Model.id })">Создать отчет о смене</a>
-        <a href="@Url.Action("CreateFSSupplyRequirementReport", "Reports", new { id = Model.id })">Создать отчет о смене</a>
+    <div class="row">
+        <div class="col-md-6">
+            <h4>Действия</h4>
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <a href="@Url.Action("CreateFSWorkShiftReport", "Reports", new { id = Model.id })">Создать отчет о смене</a>
+                </li>
+                <li class="list-group-item">
+                    <a href="@Url.Action("CreateFSSupplyRequirementReport", "Reports", new { id = Model.id })">Создать отчет о запросе снабжения</a>
+                </li>
+            </ul>
+        </div>
 
-
+        <div class="col-md-6">
+            <h4>Отчеты</h4>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Тип отчета</th>
+                        <th>Ответственный</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var r in ((IList<cerberus.Models.Reports.FactorySiteReport>)ViewBag.ReportList))
+                    {
+                        <tr>
+                            <td>
+                                <p>@r.get_type_as_string()</p>
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => users[r.creator_id].UserName)
+                            </td>
+                            <td>
+                                <a href="@Url.Action("Edit", "Reports", new { id = r.id })">Редактировать</a> |
+                                <a href="@Url.Action("Details", "Reports", new { id = r.id })">Подробности</a> |
+                                <a href="@Url.Action("Delete", "Reports", new { id = r.id })">Удалить</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     </div>
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.name)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.name)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Department.name)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Department.name)
-        </dd>
-
-    </dl>
 </div>
-    <p>
-        @Html.ActionLink("Edit", "Edit", new { id = Model.id }) |
-        @Html.ActionLink("Back to List", "Index")
-    </p>
 
+<p>
+    @Html.ActionLink("Редактировать", "Edit", new { id = Model.id }) |
+
+</p>

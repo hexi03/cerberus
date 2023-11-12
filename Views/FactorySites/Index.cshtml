@@ -1,45 +1,40 @@
 ﻿@model IEnumerable<cerberus.Models.edmx.FactorySite>
 
- 
+<div class="container">
     <p>
         @if (ViewContext.RouteData.Values.ContainsKey("id"))
         {
-            @Html.ActionLink("Create New", "Create", new { id = ViewContext.RouteData.Values["id"] })
+            @Html.ActionLink("Создать новый", "Create", new { id = ViewContext.RouteData.Values["id"] }, new { @class = "btn btn-primary" })
         }
         else
         {
-            @Html.ActionLink("Create New", "Create")
+            @Html.ActionLink("Создать новый", "Create", null, new { @class = "btn btn-primary" })
         }
     </p>
+
     <table class="table">
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.name)
-            </th>
-            <!--
-                <th>
-                    @Html.DisplayNameFor(model => model.Department.name)
-                </th>
-            -->
-            <th></th>
-        </tr>
-    
-    @foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Department.name)
-            </td>
-            <td>
-                @Html.ActionLink("Edit", "Edit", new { id = item.id }) |
-                @Html.ActionLink("Details", "Details", new { id = item.id }) |
-                @Html.ActionLink("Delete", "Delete", new { id = item.id }) |
-                @Html.ActionLink("Manage Supply", "ManageSupply", new { id = item.id }) |
-                @Html.ActionLink("Manage Access", "ManageAccess", new { id = item.id })
-            </td>
-        </tr>
-    }
-    
+        <thead>
+            <tr>
+                <th>Название</th>
+                <!--<th>@Html.DisplayNameFor(model => model.Department.name)</th>-->
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => item.name)</td>
+                    <!--<td>@Html.DisplayFor(modelItem => item.Department.name)</td>-->
+                    <td>
+                        @Html.ActionLink("Редактировать", "Edit", new { id = item.id }, new { @class = "btn btn-info btn-sm" }) |
+                        @Html.ActionLink("Подробности", "Details", new { id = item.id }, new { @class = "btn btn-success btn-sm" }) |
+                        @Html.ActionLink("Удалить", "Delete", new { id = item.id }, new { @class = "btn btn-danger btn-sm" }) |
+                        @Html.ActionLink("Управление поставкой", "ManageSupply", new { id = item.id }, new { @class = "btn btn-warning btn-sm" }) |
+                        @Html.ActionLink("Управление доступом", "ManageAccess", new { id = item.id }, new { @class = "btn btn-secondary btn-sm" })
+                    </td>
+                </tr>
+            }
+        </tbody>
     </table>
+</div>

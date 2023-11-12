@@ -1,44 +1,34 @@
 ﻿@model cerberus.Models.edmx.FactorySite
 
-<!DOCTYPE html>
-
-<html>
-<head>
-    <meta name="viewport" content="width=device-width" />
-    <title>Delete</title>
-</head>
-<body>
-    <h3>Are you sure you want to delete this?</h3>
+<div class="container">
+    <h2>Вы уверены, что хотите удалить это?</h2>
     <div>
         <h4>FactorySite</h4>
         <hr />
         <dl class="dl-horizontal">
             <dt>
-                @Html.DisplayNameFor(model => model.name)
+                <label for="name" class="control-label">Название:</label>
             </dt>
-    
             <dd>
                 @Html.DisplayFor(model => model.name)
             </dd>
-    
+
             <dt>
-                @Html.DisplayNameFor(model => model.Department.name)
+                <label for="Department.name" class="control-label">Отдел:</label>
             </dt>
-    
             <dd>
                 @Html.DisplayFor(model => model.Department.name)
             </dd>
-    
         </dl>
-    
-        @using (Html.BeginForm()) {
+
+        @using (Html.BeginForm())
+        {
             @Html.AntiForgeryToken()
-    
+
             <div class="form-actions no-color">
-                <input type="submit" value="Delete" class="btn btn-default" /> |
-                @Html.ActionLink("Back to List", "Index")
+                <button type="submit" class="btn btn-danger">Удалить</button> |
+
             </div>
         }
     </div>
-</body>
-</html>
+</div>
