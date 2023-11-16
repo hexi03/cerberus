@@ -31,4 +31,20 @@ namespace cerberus
             return mergedDict;
         }
     }
+
+
+    public interface IError{
+
+        string get_message();
+        string get_html();
+
+        
+    }
+
+    public interface IWarning
+    {
+
+        string get_message();
+        string get_html();
+    }
 }

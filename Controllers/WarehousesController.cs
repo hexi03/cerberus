@@ -54,7 +54,7 @@ namespace cerberus.Controllers
             var group_ids = await userManager.GetRolesAsync(user_id);
 
             Warehouse warehouse = GroupWareHouseClaim.get_group_warehouses(db, group_ids).Where(wh => wh.id == id).ToList().First();
-            ViewBag.State = ItemsRegistry.get_list(db,Warehouse.get_state(db, warehouse.id));
+            ViewBag.StorageState = ItemsRegistry.get_list(db,Warehouse.get_storage_state(db, warehouse.id));
             ViewBag.ReportList = await WareHouseReport.get_reports(db, warehouse.id);
             ViewBag.Users = (await userManager.Users.ToListAsync()).ToDictionary(user => user.Id);
             return View(warehouse);

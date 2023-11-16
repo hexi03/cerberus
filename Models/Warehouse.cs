@@ -10,7 +10,7 @@ namespace cerberus.Models.edmx
     [MetadataType(typeof(WareHouseMetadata))]
     public partial class Warehouse
     {
-        public static Dictionary<int, int> get_state(CerberusDBEntities db, int warehouse_id ) {
+        public static Dictionary<int, int> get_storage_state(CerberusDBEntities db, int warehouse_id ) {
             var warehouse = db.WareHouses.Find( warehouse_id );
 
             var raw_r = Report.time_filter(db.Reports
@@ -65,6 +65,18 @@ namespace cerberus.Models.edmx
                     last_inv_item_list
                 ).Where(pair => pair.Value != 0).ToDictionary(kv => kv.Key, kv => kv.Value);
         }
+
+
+        //public static (List<Error>, List<Warning>) get_state(CerberusDBEntities db, int warehouse_id)
+        //{
+        //    List<IError> err = new List<Error>();
+        //    List<IWarning> warn = new List<Warning>();
+        //
+        //    foreach (var rep in WHInventarisationReport.get_unsatisfied_wh(db, warehouse_id))
+        ///    {
+        //        err.Add(WHInventarisationReportError.fetch(rep))
+        //    }
+        //}
 
         public partial class WareHouseMetadata
         {

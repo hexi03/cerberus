@@ -65,6 +65,23 @@ namespace cerberus.Models.Reports
 
         }
 
+        public static IList<WHInventarisationReport> get_unsatisfied_wh(CerberusDBEntities db, int warehouse_id)
+        {
+            Warehouse wh = db.WareHouses.Find(warehouse_id);
+            return Report.time_filter(db.Reports
+                .Where(r => r.department_id == wh.department_id && r.report_type == Report.Types.WHInventarisation.ToString())).ToList()
+                .Select(r => (WHInventarisationReport)r.from_generic()).ToList()
+                .Where(
+                    r =>
+                    r.warehouse_id == warehouse_id &&
+                    get_unsatisfied_item_list(db, r.id).Count() != 0
+                ).ToList();
+
+        }
+
+
+
+
         public static IDictionary<int, int> get_unsatisfied_item_list(CerberusDBEntities db, int report_id)
         {
             var r_raw = db.Reports
@@ -109,6 +126,35 @@ namespace cerberus.Models.Reports
         }
 
 
+        public static IList<IError> get_errors(CerberusDBEntities db, int warehouse_id)
+        {
+            return (IList<IError>)get_unsatisfied_wh(db,warehouse_id).Select(r => new UnsatisfiedError(r)).ToList();
+
+        }
+
+
+
+
+        class UnsatisfiedError : IError
+        {
+            string text_message;
+            string html_message;
+            public UnsatisfiedError(WHInventarisationReport rep) {
+                text_message = "Состояние склада не соответствует отчету об инвентаризации " + rep.id.ToString();
+                html_message =
+                    "<p>Состояние склада не соответствует <a href='Reports/Details/" + rep.id + "'>отчету об инвентаризации</a> </p>";
+                    
+            }
+            public string get_html()
+            {
+                return html_message;
+            }
+
+            public string get_message()
+            {
+                return text_message;
+            }
+        }
 
     }
 }
