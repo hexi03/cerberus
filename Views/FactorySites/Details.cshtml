@@ -5,7 +5,7 @@
 }
 
 <div class="container">
-    <h2>FactorySite @Model.name</h2>
+    <h2>Информация о производственном участке</h2>
 
     <h4>Отдел: @Html.DisplayFor(model => model.Department.name)</h4>
     <h4>Участок: @Html.DisplayFor(model => model.name)</h4>
@@ -54,6 +54,37 @@
                 </tbody>
             </table>
         </div>
+
+        <div>
+            <h4>Состояние</h4>
+            <div>
+                @{ 
+                    var errors = (IList<IError>)ViewBag.State.Item1;
+                    var warnings = (IList<IWarning>)ViewBag.State.Item2;
+                }
+                <div>
+                    <h5>Ошибки</h5>
+                    @if (errors.Count() == 0) {
+                        <p>Ничего</p>
+                    }
+                    @foreach (var e in errors) {
+                        @Html.Raw(e.get_html())
+                    } 
+                </div>
+                <div>
+                    <h5>Предупреждения</h5>
+                    @if (warnings.Count() == 0)
+                    {
+                        <p>Ничего</p>
+                    }
+                    @foreach (var e in warnings)
+                    {
+                        @Html.Raw(e.get_html())
+                    }
+                </div>
+            </div>
+        </div>
+        
     </div>
 </div>
 

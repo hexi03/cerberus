@@ -11,6 +11,7 @@ using cerberus.Models;
 using cerberus.Models.edmx;
 using cerberus.DTO;
 using Microsoft.Ajax.Utilities;
+using System.Security.Cryptography;
 
 namespace cerberus.Controllers
 {
@@ -83,14 +84,16 @@ namespace cerberus.Controllers
                 }
 
                 if (!productionRegistryItem.requirement_ids.Select(p => (Key: Convert.ToInt32(p.Key),Value: Convert.ToInt32(p.Value))).All(p1 => db.ItemsRegistries.Any(p => p.id == p1.Key))) { return RedirectToAction("Index"); }
-                productionRegistryItem.requirement_ids.Select(p => (Key: Convert.ToInt32(p.Key), Value: Convert.ToInt32(p.Value))).ForEach(p1 =>
-                    db.ProductionRegistries.Add(new ProductionRegistry
-                    {
-                        production_id = productionRegistryItem.production_id,
-                        requirement_id = p1.Key,
-                        count = Convert.ToInt32(p1.Value)
-                    })
-                );
+                foreach (var p1 in productionRegistryItem.requirement_ids)
+                {
+                    ProductionRegistry item = new ProductionRegistry();
+
+                    item.production_id = productionRegistryItem.production_id;
+                    item.requirement_id = Convert.ToInt32(p1.Key);
+                    item.count = Convert.ToInt32(p1.Value);
+                    
+                    db.ProductionRegistries.Add(item);
+                }
                 await db.SaveChangesAsync();
                 return RedirectToAction("Index");
             }

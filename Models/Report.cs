@@ -32,11 +32,12 @@ namespace cerberus.Models.edmx
         public Report(Types type)
         {
             report_type = type.ToString();
+            id = -1;
         }
 
         public Report()
         {
-            
+            id = -1;
         }
 
         public Report(Report r)
@@ -58,7 +59,7 @@ namespace cerberus.Models.edmx
         public static void save(CerberusDBEntities db, Report rep)
         {
 
-            if (rep.id == null)
+            if (rep.id == -1)
             {
                 db.Reports.Add(rep);
             }
@@ -104,6 +105,9 @@ namespace cerberus.Models.edmx
                     break;
             }
             buf.id = id;
+            buf.timestamp = timestamp;
+            buf.creator_id = creator_id;
+            buf.department_id = department_id;
             return buf;
 
         }
@@ -114,8 +118,17 @@ namespace cerberus.Models.edmx
             return q.Where(e => e.timestamp > ts);
         }
 
+        public static IQueryable<Report> time_filter_last_day(IQueryable<Report> q)
+        {
+            //var ts = DateTime.Today.AddDays(0);
+            return q;//q.Where(e => e.timestamp <= ts);
+        }
 
-
+        public static IList<Report> time_filter_last_day(IList<Report> q)
+        {
+            //var ts = DateTime.Today.AddDays(0);
+            return q;//q.Where(e => e.timestamp <= ts).ToList();
+        }
 
 
     }

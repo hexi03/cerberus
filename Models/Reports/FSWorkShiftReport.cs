@@ -89,6 +89,20 @@ namespace cerberus.Models.Reports
 
         }
 
+        public static IList<FSWorkShiftReport> get_unsatisfied_target_wh(CerberusDBEntities db, int target_warehouse_id)
+        {
+            Warehouse wh = db.WareHouses.Find(target_warehouse_id);
+            return Report.time_filter(db.Reports
+                .Where(r => r.department_id == wh.department_id && r.report_type == Report.Types.FSWorkShift.ToString())).ToList()
+                .Select(r => (FSWorkShiftReport)r.from_generic()).ToList()
+                .Where(
+                    r =>
+                    r.target_warehouse_id == target_warehouse_id &&
+                    get_unsatisfied_item_list(db, r.id).Count() != 0
+                ).ToList();
+
+        }
+
         public static IDictionary<int,int> get_unsatisfied_item_list(CerberusDBEntities db, int report_id)
         {
             var r_raw = db.Reports
@@ -119,6 +133,77 @@ namespace cerberus.Models.Reports
                     .Select(p => (FSWorkShiftReport)p.from_generic()).Where(p => p.remains.Count() > 0).ToList();
         }
 
+        public static IList<FSWorkShiftReport> get_reports_with_losses(CerberusDBEntities db, int factorysite_id)
+        {
+            FactorySite fs = db.FactorySites.Find(factorysite_id);
+            return Report.time_filter(db.Reports.Where(p => p.report_type == Report.Types.FSWorkShift.ToString() && p.department_id == fs.department_id)).ToList()
+                    .Select(p => (FSWorkShiftReport)p.from_generic()).Where(p => p.losses.Count() > 0 && p.factorysite_id == factorysite_id).ToList();
+        }
+
+        public static IList<FSWorkShiftReport> get_reports_with_remains(CerberusDBEntities db, int factorysite_id)
+        {
+            FactorySite fs = db.FactorySites.Find(factorysite_id);
+            return Report.time_filter(db.Reports.Where(p => p.report_type == Report.Types.FSWorkShift.ToString() && p.department_id == fs.department_id)).ToList()
+                    .Select(p => (FSWorkShiftReport)p.from_generic()).Where(p => p.remains.Count() > 0 && p.factorysite_id == factorysite_id).ToList();
+        }
+
+
+        
+
+
+
+        public static IList<IWarning> get_warnings(CerberusDBEntities db, int factorysite_id) {
+            var res = new List<IWarning>();
+            res = res.Union((IList<IWarning>)get_reports_with_losses(db, factorysite_id).Select(r => (IWarning)new LossesWarning(r)).ToList()).ToList();
+            //res = res.Union((IList<IWarning>)get_reports_with_remains(db, factorysite_id).Select(r => (IWarning)new RemainsWarning(r)).ToList()).ToList();
+            return res;
+        }
+
+        class LossesWarning : IWarning
+        {
+            string text_message;
+            string html_message;
+            public LossesWarning(FSWorkShiftReport rep)
+            {
+                text_message = "В результате рабочей смены " + rep.timestamp.ToString() + " произошла потеря расходных материалов";
+                html_message =
+                    "<p>В результате <a href='/Reports/Details/" + rep.id + "'>рабочей смены " + rep.timestamp.ToString() + "</a>  произошла потеря расходных материалов</p>";
+
+            }
+            public string get_html()
+            {
+                return html_message;
+            }
+
+            public string get_message()
+            {
+                return text_message;
+            }
+        }
+
+        class RemainsWarning : IWarning
+        {
+            string text_message;
+            string html_message;
+            public RemainsWarning(FSWorkShiftReport rep)
+            {
+                text_message = "По окончании рабочей смены " + rep.timestamp.ToString() + " были задекларированы остатки РМ";
+                html_message =
+                    "<p>По окончании <a href='/Reports/Details/" + rep.id + "'>рабочей смены " + rep.timestamp.ToString() + "</a>  были задекларированы остатки РМ</p>";
+
+            }
+            public string get_html()
+            {
+                return html_message;
+            }
+
+            public string get_message()
+            {
+                return text_message;
+            }
+        }
+
+
     }
-    
+
 }

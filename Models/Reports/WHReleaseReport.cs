@@ -43,6 +43,34 @@ namespace cerberus.Models.Reports
 
         }
 
+        public static IList<IWarning> get_warnings(CerberusDBEntities db, int warehouse_id)
+        {
+            return (IList<IWarning>)FSSupplyRequirementReport.get_unsatisfied_target_wh(db, warehouse_id).Select(r => (IWarning)new UnsatisfiedWarning(r)).ToList();
+
+        }
+
+
+        class UnsatisfiedWarning : IWarning
+        {
+            string text_message;
+            string html_message;
+            public UnsatisfiedWarning(FSSupplyRequirementReport rep)
+            {
+                text_message = "Не выданы запрошенные РМ " + rep.timestamp;
+                html_message =
+                    "<p>Не выданы запрошенные РМ для <a href='/Reports/Details/" + rep.id + "'>смены " + rep.timestamp + "</a></p>";
+            }
+            public string get_html()
+            {
+                return html_message;
+            }
+
+            public string get_message()
+            {
+                return text_message;
+            }
+        }
+
 
     }
 }

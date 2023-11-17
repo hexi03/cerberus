@@ -67,16 +67,21 @@ namespace cerberus.Models.edmx
         }
 
 
-        //public static (List<Error>, List<Warning>) get_state(CerberusDBEntities db, int warehouse_id)
-        //{
-        //    List<IError> err = new List<Error>();
-        //    List<IWarning> warn = new List<Warning>();
-        //
-        //    foreach (var rep in WHInventarisationReport.get_unsatisfied_wh(db, warehouse_id))
-        ///    {
-        //        err.Add(WHInventarisationReportError.fetch(rep))
-        //    }
-        //}
+        public static (List<IError>, List<IWarning>) get_state(CerberusDBEntities db, int warehouse_id)
+        {
+            var bag = (Errors: new List<IError>(), Warnings: new List<IWarning>());
+            bag.Errors = bag.Errors.Union(WHInventarisationReport.get_errors(db, warehouse_id)).ToList();
+            bag.Warnings = bag.Warnings.Union(WHWorkShiftReplenishmentReport.get_warnings(db, warehouse_id)).ToList();
+            bag.Warnings = bag.Warnings.Union(WHReleaseReport.get_warnings(db, warehouse_id)).ToList();
+            if (has_invalid_storage_state(db, warehouse_id)) {
+                bag.Errors.Add(new InvalidStorageStateError());
+            }
+            return bag;
+        }
+
+        public static bool has_invalid_storage_state(CerberusDBEntities db, int warehouse_id) {
+            return get_storage_state(db, warehouse_id).Where(it => it.Value < 0).Count() > 0;
+        }
 
         public partial class WareHouseMetadata
         {
@@ -94,6 +99,28 @@ namespace cerberus.Models.edmx
 
             public int department_id { get; set; }
 
+        }
+
+        class InvalidStorageStateError : IError
+        {
+            string text_message;
+            string html_message;
+            public InvalidStorageStateError()
+            {
+                text_message = "Получение состояния из отчетности приводит к невозможному результату (рекомендуется перепроверить отчеты).";
+                html_message =
+                    "<p>Получение состояния из отчетности приводит к невозможному результату (рекомендуется перепроверить отчеты).</p>";
+
+            }
+            public string get_html()
+            {
+                return html_message;
+            }
+
+            public string get_message()
+            {
+                return text_message;
+            }
         }
     }
 }

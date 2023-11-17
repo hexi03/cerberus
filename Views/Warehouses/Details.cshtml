@@ -48,13 +48,53 @@
 
         <div>
             <h4>Состояние склада</h4>
-            @foreach (var item in ((IList<(cerberus.Models.edmx.ItemsRegistry, int)>)ViewBag.State))
-            {
-                <p>@Html.DisplayFor(model => item.Item1.name):  @Html.DisplayFor(model => item.Item2)</p>
-            }
+            <div class="mx-5 my-2">
+                <h5>Содержимое склада</h5>
+                <div class="mx-5">
+                    @if (((IList<(cerberus.Models.edmx.ItemsRegistry, int)>)ViewBag.StorageState).Count() == 0)
+                    {
+                        <p>Ничего</p>
+                    }
+                    @foreach (var item in ((IList<(cerberus.Models.edmx.ItemsRegistry, int)>)ViewBag.StorageState))
+                    {
+                        <p>@Html.DisplayFor(model => item.Item1.name):  @Html.DisplayFor(model => item.Item2)</p>
+                    }
+                </div>
+                
+                <div>
+                    @{
+                        var errors = (IList<IError>)ViewBag.State.Item1;
+                        var warnings = (IList<IWarning>)ViewBag.State.Item2;
+                    }
+                    <div>
+                        <h5>Ошибки</h5>
+                        @if (errors.Count() == 0)
+                        {
+                            <p>Ничего</p>
+                        }
+                        @foreach (var e in errors)
+                        {
+                            @Html.Raw(e.get_html())
+                        }
+                    </div>
+                    <div>
+                        <h5>Предупреждения</h5>
+                        @if (warnings.Count() == 0)
+                        {
+                            <p>Ничего</p>
+                        }
+                        @foreach (var e in warnings)
+                        {
+                            @Html.Raw(e.get_html())
+                        }
+                    </div>
+                </div>
+                
+            </div>
+            
         </div>
     </div>
-
+    <hr />
     <div class="form-actions no-color">
         @Html.ActionLink("Редактировать", "Edit", new { id = Model.id }, new { @class = "btn btn-primary" }) |
 

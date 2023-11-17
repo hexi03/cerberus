@@ -57,6 +57,7 @@ namespace cerberus.Controllers
             ViewBag.StorageState = ItemsRegistry.get_list(db,Warehouse.get_storage_state(db, warehouse.id));
             ViewBag.ReportList = await WareHouseReport.get_reports(db, warehouse.id);
             ViewBag.Users = (await userManager.Users.ToListAsync()).ToDictionary(user => user.Id);
+            ViewBag.State = Warehouse.get_state(db, id);
             return View(warehouse);
         }
 

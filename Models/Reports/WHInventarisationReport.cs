@@ -128,7 +128,7 @@ namespace cerberus.Models.Reports
 
         public static IList<IError> get_errors(CerberusDBEntities db, int warehouse_id)
         {
-            return (IList<IError>)get_unsatisfied_wh(db,warehouse_id).Select(r => new UnsatisfiedError(r)).ToList();
+            return (IList<IError>)get_unsatisfied_wh(db,warehouse_id).Select(r => (IError)new UnsatisfiedError(r)).ToList();
 
         }
 
@@ -142,7 +142,7 @@ namespace cerberus.Models.Reports
             public UnsatisfiedError(WHInventarisationReport rep) {
                 text_message = "Состояние склада не соответствует отчету об инвентаризации " + rep.id.ToString();
                 html_message =
-                    "<p>Состояние склада не соответствует <a href='Reports/Details/" + rep.id + "'>отчету об инвентаризации</a> </p>";
+                    "<p>Состояние склада не соответствует <a href='/Reports/Details/" + rep.id + "'>отчету об инвентаризации</a> </p>";
                     
             }
             public string get_html()

@@ -50,6 +50,9 @@ namespace cerberus.Controllers
 
             FactorySite factorySite = GroupFactorySiteClaim.get_group_factorysites(db,group_ids).Where(fs => fs.id == id).First();
             ViewBag.ReportList = await FactorySiteReport.get_reports(db, factorySite.id);
+            ViewBag.State = await FactorySite.get_state(db, id);
+            ViewBag.Users = (await userManager.Users.ToListAsync()).ToDictionary(user => user.Id);
+
             return View(factorySite);
         }
 

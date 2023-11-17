@@ -17,32 +17,28 @@
 {
     @Html.AntiForgeryToken()
 
-    <div class="form-horizontal">
-        <h4>Report</h4>
-        <hr />
+<div class="form-horizontal">
+    <h2>Отчет о рабочей смене</h2>
+    <hr />
 
-        <input name="factorysite_id" type="hidden" value="@ViewBag.factorysite_id">
-
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.target_warehouse_id, "target_warehouse_id", htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.DropDownList("target_warehouse_id", (SelectList)ViewBag.WHVariants, htmlAttributes: new { @class = "form-control" })
-                @Html.ValidationMessageFor(model => model.target_warehouse_id, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        @if (ViewBag.mode == "edit")
-        {
-            @Html.DropDownList("target_warehouse_id", (SelectList)ViewBag.WHVariants, htmlAttributes: new { @class = "form-control" })
-            @Html.ValidationMessageFor(model => model.target_warehouse_id, "", new { @class = "text-danger" })
-        }
-        else
-        {
-            <input name="target_warehouse_id" value="@Model.target_warehouse_id" readonly>
-        }
+    <input name="factorysite_id" type="hidden" value="@ViewBag.factorysite_id">
 
 
+    <h5>Целевой склад</h5>
+    @if (ViewBag.mode == "edit")
+    {
+
+        <input name="target_warehouse_id" class=" form-control my-2" value="@Model.target_warehouse_id" readonly>
+
+    }
+    else
+    {
+        @Html.DropDownList("target_warehouse_id", (SelectList)ViewBag.WHVariants, htmlAttributes: new { @class = "form-control my-2" })
+        @Html.ValidationMessageFor(model => model.target_warehouse_id, "", new { @class = "text-danger" })
+    }
+
+
+    <h5>Произведенная продукция</h5>
 
     <div class="keyValuePairs item-list-controlable-container" data-dname="produced">
 
@@ -66,52 +62,52 @@
     </div>
 
 
+    <h5>Потери</h5>
+    <div class="keyValuePairs item-list-controlable-container" data-dname="losses">
 
-        <div class="keyValuePairs item-list-controlable-container" data-dname="losses">
-
-            <button type="button" class="addKeyValuePair">+</button>
-            @if (Model != null)
+        <button type="button" class="addKeyValuePair">+</button>
+        @if (Model != null)
+        {
+            foreach (var item in Model.losses)
             {
-                foreach (var item in Model.losses)
-                {
-                    <div class="keyValuePairContainer item-list-controlable-section">
-                        <input type="text" placeholder="Наименование" class="item-list-target-content item-list-show showMenu" value="@ViewBag.Items[item.Key].name" readonly />
-                        <input type="hidden" class="key item-list-target-value" value="@ViewBag.Items[item.Key].id" />
-                        <input type="text" placeholder="Количество" class="value" value="@item.Value" />
-                        <button class="removeKeyValuePair">Удалить</button>
-                        <input type="hidden" class="hiddenKV" name="losses[@ViewBag.Items[item.Key].id]" value="@item.Value" />
-                    </div>
-                }
+                <div class="keyValuePairContainer item-list-controlable-section">
+                    <input type="text" placeholder="Наименование" class="item-list-target-content item-list-show showMenu" value="@ViewBag.Items[item.Key].name" readonly />
+                    <input type="hidden" class="key item-list-target-value" value="@ViewBag.Items[item.Key].id" />
+                    <input type="text" placeholder="Количество" class="value" value="@item.Value" />
+                    <button class="removeKeyValuePair">Удалить</button>
+                    <input type="hidden" class="hiddenKV" name="losses[@ViewBag.Items[item.Key].id]" value="@item.Value" />
+                </div>
             }
-        </div>
+        }
+    </div>
 
 
+    <h5>Остатки РМ</h5>
+    <div class="keyValuePairs item-list-controlable-container" data-dname="remains">
 
-        <div class="keyValuePairs item-list-controlable-container" data-dname="remains">
-
-            <button type="button" class="addKeyValuePair">+</button>
-            @if (Model != null)
+        <button type="button" class="addKeyValuePair">+</button>
+        @if (Model != null)
+        {
+            foreach (var item in Model.remains)
             {
-                foreach (var item in Model.remains)
-                {
-                    <div class="keyValuePairContainer item-list-controlable-section">
-                        <input type="text" placeholder="Наименование" class="item-list-target-content item-list-show showMenu" value="@ViewBag.Items[item.Key].name" readonly />
-                        <input type="hidden" class="key item-list-target-value" value="@ViewBag.Items[item.Key].id" />
-                        <input type="text" placeholder="Количество" class="value" value="@item.Value" />
-                        <button class="removeKeyValuePair">Удалить</button>
-                        <input type="hidden" class="hiddenKV" name="remains[@ViewBag.Items[item.Key].id]" value="@item.Value" />
-                    </div>
-                }
+                <div class="keyValuePairContainer item-list-controlable-section">
+                    <input type="text" placeholder="Наименование" class="item-list-target-content item-list-show showMenu" value="@ViewBag.Items[item.Key].name" readonly />
+                    <input type="hidden" class="key item-list-target-value" value="@ViewBag.Items[item.Key].id" />
+                    <input type="text" placeholder="Количество" class="value" value="@item.Value" />
+                    <button class="removeKeyValuePair">Удалить</button>
+                    <input type="hidden" class="hiddenKV" name="remains[@ViewBag.Items[item.Key].id]" value="@item.Value" />
+                </div>
             }
-        </div>
+        }
+    </div>
 
 
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Create" class="btn btn-default" />
-            </div>
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <input type="submit" value="Create" class="btn btn-default" />
         </div>
     </div>
+</div>
 }
 
 <div>

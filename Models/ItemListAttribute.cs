@@ -13,6 +13,7 @@ namespace cerberus.Models
         
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
+            if (value == null) return ValidationResult.Success;
             CerberusDBEntities db = new CerberusDBEntities();
             IDictionary<int,int> dict = ((IDictionary<string, string>)value).ToDictionary(kv => Convert.ToInt32(kv.Key), kv => Convert.ToInt32(kv.Value));
 

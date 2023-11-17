@@ -18,7 +18,7 @@
     @Html.AntiForgeryToken()
 
     <div class="container">
-        <h2>Отчет о пополнении склада</h2>
+        <h2>Отчет о приемке РМ на склад</h2>
         <hr />
         <input name="warehouse_id" type="hidden" value="@ViewBag.warehouse_id">
 
@@ -30,9 +30,9 @@
                 foreach (var item in Model.items)
                 {
                     <div class="keyValuePairContainer item-list-controlable-section">
-                        <input type="text" placeholder="Наименование" class="item-list-target-content item-list-show showMenu form-control" value="@ViewBag.Items[item.Key].name" readonly />
+                        <input type="text" placeholder="Наименование" class="item-list-target-content item-list-show showMenu" value="@ViewBag.Items[item.Key].name" readonly />
                         <input type="hidden" class="key item-list-target-value" value="@ViewBag.Items[item.Key].id" />
-                        <input type="text" placeholder="Количество" class="value form-control" value="@item.Value" />
+                        <input type="text" placeholder="Количество" class="value" value="@item.Value" />
                         <button class="btn btn-danger removeKeyValuePair">Удалить</button>
                         <input type="hidden" class="hiddenKV" name="items[@ViewBag.Items[item.Key].id]" value="@item.Value" />
                     </div>

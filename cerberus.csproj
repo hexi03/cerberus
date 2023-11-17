@@ -333,6 +333,7 @@
       <DependentUpon>Model1.edmx</DependentUpon>
     </Compile>
     <Compile Include="Models\MenuAttribute.cs" />
+    <Compile Include="Models\ProductionRegistry.cs" />
     <Compile Include="Models\Report.cs" />
     <Compile Include="Models\Reports\FactorySiteReport.cs" />
     <Compile Include="Models\Reports\FSSupplyRequirementReport.cs" />
@@ -462,7 +463,7 @@
     <Content Include="Views\Departments\ManageAccess.cshtml" />
     <Content Include="Views\FactorySites\ManageAccess.cshtml" />
     <Content Include="Views\FactorySites\ManageSupply.cshtml" />
-    <Content Include="Views\Reports\GetFSSupplyRequrementUnsatisfiedItemList.cshtml" />
+    <Content Include="Views\Reports\GetFSSupplyRequirementUnsatisfiedItemList.cshtml" />
     <Content Include="Views\Reports\GetFSWorkShiftReportUnsatisfiedItemList.cshtml" />
     <None Include="Views\Shared\Menu.cshtml" />
     <Content Include="Views\Warehouses\Create.cshtml" />

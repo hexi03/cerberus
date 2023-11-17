@@ -18,7 +18,7 @@
     @Html.AntiForgeryToken()
 
     <div class="container">
-        <h2>Отчет</h2>
+        <h2>Отчет о запросе снабжения</h2>
         <hr />
 
         <input name="factorysite_id" type="hidden" value="@ViewBag.factorysite_id">
@@ -28,12 +28,13 @@
             <div class="col-md-10">
                 @if (ViewBag.mode == "edit")
                 {
-                    @Html.DropDownList("target_warehouse_id", (SelectList)ViewBag.WHVariants, htmlAttributes: new { @class = "form-control" })
-                    @Html.ValidationMessageFor(model => model.target_warehouse_id, "", new { @class = "text-danger" })
+                    <input name="target_warehouse_id" class="form-control" value="@Model.target_warehouse_id" readonly>
                 }
                 else
                 {
-                    <input name="target_warehouse_id" value="@Model.target_warehouse_id" readonly>
+                    @Html.DropDownList("target_warehouse_id", (SelectList)ViewBag.WHVariants, htmlAttributes: new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.target_warehouse_id, "", new { @class = "text-danger" })
+
                 }
             </div>
         </div>
