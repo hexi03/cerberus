@@ -33,11 +33,11 @@ namespace cerberus.Controllers
         {
             var user_id = User.Identity.GetUserId();
             
-            var group_ids = await userManager.GetRolesAsync(user_id);
+            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
 
             ViewBag.ReturnUrl = @Request.Url.PathAndQuery;
             
-            var wareHouses = GroupWareHouseClaim.get_group_warehouses(db, group_ids).Where(w => w.department_id == id).ToList();
+            var wareHouses = GroupWareHouseClaim.get_group_warehouses(db, userManager, user_id).Where(w => w.department_id == id).ToList();
             return View(wareHouses);
         }
 
@@ -51,9 +51,9 @@ namespace cerberus.Controllers
 
             var user_id = User.Identity.GetUserId();
             
-            var group_ids = await userManager.GetRolesAsync(user_id);
+            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
 
-            Warehouse warehouse = GroupWareHouseClaim.get_group_warehouses(db, group_ids).Where(wh => wh.id == id).ToList().First();
+            Warehouse warehouse = GroupWareHouseClaim.get_group_warehouses(db, userManager, user_id).Where(wh => wh.id == id).ToList().First();
             ViewBag.StorageState = ItemsRegistry.get_list(db,Warehouse.get_storage_state(db, warehouse.id));
             ViewBag.ReportList = await WareHouseReport.get_reports(db, warehouse.id);
             ViewBag.Users = (await userManager.Users.ToListAsync()).ToDictionary(user => user.Id);
@@ -68,9 +68,9 @@ namespace cerberus.Controllers
         {
             var user_id = User.Identity.GetUserId();
             
-            var group_ids = await userManager.GetRolesAsync(user_id);
+            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
 
-            var departments_list = GroupDepartmentClaim.get_group_departments(db, group_ids, GroupDepartmentClaim.Levels.Full);
+            var departments_list = GroupDepartmentClaim.get_group_departments(db, userManager, user_id, GroupDepartmentClaim.Levels.Full);
 
 
             ViewBag.ReturnUrl = HttpContext.Request.QueryString["returnUrl"];
@@ -122,12 +122,12 @@ namespace cerberus.Controllers
         {
             var user_id = User.Identity.GetUserId();
             
-            var group_ids = await userManager.GetRolesAsync(user_id);
+            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
 
-            Warehouse warehouse = GroupWareHouseClaim.get_group_warehouses(db, group_ids).Where(wh => wh.id == id).First();
+            Warehouse warehouse = GroupWareHouseClaim.get_group_warehouses(db, userManager, user_id).Where(wh => wh.id == id).First();
 
             ViewBag.ReturnUrl = HttpContext.Request.QueryString["returnUrl"];
-            ViewBag.department_id = new SelectList(GroupDepartmentClaim.get_group_departments(db, group_ids, GroupDepartmentClaim.Levels.Full), "id", "name", warehouse.department_id);
+            ViewBag.department_id = new SelectList(GroupDepartmentClaim.get_group_departments(db, userManager, user_id, GroupDepartmentClaim.Levels.Full), "id", "name", warehouse.department_id);
             return View(warehouse);
         }
 
@@ -142,7 +142,7 @@ namespace cerberus.Controllers
 
             var user_id = User.Identity.GetUserId();
             
-            var group_ids = await userManager.GetRolesAsync(user_id);
+            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
 
             if (ModelState.IsValid)
             {
@@ -153,7 +153,7 @@ namespace cerberus.Controllers
                 else
                     return RedirectToAction("Index", "Home");
             }
-            ViewBag.department_id = new SelectList(GroupDepartmentClaim.get_group_departments(db, group_ids, GroupDepartmentClaim.Levels.Full), "id", "name", warehouse.department_id);
+            ViewBag.department_id = new SelectList(GroupDepartmentClaim.get_group_departments(db, userManager, user_id, GroupDepartmentClaim.Levels.Full), "id", "name", warehouse.department_id);
             return View(warehouse);
         }
 
@@ -163,12 +163,12 @@ namespace cerberus.Controllers
         {
             var user_id = User.Identity.GetUserId();
             
-            var group_ids = await userManager.GetRolesAsync(user_id);
+            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
 
             ViewBag.ReturnUrl = HttpContext.Request.QueryString["returnUrl"];
 
 
-            Warehouse warehouse = GroupWareHouseClaim.get_group_warehouses(db, group_ids).Where(wh => wh.id == id).First();
+            Warehouse warehouse = GroupWareHouseClaim.get_group_warehouses(db, userManager, user_id).Where(wh => wh.id == id).First();
 
             return View(warehouse);
         }
@@ -182,9 +182,9 @@ namespace cerberus.Controllers
             ViewBag.ReturnUrl = HttpContext.Request.QueryString["returnUrl"];
             var user_id = User.Identity.GetUserId();
             
-            var group_ids = await userManager.GetRolesAsync(user_id);
+            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
 
-            Warehouse warehouse = GroupWareHouseClaim.get_group_warehouses(db, group_ids).Where(wh => wh.id == id).First();
+            Warehouse warehouse = GroupWareHouseClaim.get_group_warehouses(db, userManager, user_id).Where(wh => wh.id == id).First();
             db.WareHouses.Remove(warehouse);
             await db.SaveChangesAsync();
             if (!String.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
@@ -199,9 +199,9 @@ namespace cerberus.Controllers
         public async Task<ActionResult> ManageAccess(int id) {
 
             var user_id = User.Identity.GetUserId();
-            var group_ids = await userManager.GetRolesAsync(user_id);
+            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
 
-            var wh = GroupWareHouseClaim.get_group_warehouses(db, group_ids).Where(p => p.id == id).First();
+            var wh = GroupWareHouseClaim.get_group_warehouses(db, userManager, user_id).Where(p => p.id == id).First();
 
             ViewBag.Roles = roleManager.Roles.ToList();
 
@@ -219,9 +219,9 @@ namespace cerberus.Controllers
         {
             
             var user_id = User.Identity.GetUserId();
-            var group_ids = await userManager.GetRolesAsync(user_id);
+            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
 
-            var wh = GroupWareHouseClaim.get_group_warehouses(db, group_ids).Where(p => p.id == id).First();
+            var wh = GroupWareHouseClaim.get_group_warehouses(db, userManager, user_id).Where(p => p.id == id).First();
 
             db.GroupWareHouseClaims.RemoveRange(db.GroupWareHouseClaims.Where(p => p.warehouse_id == id));
 

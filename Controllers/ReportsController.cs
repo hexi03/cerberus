@@ -27,22 +27,155 @@ namespace cerberus.Controllers
     {
         private CerberusDBEntities db = new CerberusDBEntities();
         private ApplicationUserManager userManager = new ApplicationUserManager(new UserStore<ApplicationUser>(new ApplicationDbContext()));
+        private RoleManager<IdentityRole> roleManager = new RoleManager<IdentityRole>(new RoleStore<IdentityRole>(ApplicationDbContext.Create()));
+
+
 
         // GET: Reports/Details/5
-        public async Task<ActionResult> Details(int? id)
+        public async Task<ActionResult> Details(int id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
             Report report = (await db.Reports.FindAsync(id)).from_generic();
-
             if (report == null)
             {
                 return HttpNotFound();
             }
-            return View(report);
+
+            switch ((Report.Types)Enum.Parse(typeof(Report.Types), report.report_type))
+            {
+                case Report.Types.WHRelease:
+                    return await this.DetailsWHReleaseReport((WHReleaseReport)report);
+
+                case Report.Types.WHInventarisation:
+                    return await this.DetailsWHInventarisationReport((WHInventarisationReport)report);
+
+                case Report.Types.WHReplenishment:
+                    return await this.DetailsWHReplenishmentReport((WHReplenishmentReport)report);
+
+                case Report.Types.WHShipment:
+                    return await this.DetailsWHShipmentReport((WHShipmentReport)report);
+
+                case Report.Types.WHWorkShiftReplenishment:
+                    return await this.DetailsWHReplenishmentWorkShiftReport((WHWorkShiftReplenishmentReport)report);
+
+                case Report.Types.FSWorkShift:
+                    return await this.DetailsFSWorkShiftReport((FSWorkShiftReport)report);
+
+                case Report.Types.FSSupplyRequirement:
+                    return await this.DetailsFSSupplyRequirementReport((FSSupplyRequirementReport)report);
+
+            }
+            return RedirectToAction("Index", "Home");
         }
+
+        // POST: Reports/Create
+        // Чтобы защититься от атак чрезмерной передачи данных, включите определенные свойства, для которых следует установить привязку. Дополнительные 
+        // сведения см. в разделе https://go.microsoft.com/fwlink/?LinkId=317598.
+        [WareHouseAuthorize]
+        [NonAction]
+        public async Task<ActionResult> DetailsWHReplenishmentReport(WHReplenishmentReport rep)
+        {
+            ViewBag.warehouse_id = rep.warehouse_id;
+            var keys = rep.items.Keys.Select(k => Convert.ToInt32(k)).ToList();
+            ViewBag.Items = db.ItemsRegistries.Where(it => keys.Contains(it.id)).ToDictionary(kv => kv.id, kv => kv);
+            ViewBag.Reports = db.Reports.Where(r => r.id == rep.id).ToDictionary(kv => kv.id, kv => kv);
+            ViewBag.WareHouses = db.WareHouses.Where(r => r.id == rep.warehouse_id).ToDictionary(kv => kv.id, kv => kv);
+            ViewBag.mode = "Details";
+            return View("~/Views/Reports/Details/WHReplenishmentDetails.cshtml", rep);
+        }
+
+        [WareHouseAuthorize]
+        [NonAction]
+        public async Task<ActionResult> DetailsWHInventarisationReport(WHInventarisationReport rep)
+        {
+            ViewBag.warehouse_id = rep.warehouse_id;
+            var keys = rep.items.Keys.Select(k => Convert.ToInt32(k)).ToList();
+            ViewBag.Items = db.ItemsRegistries.Where(it => keys.Contains(it.id)).ToDictionary(kv => kv.id, kv => kv);
+            ViewBag.Reports = db.Reports.Where(r => r.id == rep.id).ToDictionary(kv => kv.id, kv => kv);
+            ViewBag.WareHouses = db.WareHouses.Where(r => r.id == rep.warehouse_id).ToDictionary(kv => kv.id, kv => kv);
+            ViewBag.mode = "Details";
+            return View("~/Views/Reports/Details/WHInventarisationDetails.cshtml", rep);
+        }
+
+        [WareHouseAuthorize]
+        [NonAction]
+        public async Task<ActionResult> DetailsWHReleaseReport(WHReleaseReport rep)
+        {
+            var department_id = (await db.WareHouses.FindAsync(rep.warehouse_id)).department_id;
+            ViewBag.warehouse_id = rep.warehouse_id;
+            var keys = rep.items.Keys.Select(k => Convert.ToInt32(k)).ToList();
+            ViewBag.Items = db.ItemsRegistries.Where(it => keys.Contains(it.id)).ToDictionary(kv => kv.id, kv => kv);
+            ViewBag.Reports = db.Reports.Where(r => r.id == rep.id || r.id == rep.supply_requirement_id).ToDictionary(kv => kv.id, kv => kv);
+            ViewBag.WareHouses = db.WareHouses.Where(r => r.id == rep.warehouse_id).ToDictionary(kv => kv.id, kv => kv);
+            ViewBag.mode = "Details";
+            
+            return View("~/Views/Reports/Details/WHReleaseDetails.cshtml", rep);
+        }
+
+        [WareHouseAuthorize]
+        [NonAction]
+        public async Task<ActionResult> DetailsWHShipmentReport(WHShipmentReport rep)
+        {
+
+            ViewBag.warehouse_id = rep.warehouse_id;
+            var keys = rep.items.Keys.Select(k => Convert.ToInt32(k)).ToList();
+            ViewBag.Items = db.ItemsRegistries.Where(it => keys.Contains(it.id)).ToDictionary(kv => kv.id, kv => kv);
+            ViewBag.Reports = db.Reports.Where(r => r.id == rep.id).ToDictionary(kv => kv.id, kv => kv);
+            ViewBag.WareHouses = db.WareHouses.Where(r => r.id == rep.warehouse_id).ToDictionary(kv => kv.id, kv => kv);
+            ViewBag.mode = "Details";
+            return View("~/Views/Reports/Details/WHShipmentDetails.cshtml", rep);
+        }
+
+        [WareHouseAuthorize]
+        [NonAction]
+        public async Task<ActionResult> DetailsWHReplenishmentWorkShiftReport(WHWorkShiftReplenishmentReport rep)
+        {
+            var department_id = (await db.WareHouses.FindAsync(rep.warehouse_id)).department_id;
+            ViewBag.warehouse_id = rep.warehouse_id;
+            var keys = rep.items.Keys.Select(k => Convert.ToInt32(k)).ToList();
+            ViewBag.Items = db.ItemsRegistries.Where(it => keys.Contains(it.id)).ToDictionary(kv => kv.id, kv => kv);
+            ViewBag.Reports = db.Reports.Where(r => r.id == rep.id || r.id == rep.workshift_id).ToDictionary(kv => kv.id, kv => kv);
+            ViewBag.WareHouses = db.WareHouses.Where(r => r.id == rep.warehouse_id).ToDictionary(kv => kv.id, kv => kv);
+            
+            ViewBag.mode = "Details";
+            return View("~/Views/Reports/Details/WHReplenishmentWorkShiftDetails.cshtml", rep);
+        }
+
+
+        [FactorySiteAuthorize]
+        [NonAction]
+        public async Task<ActionResult> DetailsFSWorkShiftReport(FSWorkShiftReport rep)
+        {
+            ViewBag.factorysite_id = rep.factorysite_id;
+            var keys = rep.produced.Keys.Union(rep.losses.Keys.Union(rep.remains.Keys)).Select(k => Convert.ToInt32(k)).ToList();
+            ViewBag.Items = db.ItemsRegistries.Where(it => keys.Contains(it.id)).ToDictionary(kv => kv.id, kv => kv);
+            ViewBag.Reports = db.Reports.Where(r => r.id == rep.id).ToDictionary(kv => kv.id, kv => kv);
+            ViewBag.WareHouses = db.WareHouses.Where(r => r.id == rep.target_warehouse_id).ToDictionary(kv => kv.id, kv => kv);
+            ViewBag.FactorySites = db.FactorySites.Where(r => r.id == rep.factorysite_id).ToDictionary(kv => kv.id, kv => kv);
+            ViewBag.mode = "Details";
+            return View("~/Views/Reports/Details/FSWorkShiftDetails.cshtml", rep);
+        }
+
+        [FactorySiteAuthorize]
+        [NonAction]
+        public async Task<ActionResult> DetailsFSSupplyRequirementReport(FSSupplyRequirementReport rep)
+        {
+            ViewBag.factorysite_id = rep.factorysite_id;
+            var keys = rep.items.Keys.Select(k => Convert.ToInt32(k)).ToList();
+            ViewBag.Items = db.ItemsRegistries.Where(it => keys.Contains(it.id)).ToDictionary(kv => kv.id, kv => kv);
+            ViewBag.Reports = db.Reports.Where(r => r.id == rep.id).ToDictionary(kv => kv.id, kv => kv);
+            ViewBag.WareHouses = db.WareHouses.Where(r => r.id == rep.target_warehouse_id).ToDictionary(kv => kv.id, kv => kv);
+            ViewBag.FactorySites = db.FactorySites.Where(r => r.id == rep.factorysite_id).ToDictionary(kv => kv.id, kv => kv);
+            ViewBag.mode = "Details";
+            return View("~/Views/Reports/Details/FSSupplyRequirementDetails.cshtml", rep);
+        }
+
+
+
+
 
 
 
@@ -53,14 +186,14 @@ namespace cerberus.Controllers
         public async Task<ActionResult> CreateWHReplenishmentReport(int id)
         {
             ViewBag.warehouse_id = id;
-            return View("~/Views/Shared/Reports/WHReplenishmentReportForm.cshtml");
+            return View("~/Views/Reports/Forms/WHReplenishmentReportForm.cshtml");
         }
 
         [WareHouseAuthorize]
         public async Task<ActionResult> CreateWHInventarisationReport(int id)
         {
             ViewBag.warehouse_id = id;
-            return View("~/Views/Shared/Reports/WHInventarisationReportForm.cshtml");
+            return View("~/Views/Reports/Forms/WHInventarisationReportForm.cshtml");
         }
 
         [WareHouseAuthorize]
@@ -70,7 +203,7 @@ namespace cerberus.Controllers
             ViewBag.warehouse_id = id;
             ViewBag.SupplyRequirementReportVariants = FSSupplyRequirementReport.get_unsatisfied(db, department_id).ToList();
 
-            return View("~/Views/Shared/Reports/WHReleaseReportForm.cshtml");
+            return View("~/Views/Reports/Forms/WHReleaseReportForm.cshtml");
         }
 
         [WareHouseAuthorize]
@@ -79,7 +212,7 @@ namespace cerberus.Controllers
         {
 
             ViewBag.warehouse_id = id;
-            return View("~/Views/Shared/Reports/WHShipmentReportForm.cshtml");
+            return View("~/Views/Reports/Forms/WHShipmentReportForm.cshtml");
         }
 
         [WareHouseAuthorize]
@@ -88,7 +221,7 @@ namespace cerberus.Controllers
             var department_id = (await db.WareHouses.FindAsync(id)).department_id;
             ViewBag.warehouse_id = id;
             ViewBag.WorkShiftReportVariants = FSWorkShiftReport.get_unsatisfied(db,department_id).ToList();
-            return View("~/Views/Shared/Reports/WHReplenishmentWorkShiftReportForm.cshtml");
+            return View("~/Views/Reports/Forms/WHReplenishmentWorkShiftReportForm.cshtml");
         }
 
 
@@ -98,7 +231,7 @@ namespace cerberus.Controllers
             ViewBag.factorysite_id = id;
 
             ViewBag.WHVariants = new SelectList(await FactorySiteWareHouseClaim.get_warehouses(ViewBag.factorysite_id), "id", "name");
-            return View("~/Views/Shared/Reports/FSWorkShiftReportForm.cshtml");
+            return View("~/Views/Reports/Forms/FSWorkShiftReportForm.cshtml");
         }
 
         [FactorySiteAuthorize]
@@ -107,7 +240,7 @@ namespace cerberus.Controllers
             ViewBag.factorysite_id = id;
 
             ViewBag.WHVariants = new SelectList(await FactorySiteWareHouseClaim.get_warehouses(ViewBag.factorysite_id), "id", "name");
-            return View("~/Views/Shared/Reports/FSSupplyRequirementReportForm.cshtml");
+            return View("~/Views/Reports/Forms/FSSupplyRequirementReportForm.cshtml");
         }
 
 
@@ -123,9 +256,9 @@ namespace cerberus.Controllers
             
             var user_id = User.Identity.GetUserId();
             
-            var group_ids = await userManager.GetRolesAsync(user_id);
+            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
 
-            var warehouse_list = GroupWareHouseClaim.get_group_warehouses(db, group_ids);
+            var warehouse_list = GroupWareHouseClaim.get_group_warehouses(db, userManager, user_id);
 
             if (!warehouse_list.Any(e => e.id == report.warehouse_id)) {
                 return RedirectToAction("Index", "Home");
@@ -158,9 +291,9 @@ namespace cerberus.Controllers
         {
             var user_id = User.Identity.GetUserId();
             
-            var group_ids = await userManager.GetRolesAsync(user_id);
+            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
 
-            var warehouse_list = GroupWareHouseClaim.get_group_warehouses(db, group_ids);
+            var warehouse_list = GroupWareHouseClaim.get_group_warehouses(db, userManager, user_id);
 
             if (!warehouse_list.Any(e => e.id == report.warehouse_id))
             {
@@ -192,9 +325,9 @@ namespace cerberus.Controllers
         {
             var user_id = User.Identity.GetUserId();
             
-            var group_ids = await userManager.GetRolesAsync(user_id);
+            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
 
-            var warehouse_list = GroupWareHouseClaim.get_group_warehouses(db, group_ids);
+            var warehouse_list = GroupWareHouseClaim.get_group_warehouses(db, userManager, user_id);
 
             if (!warehouse_list.Any(e => e.id == report.warehouse_id))
             {
@@ -231,9 +364,9 @@ namespace cerberus.Controllers
         {
             var user_id = User.Identity.GetUserId();
             
-            var group_ids = await userManager.GetRolesAsync(user_id);
+            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
 
-            var warehouse_list = GroupWareHouseClaim.get_group_warehouses(db, group_ids);
+            var warehouse_list = GroupWareHouseClaim.get_group_warehouses(db, userManager, user_id);
 
             if (!warehouse_list.Any(e => e.id == report.warehouse_id))
             {
@@ -265,9 +398,9 @@ namespace cerberus.Controllers
         {
             var user_id = User.Identity.GetUserId();
             
-            var group_ids = await userManager.GetRolesAsync(user_id);
+            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
 
-            var warehouse_list = GroupWareHouseClaim.get_group_warehouses(db, group_ids);
+            var warehouse_list = GroupWareHouseClaim.get_group_warehouses(db, userManager, user_id);
 
             if (!warehouse_list.Any(e => e.id == report.warehouse_id))
             {
@@ -297,10 +430,10 @@ namespace cerberus.Controllers
         public async Task<ActionResult> CreateFSWorkShiftReport(FSWorkShiftReportFormDTO report)
         {
             var user_id = User.Identity.GetUserId();
-            
-            var group_ids = await userManager.GetRolesAsync(user_id);
 
-            var factorisites_list = GroupFactorySiteClaim.get_group_factorysites(db, group_ids);
+            var group_ids = (userManager.GetRoles(user_id)).Select(r => roleManager.FindByName(r)).ToList();
+
+            var factorisites_list = GroupFactorySiteClaim.get_group_factorysites(db, userManager, user_id);
 
             if (!factorisites_list.Any(e => e.id == report.factorysite_id))
             {
@@ -337,9 +470,9 @@ namespace cerberus.Controllers
         {
             var user_id = User.Identity.GetUserId();
             
-            var group_ids = await userManager.GetRolesAsync(user_id);
+            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
 
-            var factorisites_list = GroupFactorySiteClaim.get_group_factorysites(db, group_ids);
+            var factorisites_list = GroupFactorySiteClaim.get_group_factorysites(db, userManager, user_id);
 
             if (!factorisites_list.Any(e => e.id == report.factorysite_id))
             {
@@ -434,7 +567,7 @@ namespace cerberus.Controllers
             var keys = rep.items.Keys.Select(k => Convert.ToInt32(k)).ToList();
             ViewBag.Items = db.ItemsRegistries.Where(it => keys.Contains(it.id)).ToDictionary(kv => kv.id.ToString(), kv => kv);
             ViewBag.mode = "edit";
-            return View("~/Views/Shared/Reports/WHReplenishmentReportForm.cshtml", rep);
+            return View("~/Views/Reports/Forms/WHReplenishmentReportForm.cshtml", rep);
         }
 
         [WareHouseAuthorize]
@@ -445,7 +578,7 @@ namespace cerberus.Controllers
             var keys = rep.items.Keys.Select(k => Convert.ToInt32(k)).ToList();
             ViewBag.Items = db.ItemsRegistries.Where(it => keys.Contains(it.id)).ToDictionary(kv => kv.id.ToString(), kv => kv);
             ViewBag.mode = "edit";
-            return View("~/Views/Shared/Reports/WHInventarisationReportForm.cshtml", rep);
+            return View("~/Views/Reports/Forms/WHInventarisationReportForm.cshtml", rep);
         }
 
         [WareHouseAuthorize]
@@ -459,7 +592,7 @@ namespace cerberus.Controllers
             ViewBag.mode = "edit";
             ViewBag.SupplyRequirementReportVariants = FSSupplyRequirementReport.get_unsatisfied(db, department_id).ToList();
 
-            return View("~/Views/Shared/Reports/WHReleaseReportForm.cshtml", rep);
+            return View("~/Views/Reports/Forms/WHReleaseReportForm.cshtml", rep);
         }
 
         [WareHouseAuthorize]
@@ -471,7 +604,7 @@ namespace cerberus.Controllers
             var keys = rep.items.Keys.Select(k => Convert.ToInt32(k)).ToList();
             ViewBag.Items = db.ItemsRegistries.Where(it => keys.Contains(it.id)).ToDictionary(kv => kv.id.ToString(), kv => kv);
             ViewBag.mode = "edit";
-            return View("~/Views/Shared/Reports/WHShipmentReportForm.cshtml", rep);
+            return View("~/Views/Reports/Forms/WHShipmentReportForm.cshtml", rep);
         }
 
         [WareHouseAuthorize]
@@ -484,7 +617,7 @@ namespace cerberus.Controllers
             ViewBag.Items = db.ItemsRegistries.Where(it => keys.Contains(it.id)).ToDictionary(kv => kv.id.ToString(), kv => kv);
             ViewBag.WorkShiftReportVariants = FSWorkShiftReport.get_unsatisfied(db, department_id).ToList();
             ViewBag.mode = "edit";
-            return View("~/Views/Shared/Reports/WHReplenishmentWorkShiftReportForm.cshtml", rep);
+            return View("~/Views/Reports/Forms/WHReplenishmentWorkShiftReportForm.cshtml", rep);
         }
 
 
@@ -497,7 +630,7 @@ namespace cerberus.Controllers
             ViewBag.Items = db.ItemsRegistries.Where(it => keys.Contains(it.id)).ToDictionary(kv => kv.id.ToString(), kv => kv);
             ViewBag.WHVariants = new SelectList(await FactorySiteWareHouseClaim.get_warehouses(ViewBag.factorysite_id), "id", "name");
             ViewBag.mode = "edit";
-            return View("~/Views/Shared/Reports/FSWorkShiftReportForm.cshtml", rep);
+            return View("~/Views/Reports/Forms/FSWorkShiftReportForm.cshtml", rep);
         }
 
         [FactorySiteAuthorize]
@@ -509,7 +642,7 @@ namespace cerberus.Controllers
             ViewBag.Items = db.ItemsRegistries.Where(it => keys.Contains(it.id)).ToDictionary(kv => kv.id.ToString(), kv => kv);
             ViewBag.WHVariants = new SelectList(await FactorySiteWareHouseClaim.get_warehouses(ViewBag.factorysite_id), "id", "name");
             ViewBag.mode = "edit";
-            return View("~/Views/Shared/Reports/FSSupplyRequirementReportForm.cshtml", rep);
+            return View("~/Views/Reports/Forms/FSSupplyRequirementReportForm.cshtml", rep);
         }
 
 
@@ -544,7 +677,7 @@ namespace cerberus.Controllers
                 return RedirectToAction("Index", "Home");
             }
             ViewBag.mode = "edit";
-            return View("~/Views/Shared/Reports/WHReplenishmentReportForm.cshtml", r_rep);
+            return View("~/Views/Reports/Forms/WHReplenishmentReportForm.cshtml", r_rep);
         }
 
         [HttpPost]
@@ -576,7 +709,7 @@ namespace cerberus.Controllers
             ViewBag.warehouse_id = prev_rep.warehouse_id;
             var keys = prev_rep.items.Keys.Select(k => Convert.ToInt32(k)).ToList();
             ViewBag.Items = db.ItemsRegistries.Where(it => keys.Contains(it.id)).ToDictionary(kv => kv.id.ToString(), kv => kv);
-            return View("~/Views/Shared/Reports/WHInventarisationReportForm.cshtml", r_rep);
+            return View("~/Views/Reports/Forms/WHInventarisationReportForm.cshtml", r_rep);
         }
 
         [HttpPost]
@@ -608,7 +741,7 @@ namespace cerberus.Controllers
             ViewBag.warehouse_id = prev_rep.warehouse_id;
             var keys = prev_rep.items.Keys.Select(k => Convert.ToInt32(k)).ToList();
             ViewBag.Items = db.ItemsRegistries.Where(it => keys.Contains(it.id)).ToDictionary(kv => kv.id.ToString(), kv => kv);
-            return View("~/Views/Shared/Reports/WHReleaseReportForm.cshtml", r_rep);
+            return View("~/Views/Reports/Forms/WHReleaseReportForm.cshtml", r_rep);
         }
 
 
@@ -640,7 +773,7 @@ namespace cerberus.Controllers
             ViewBag.warehouse_id = prev_rep.warehouse_id;
             var keys = prev_rep.items.Keys.Select(k => Convert.ToInt32(k)).ToList();
             ViewBag.Items = db.ItemsRegistries.Where(it => keys.Contains(it.id)).ToDictionary(kv => kv.id.ToString(), kv => kv);
-            return View("~/Views/Shared/Reports/WHShipmentReportForm.cshtml", r_rep);
+            return View("~/Views/Reports/Forms/WHShipmentReportForm.cshtml", r_rep);
         }
 
         [HttpPost]
@@ -673,7 +806,7 @@ namespace cerberus.Controllers
             ViewBag.warehouse_id = prev_rep.warehouse_id;
             var keys = prev_rep.items.Keys.Select(k => Convert.ToInt32(k)).ToList();
             ViewBag.Items = db.ItemsRegistries.Where(it => keys.Contains(it.id)).ToDictionary(kv => kv.id.ToString(), kv => kv);
-            return View("~/Views/Shared/Reports/WHReplenishmentWorkShiftReportForm.cshtml", r_rep);
+            return View("~/Views/Reports/Forms/WHReplenishmentWorkShiftReportForm.cshtml", r_rep);
         }
 
         [HttpPost]
@@ -710,7 +843,7 @@ namespace cerberus.Controllers
             ViewBag.factorysite_id = prev_rep.factorysite_id;
             var keys = prev_rep.produced.Keys.Union(prev_rep.losses.Keys.Union(prev_rep.remains.Keys)).Select(k => Convert.ToInt32(k)).ToList();
             ViewBag.Items = db.ItemsRegistries.Where(it => keys.Contains(it.id)).ToDictionary(kv => kv.id.ToString(), kv => kv);
-            return View("~/Views/Shared/Reports/FSWorkShiftReportForm.cshtml", r_rep);
+            return View("~/Views/Reports/Forms/FSWorkShiftReportForm.cshtml", r_rep);
         }
 
         [HttpPost]
@@ -744,12 +877,14 @@ namespace cerberus.Controllers
             ViewBag.factorysite_id = prev_rep.factorysite_id;
             var keys = prev_rep.items.Keys.Select(k => Convert.ToInt32(k)).ToList();
             ViewBag.Items = db.ItemsRegistries.Where(it => keys.Contains(it.id)).ToDictionary(kv => kv.id.ToString(), kv => kv);
-            return View("~/Views/Shared/Reports/FSSupplyRequirementReportForm.cshtml", r_rep);
+            return View("~/Views/Reports/Forms/FSSupplyRequirementReportForm.cshtml", r_rep);
         }
 
         // GET: Reports/Delete/5
         public async Task<ActionResult> Delete(int? id)
         {
+            ViewBag.Users = (await userManager.Users.ToListAsync()).ToDictionary(user => user.Id);
+
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);

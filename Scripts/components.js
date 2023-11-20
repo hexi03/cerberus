@@ -6,8 +6,8 @@
     });
 }
 
-
 let item_list_current_container = null;
+
 $(document).ready(function () {
 
     //KEYVALUE FORM
@@ -37,10 +37,10 @@ $(document).ready(function () {
         event.stopPropagation();
         const pairDiv = $("<div>");
         pairDiv.addClass("keyValuePairContainer");
-        pairDiv.addClass("item-list-controlable-section");
+        pairDiv.addClass($(this).data("ltype") + "-list-controlable-section");
         
-        pairDiv.append('<input type="text" placeholder="Наименование" class="item-list-target-content item-list-show showMenu" readonly/>');
-        pairDiv.append('<input type="hidden" class="key item-list-target-value" />');
+        pairDiv.append('<input type="text" placeholder="Наименование" class="' + $(this).data("ltype") + '-list-target-content ' + $(this).data("ltype") + '-list-show showMenu" readonly/>');
+        pairDiv.append('<input type="hidden" class="key ' + $(this).data("ltype") + '-list-target-value" />');
         pairDiv.append('<input type="text" placeholder="Количество" class="value" />');
         pairDiv.append('<button class="removeKeyValuePair">Удалить</button>');
         pairDiv.append('<input type="hidden" class="hiddenKV" name="" value="" />');
@@ -84,18 +84,16 @@ $(document).ready(function () {
     });
 
 
-    //ITEM LIST
-    
 
     $(".item-list-controlable-container").on("click", ".item-list-controlable-section .item-list-show.showMenu", function (event) {
         event.stopPropagation();
         item_list_current_container = $(this).parent();
-        $(".overlayMenu").fadeIn();
+        $(".item-list-container.overlayMenu").fadeIn();
     });
 
     $(".item-list-container").on("click", ".item-button-row", function (event) {
         event.stopPropagation();
-        
+
         item_list_current_container.find(".item-list-target-value").val($(this).find("td.item-list-id").text());
         console.log($(this).find("td.item-list-id").text());
         item_list_current_container.find(".item-list-target-content").val($(this).find("td.item-list-name").text());
@@ -104,6 +102,26 @@ $(document).ready(function () {
         item_list_current_container.find(".item-list-target-value").trigger('change');
         $(".overlayMenu").fadeOut();
     });
+
+    //PRODUCTION LIST
+    $(".production-list-controlable-container").on("click", ".production-list-controlable-section .production-list-show.showMenu", function (event) {
+        event.stopPropagation();
+        item_list_current_container = $(this).parent();
+        $(".production-list-container.overlayMenu").fadeIn();
+    });
+
+    $(".production-list-container").on("click", ".production-button-row", function (event) {
+        event.stopPropagation();
+
+        item_list_current_container.find(".production-list-target-value").val($(this).find("td.production-list-id").text());
+        console.log($(this).find("td.production-list-id").text());
+        item_list_current_container.find(".production-list-target-content").val($(this).find("td.production-list-name").text());
+        console.log($(this).find("td.production-list-name").text());
+        item_list_current_container.find(".production-list-target-content").trigger('change');
+        item_list_current_container.find(".production-list-target-value").trigger('change');
+        $(".overlayMenu").fadeOut();
+    });
+    
 
 
 

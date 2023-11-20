@@ -1,16 +1,18 @@
 ﻿
 @{
-    ViewBag.Title = "Create Group";
+    ViewBag.Title = "Создать группу";
 }
 
-<h2>Create Group</h2>
+<h2>Создать группу</h2>
 
 @using (Html.BeginForm("GroupCreate", "GroupUser", FormMethod.Post))
 {
-    @Html.Label("Group Name:")
-    @Html.TextBox("id")
-
-    <input type="submit" value="Create" />
+    <div class="form-control">
+        @Html.Label("Наименование:")
+        @Html.TextBox("id")
+    </div>
+    <input type="submit" value="Создать" class="btn btn-primary" />
+    
 }
 
-@Html.ActionLink("Back to List", "Index")
+@Html.ActionLink("Обратно", "Index")

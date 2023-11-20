@@ -51,24 +51,21 @@ namespace cerberus.Models.edmx
         {
             FactorySite fs = db.FactorySites.Find(factorysite_id);
 
-            var raw_remains = Report.time_filter_last_day(FSWorkShiftReport.get_reports_with_remains(db, factorysite_id).Select(r => (Report)r ).ToList()).Aggregate(new Dictionary<int, int>(), (acc, p) =>
-                        misc.MergeDictionariesWithSum(acc, ((FSWorkShiftReport)p).remains)
+            var raw_remains = FSWorkShiftReport.get_reports_with_remains(db, factorysite_id).Aggregate(new Dictionary<int, int>(), (acc, p) =>
+                        misc.MergeDictionariesWithSum(acc, p.remains)
                     ).ToDictionary(kv => kv.Key, kv => kv.Value);
-            var raw_production_costs = await ProductionRegistry.get_costs(db, Report.time_filter_last_day(db.Reports.Where(p => p.report_type == Report.Types.FSWorkShift.ToString() && p.department_id == fs.department_id)).ToList()
+            var raw_production_costs = await ProductionRegistry.get_costs(db,db.Reports.Where(p => p.report_type == Report.Types.FSWorkShift.ToString() && p.department_id == fs.department_id).ToList()
                     .Select(p => (FSWorkShiftReport)p.from_generic()).Where(p => p.factorysite_id == factorysite_id).Aggregate(new Dictionary<int, int>(), (acc, p) =>
                         misc.MergeDictionariesWithSum(acc, p.produced)
                     ).ToDictionary(kv => kv.Key, kv => kv.Value));
 
-            var aaa = FSWorkShiftReport.get_reports_with_losses(db, factorysite_id).Select(r => (Report)r).ToList().Aggregate(new Dictionary<int, int>(), (acc, p) =>
-                        misc.MergeDictionariesWithSum(acc, ((FSWorkShiftReport)p).losses)
+
+            var raw_losses = FSWorkShiftReport.get_reports_with_losses(db, factorysite_id).Aggregate(new Dictionary<int, int>(), (acc, p) =>
+                        misc.MergeDictionariesWithSum(acc, p.losses)
                     ).ToDictionary(kv => kv.Key, kv => kv.Value);
 
-            var raw_losses = Report.time_filter_last_day(FSWorkShiftReport.get_reports_with_losses(db, factorysite_id).Select(r => (Report)r).ToList()).Aggregate(new Dictionary<int, int>(), (acc, p) =>
-                        misc.MergeDictionariesWithSum(acc, ((FSWorkShiftReport)p).losses)
-                    ).ToDictionary(kv => kv.Key, kv => kv.Value);
-
-            var raw_consumed = FSSupplyRequirementReport.get_satisfied_fs(db,factorysite_id).Aggregate(new Dictionary<int, int>(), (acc, p) =>
-                        misc.MergeDictionariesWithSum(acc, (p).items)
+            var raw_consumed = Report.time_filter_last_day(FSSupplyRequirementReport.get_satisfied_fs(db,factorysite_id).Select(r => (Report)r).ToList()).Aggregate(new Dictionary<int, int>(), (acc, p) =>
+                        misc.MergeDictionariesWithSum(acc, ((FSSupplyRequirementReport)p).items)
                     ).ToDictionary(kv => kv.Key, kv => kv.Value);
 
             return misc.MergeDictionariesWithSum(

@@ -33,22 +33,5 @@ namespace cerberus.Models.Reports
                 .Select(r => (WareHouseReport)r.from_generic()).Where(r => r.warehouse_id == warehouse_id).ToList();
         }
 
-        public string get_type_as_string() {
-            switch ((Types)Enum.Parse(typeof(Types), report_type))
-            {
-                case Types.WHWorkShiftReplenishment:
-                    return "Отчет о приемке ПП смены";
-                case Types.WHReplenishment:
-                    return "Отчет о приемке";
-                case Types.WHShipment:
-                    return "Отчет об отгрузках";
-                case Types.WHRelease:
-                    return "Отчет о предоставлении РМ";
-                case Types.WHInventarisation:
-                    return "Отчет об инвентаризации";
-                default:
-                    return "Неизветный отчет";
-            }
-        }
     }
 }

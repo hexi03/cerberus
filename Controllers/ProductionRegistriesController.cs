@@ -12,6 +12,7 @@ using cerberus.Models.edmx;
 using cerberus.DTO;
 using Microsoft.Ajax.Utilities;
 using System.Security.Cryptography;
+using Npgsql;
 
 namespace cerberus.Controllers
 {
@@ -82,6 +83,8 @@ namespace cerberus.Controllers
                     .Any(p => p.id == productionRegistryItem.production_id))) {
                     return RedirectToAction("Index");
                 }
+                var conn = (NpgsqlConnection)db.Database.Connection;
+                conn.Open();
 
                 if (!productionRegistryItem.requirement_ids.Select(p => (Key: Convert.ToInt32(p.Key),Value: Convert.ToInt32(p.Value))).All(p1 => db.ItemsRegistries.Any(p => p.id == p1.Key))) { return RedirectToAction("Index"); }
                 foreach (var p1 in productionRegistryItem.requirement_ids)
@@ -91,10 +94,22 @@ namespace cerberus.Controllers
                     item.production_id = productionRegistryItem.production_id;
                     item.requirement_id = Convert.ToInt32(p1.Key);
                     item.count = Convert.ToInt32(p1.Value);
+
+                    //db.ProductionRegistries.Add(item);
                     
-                    db.ProductionRegistries.Add(item);
+                    using (var cmd = new NpgsqlCommand("INSERT INTO \"public\".\"ProductionRegistry\" (\"production_id\", \"requirement_id\", \"count\") VALUES (@ProductionId, @RequirementId, @Count) RETURNING \"id\"", conn))
+                    {
+                        cmd.Parameters.AddWithValue("ProductionId", productionRegistryItem.production_id);
+                        cmd.Parameters.AddWithValue("RequirementId", Convert.ToInt32(p1.Key));
+                        cmd.Parameters.AddWithValue("Count", Convert.ToInt32(p1.Value));
+
+                        var insertedId = cmd.ExecuteScalar();
+                        
+                    }
+
                 }
-                await db.SaveChangesAsync();
+                conn.Close();
+                //await db.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
 
@@ -130,12 +145,50 @@ namespace cerberus.Controllers
                 if (!db.ItemsRegistries.Any(p => p.id == productionRegistryItem.production_id)) { return RedirectToAction("Index"); }
                 if (!productionRegistryItem.requirement_ids.Select(p => (Key: Convert.ToInt32(p.Key), Value: Convert.ToInt32(p.Value))).All(p1 => db.ItemsRegistries.Any(p => p.id == p1.Key))) { return RedirectToAction("Index"); }
 
-                db.ProductionRegistries.Where(p => p.production_id == productionRegistryItem.production_id).ForEach(p =>
+                /*db.ProductionRegistries.Where(p => p.production_id == productionRegistryItem.production_id).ForEach(p =>
                 {
                     db.ProductionRegistries.Remove(p);
                 });
                 await db.SaveChangesAsync();
-                productionRegistryItem.requirement_ids.Select(p => (Key: Convert.ToInt32(p.Key), Value: Convert.ToInt32(p.Value))).ForEach(p1 =>
+
+*/
+
+
+                var conn = (NpgsqlConnection)db.Database.Connection;
+                conn.Open();
+
+                using (var cmd = new NpgsqlCommand("DELETE FROM \"public\".\"ProductionRegistry\" WHERE \"production_id\" = @ProductionId", conn))
+                {
+                    cmd.Parameters.AddWithValue("ProductionId", productionRegistryItem.production_id);
+
+                    var insertedId = cmd.ExecuteNonQuery();
+
+                }
+
+
+                foreach (var p1 in productionRegistryItem.requirement_ids)
+                {
+                    ProductionRegistry item = new ProductionRegistry();
+
+                    item.production_id = productionRegistryItem.production_id;
+                    item.requirement_id = Convert.ToInt32(p1.Key);
+                    item.count = Convert.ToInt32(p1.Value);
+
+                    //db.ProductionRegistries.Add(item);
+
+                    using (var cmd = new NpgsqlCommand("INSERT INTO \"public\".\"ProductionRegistry\" (\"production_id\", \"requirement_id\", \"count\") VALUES (@ProductionId, @RequirementId, @Count) RETURNING \"id\"", conn))
+                    {
+                        cmd.Parameters.AddWithValue("ProductionId", productionRegistryItem.production_id);
+                        cmd.Parameters.AddWithValue("RequirementId", Convert.ToInt32(p1.Key));
+                        cmd.Parameters.AddWithValue("Count", Convert.ToInt32(p1.Value));
+
+                        var insertedId = cmd.ExecuteScalar();
+
+                    }
+
+                }
+                conn.Close();
+                /*productionRegistryItem.requirement_ids.Select(p => (Key: Convert.ToInt32(p.Key), Value: Convert.ToInt32(p.Value))).ForEach(p1 =>
                     db.ProductionRegistries.Add(new ProductionRegistry
                     {
                         production_id = productionRegistryItem.production_id,
@@ -143,7 +196,7 @@ namespace cerberus.Controllers
                         count = Convert.ToInt32(p1.Value)
                     })
                 );
-                await db.SaveChangesAsync();
+                await db.SaveChangesAsync();*/
                 return RedirectToAction("Index");
             }
 
@@ -174,12 +227,23 @@ namespace cerberus.Controllers
         public async Task<ActionResult> DeleteConfirmed(int id)
         {
             if (!db.ItemsRegistries.Any(p => p.id == id)) { return RedirectToAction("Index"); }
-            
+            /*
             db.ProductionRegistries.Where(p => p.production_id == id).ForEach(p =>
             {
                 db.ProductionRegistries.Remove(p);
             });
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync();*/
+            var conn = (NpgsqlConnection)db.Database.Connection;
+            conn.Open();
+
+            using (var cmd = new NpgsqlCommand("DELETE FROM \"public\".\"ProductionRegistry\" WHERE \"production_id\" = @ProductionId", conn))
+            {
+                cmd.Parameters.AddWithValue("ProductionId", id);
+
+                var insertedId = cmd.ExecuteNonQuery();
+
+            }
+            conn.Close();
             return RedirectToAction("Index");
         }
 

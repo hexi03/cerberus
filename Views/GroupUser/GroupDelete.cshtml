@@ -2,21 +2,21 @@
 @model Microsoft.AspNet.Identity.EntityFramework.IdentityRole
 
 @{
-    ViewBag.Title = "Delete Group";
+    ViewBag.Title = "Удалить группу";
 }
 
-<h2>Delete Group</h2>
+<h2>Удалить группу</h2>
 
 <div>
     <dl class="dl-horizontal">
-        <dt>Group Name:</dt>
+        <dt>Наименование:</dt>
         <dd>@Model.Name</dd>
     </dl>
 </div>
 
 @using (Html.BeginForm("GroupDeleteConfirmed", "GroupUser", new { id = Model.Name }, FormMethod.Post))
 {
-    <input type="submit" value="Delete" />
+    <input type="submit" value="Удалить" class="btn btn-danger"/>
 }
 
-@Html.ActionLink("Cancel", "Index")
+@Html.ActionLink("Отмена", "Index")

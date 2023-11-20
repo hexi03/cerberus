@@ -80,16 +80,10 @@ namespace cerberus.Controllers
         [HttpPost]
         public async Task<ActionResult> GroupDeleteConfirmed(string id)
         {
-            try
-            {
-                await roleManager.DeleteAsync(await roleManager.FindByNameAsync(id));
+            await roleManager.DeleteAsync(await roleManager.FindByNameAsync(id));    
+            
+            return RedirectToAction("Index");
 
-                return RedirectToAction("Index");
-            }
-            catch
-            {
-                return View();
-            }
         }
 
 
@@ -223,8 +217,7 @@ namespace cerberus.Controllers
         [HttpPost]
         public async Task<ActionResult> UserDeleteConfirmed(string id)
         {
-            try
-            {
+
                 var user = await userManager.FindByNameAsync(id);
                 if (user == null)
                 {
@@ -233,11 +226,7 @@ namespace cerberus.Controllers
                 await userManager.DeleteAsync(user);
 
                 return RedirectToAction("Index");
-            }
-            catch
-            {
-                return View();
-            }
+
         }
     }
 }

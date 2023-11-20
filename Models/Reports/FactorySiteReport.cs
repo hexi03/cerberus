@@ -28,19 +28,7 @@ namespace cerberus.Models.Reports
                 ).ToListAsync()).Select(r => (FactorySiteReport)r.from_generic()).Where(r => r.factorysite_id == factorysite_id).ToList();
         }
 
-        public string get_type_as_string()
-        {
-            switch ((Types)Enum.Parse(typeof(Types), report_type))
-            {
-                case Types.FSSupplyRequirement:
-                    return "Отчет о запросе снабжения";
-                case Types.FSWorkShift:
-                    return "Отчет о рабочей смене";
-
-                default:
-                    return "Неизветный отчет";
-            }
-        }
+        
 
         
     }

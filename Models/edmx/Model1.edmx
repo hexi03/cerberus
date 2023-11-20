@@ -65,10 +65,10 @@
 предупреждение 6002: В таблице или представлении "CerberusDB.public.ProductionRegistry" не определен первичный ключ. Ключ был выведен, а определение таблицы или представления было создано в режиме только для чтения.-->
         <EntityType Name="ProductionRegistry">
           <Key>
-            
-            
+            <PropertyRef Name="production_id" />
+            <PropertyRef Name="requirement_id" />
             <PropertyRef Name="id" />
-            
+            <PropertyRef Name="count" />
           </Key>
           <Property Name="production_id" Type="int4" Nullable="false" />
           <Property Name="requirement_id" Type="int4" Nullable="false" />
@@ -84,7 +84,7 @@
           <Property Name="creator_id" Type="text" Nullable="false" />
           <Property Name="serialized" Type="text" Nullable="false" />
           <Property Name="department_id" Type="int4" Nullable="false" />
-          <Property Name="timestamp" Type="timestamp" Nullable="false" />
+          <Property Name="timestamp" Type="date" Nullable="false" />
         </EntityType>
         <EntityType Name="WareHouses">
           <Key>
@@ -408,9 +408,9 @@
           <Property Name="id" Nullable="false" annotation:StoreGeneratedPattern="Identity" Type="Int32" />
           <Property Name="name" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" Type="String" />
           <Property Name="batch" MaxLength="Max" FixedLength="false" Unicode="true" Type="String" />
+          <Property Name="units" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
           <NavigationProperty Name="ProductionRegistries" Relationship="CerberusDBModel.ProductionRegistry_production_id_fkey" FromRole="ItemsRegistry" ToRole="ProductionRegistry" />
           <NavigationProperty Name="ProductionRegistries1" Relationship="CerberusDBModel.ProductionRegistry_requirement_id_fkey" FromRole="ItemsRegistry" ToRole="ProductionRegistry" />
-          <Property Name="units" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
           </EntityType>
         <EntityType Name="Report">
           <Key>
@@ -547,14 +547,17 @@
         </Association>
         <EntityType Name="ProductionRegistry">
           <Key>
+            <PropertyRef Name="production_id" />
+            <PropertyRef Name="requirement_id" />
             <PropertyRef Name="id" />
+            <PropertyRef Name="count" />
           </Key>
           <Property Name="production_id" Type="Int32" Nullable="false" />
           <Property Name="requirement_id" Type="Int32" Nullable="false" />
           <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="count" Type="Int32" Nullable="false" />
           <NavigationProperty Name="ItemsRegistry" Relationship="CerberusDBModel.ProductionRegistry_production_id_fkey" FromRole="ProductionRegistry" ToRole="ItemsRegistry" />
           <NavigationProperty Name="ItemsRegistry1" Relationship="CerberusDBModel.ProductionRegistry_requirement_id_fkey" FromRole="ProductionRegistry" ToRole="ItemsRegistry" />
-          <Property Name="count" Type="Int32" Nullable="false" />
         </EntityType>
         <Association Name="ProductionRegistry_production_id_fkey">
           <End Type="CerberusDBModel.ItemsRegistry" Role="ItemsRegistry" Multiplicity="1">
@@ -571,7 +574,9 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="ProductionRegistry_requirement_id_fkey">
-          <End Type="CerberusDBModel.ItemsRegistry" Role="ItemsRegistry" Multiplicity="1" />
+          <End Type="CerberusDBModel.ItemsRegistry" Role="ItemsRegistry" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
           <End Type="CerberusDBModel.ProductionRegistry" Role="ProductionRegistry" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="ItemsRegistry">

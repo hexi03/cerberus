@@ -40,16 +40,16 @@
 
     <h5>Произведенная продукция</h5>
 
-    <div class="keyValuePairs item-list-controlable-container" data-dname="produced">
+    <div class="keyValuePairs production-list-controlable-container" data-dname="produced">
 
-        <button type="button" class="addKeyValuePair">+</button>
+        <button type="button" class="addKeyValuePair" data-ltype="production">+</button>
         @if (Model != null)
         {
             foreach (var item in Model.produced)
             {
-                <div class="keyValuePairContainer item-list-controlable-section">
-                    <input type="text" placeholder="Наименование" class="item-list-target-content item-list-show showMenu" value="@ViewBag.Items[item.Key].name" readonly />
-                    <input type="hidden" class="key item-list-target-value" value="@ViewBag.Items[item.Key].id" />
+                <div class="keyValuePairContainer production-list-controlable-section">
+                    <input type="text" placeholder="Наименование" class="production-list-target-content production-list-show showMenu" value="@ViewBag.Items[item.Key].name" readonly />
+                    <input type="hidden" class="key production-list-target-value" value="@ViewBag.Items[item.Key].id" />
                     <input type="text" placeholder="Количество" class="value" value="@item.Value" />
                     <button class="removeKeyValuePair">Удалить</button>
                     <input type="hidden" class="hiddenKV" name="produced[@ViewBag.Items[item.Key].id]" value="@item.Value" />
@@ -65,7 +65,7 @@
     <h5>Потери</h5>
     <div class="keyValuePairs item-list-controlable-container" data-dname="losses">
 
-        <button type="button" class="addKeyValuePair">+</button>
+        <button type="button" class="addKeyValuePair" data-ltype="item">+</button>
         @if (Model != null)
         {
             foreach (var item in Model.losses)
@@ -85,7 +85,7 @@
     <h5>Остатки РМ</h5>
     <div class="keyValuePairs item-list-controlable-container" data-dname="remains">
 
-        <button type="button" class="addKeyValuePair">+</button>
+        <button type="button" class="addKeyValuePair"  data-ltype="item">+</button>
         @if (Model != null)
         {
             foreach (var item in Model.remains)

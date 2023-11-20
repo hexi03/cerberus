@@ -1,5 +1,6 @@
 ﻿using cerberus.Models.edmx;
 using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.AspNet.Identity.Owin;
 using System;
 using System.Collections.Generic;
@@ -27,11 +28,12 @@ namespace cerberus.Models
             {
                 var user_id = cont.User.Identity.GetUserId();
                 var userManager = cont.HttpContext.GetOwinContext().GetUserManager<ApplicationUserManager>();
-                var group_ids = userManager.GetRoles(user_id);
+                RoleManager<IdentityRole> roleManager = new RoleManager<IdentityRole>(new RoleStore<IdentityRole>(ApplicationDbContext.Create()));
+                var group_ids = (userManager.GetRoles(user_id)).Select(r => roleManager.FindByName(r)).ToList();
 
-                
 
-                var factorysite_list = GroupFactorySiteClaim.get_group_factorysites(context,group_ids);
+
+                var factorysite_list = GroupFactorySiteClaim.get_group_factorysites(context,userManager, user_id);
 
                 if (!factorysite_list.Any(e => e.id == factroysite_id))
                 {

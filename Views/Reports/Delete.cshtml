@@ -1,43 +1,47 @@
 ﻿@model cerberus.Models.edmx.Report
+@{
+    var users = ((Dictionary<string, cerberus.Models.ApplicationUser>)ViewBag.Users);
+}
 
- 
-    <h3>Are you sure you want to delete this?</h3>
-    <div>
-        <h4>Report</h4>
-        <hr />
-        <dl class="dl-horizontal">
-            <dt>
-                @Html.DisplayNameFor(model => model.report_type)
-            </dt>
-    
-            <dd>
-                @Html.DisplayFor(model => model.report_type)
-            </dd>
-    
-            <dt>
-                @Html.DisplayNameFor(model => model.creator_id)
-            </dt>
-    
-            <dd>
-                @Html.DisplayFor(model => model.creator_id)
-            </dd>
-    
-            <dt>
-                @Html.DisplayNameFor(model => model.serialized)
-            </dt>
-    
-            <dd>
-                @Html.DisplayFor(model => model.serialized)
-            </dd>
-    
-        </dl>
-    
-        @using (Html.BeginForm()) {
-            @Html.AntiForgeryToken()
-    
-            <div class="form-actions no-color">
-                <input type="submit" value="Delete" class="btn btn-default" /> |
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    <h4>Report</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            <p>Тип отчета</p>
+        </dt>
 
-            </div>
-        }
-    </div>
+        <dd>
+            <p>@Model.get_type_as_string()</p>
+        </dd>
+
+        <dt>
+            <p>Дата/Время</p>
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.timestamp)
+        </dd>
+
+        <dt>
+            <p>Создатель</p>
+        </dt>
+
+        <dd>
+            <p>@users[Model.creator_id].UserName</p>
+        </dd>
+
+
+    </dl>
+
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions no-color">
+            <input type="submit" value="Delete" class="btn btn-danger" />
+
+        </div>
+    }
+</div>

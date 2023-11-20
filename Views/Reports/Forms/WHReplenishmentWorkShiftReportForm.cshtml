@@ -45,15 +45,15 @@
         <!-- Content loaded dynamically with AJAX -->
     </div>
 
-    <div class="keyValuePairs item-list-controlable-container" data-dname="items">
-        <button type="button" class="btn btn-success addKeyValuePair">Добавить</button>
+    <div class="keyValuePairs production-list-controlable-container" data-dname="items">
+        <button type="button" class="btn btn-success addKeyValuePair"  data-ltype="production">+</button>
         @if (Model != null)
         {
             foreach (var item in Model.items)
             {
-                <div class="keyValuePairContainer item-list-controlable-section ">
-                    <input type="text" placeholder="Наименование" class="item-list-target-content item-list-show showMenu" value="@ViewBag.Items[item.Key].name" readonly />
-                    <input type="hidden" class="key item-list-target-value" value="@ViewBag.Items[item.Key].id" />
+                <div class="keyValuePairContainer production-list-controlable-section ">
+                    <input type="text" placeholder="Наименование" class="production-list-target-content production-list-show showMenu" value="@ViewBag.Items[item.Key].name" readonly />
+                    <input type="hidden" class="key production-list-target-value" value="@ViewBag.Items[item.Key].id" />
                     <input type="text" placeholder="Количество" class="value " value="@item.Value" />
                     <button class="btn btn-danger removeKeyValuePair">Удалить</button>
                     <input type="hidden" class="hiddenKV" name="items[@ViewBag.Items[item.Key].id]" value="@item.Value" />

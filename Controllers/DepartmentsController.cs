@@ -30,9 +30,9 @@ namespace cerberus.Controllers
         {
             var user_id = User.Identity.GetUserId();
             
-            var group_ids = userManager.GetRoles(user_id);
+            var group_ids = (userManager.GetRoles(user_id)).Select(r => roleManager.FindByName(r)).ToList();
 
-            return View(GroupDepartmentClaim.get_group_departments(db,group_ids, GroupDepartmentClaim.Levels.Full).ToList());
+            return View(GroupDepartmentClaim.get_group_departments(db,userManager, user_id, GroupDepartmentClaim.Levels.Full).ToList());
         }
 
         // GET: Departments/Details/5
@@ -41,9 +41,9 @@ namespace cerberus.Controllers
         {
             var user_id = User.Identity.GetUserId();
             
-            var group_ids = userManager.GetRoles(user_id);
+            var group_ids = (userManager.GetRoles(user_id)).Select(r => roleManager.FindByName(r)).ToList();
 
-            Department department = GroupDepartmentClaim.get_group_departments(db,group_ids, GroupDepartmentClaim.Levels.Full).Where(e => e.id == id).First();
+            Department department = GroupDepartmentClaim.get_group_departments(db,userManager, user_id, GroupDepartmentClaim.Levels.Full).Where(e => e.id == id).First();
 
             return View(department);
         }
@@ -133,9 +133,9 @@ namespace cerberus.Controllers
         public async Task<ActionResult> ManageAccess(int id)
         {
             var user_id = User.Identity.GetUserId();
-            var group_ids = await userManager.GetRolesAsync(user_id);
+            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
 
-            var department = GroupDepartmentClaim.get_group_departments(db, group_ids, GroupDepartmentClaim.Levels.Full).FirstOrDefault(p => p.id == id);
+            var department = GroupDepartmentClaim.get_group_departments(db, userManager, user_id, GroupDepartmentClaim.Levels.Full).FirstOrDefault(p => p.id == id);
 
 
             ViewBag.Roles = roleManager.Roles.ToList();
@@ -158,9 +158,9 @@ namespace cerberus.Controllers
         public async Task<ActionResult> ManageAccess(int id, Dictionary<string, string> Roles)
         {
             var user_id = User.Identity.GetUserId();
-            var group_ids = await userManager.GetRolesAsync(user_id);
+            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
 
-            var department = GroupDepartmentClaim.get_group_departments(db, group_ids, GroupDepartmentClaim.Levels.Full).FirstOrDefault(p => p.id == id);
+            var department = GroupDepartmentClaim.get_group_departments(db, userManager, user_id, GroupDepartmentClaim.Levels.Full).FirstOrDefault(p => p.id == id);
 
 
             db.GroupDepartmentClaims.RemoveRange(db.GroupDepartmentClaims.Where(p => p.department_id == id));

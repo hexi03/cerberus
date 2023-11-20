@@ -1,0 +1,26 @@
+﻿@model cerberus.Models.Reports.WHWorkShiftReplenishmentReport
+
+<div class="container">
+    <h2>Отчет о приемке ПП</h2>
+    <hr />
+
+    <p>Склад: @ViewBag.WareHouses[Model.warehouse_id].name</p>
+
+    <p>Смена: @ViewBag.Reports[Model.workshift_id].timestamp</p>
+
+    <h5>Принято:</h5>
+    <div>
+        @if (Model.items.Count() == 0)
+        {
+            <div>
+                <p>Ничего</p>
+            </div>
+        }
+        @foreach (var item in Model.items)
+        {
+            <div>
+                <p>@ViewBag.Items[item.Key].name : @item.Value</p>
+            </div>
+        }
+    </div>
+</div>

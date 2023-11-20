@@ -1,4 +1,5 @@
-﻿using cerberus.Models.edmx;
+﻿using cerberus.Models;
+using cerberus.Models.edmx;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,9 @@ namespace cerberus.DTO
     {
         public ItemsRegistry production_item { get; set; }
         public Dictionary<ItemsRegistry, int> requirement_items { get; set; }
+        
         public int production_id { get; set; }
+        [ItemList]
         public Dictionary<string, string> requirement_ids { get; set; }
     }
 }

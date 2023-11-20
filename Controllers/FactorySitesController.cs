@@ -31,10 +31,10 @@ namespace cerberus.Controllers
         {
             var user_id = User.Identity.GetUserId();
             
-            var group_ids = await userManager.GetRolesAsync(user_id);
+            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
 
             ViewBag.ReturnUrl = @Request.Url.PathAndQuery;
-            var factorySites = GroupFactorySiteClaim.get_group_factorysites(db,group_ids).Where(w => w.department_id == id).ToList();
+            var factorySites = GroupFactorySiteClaim.get_group_factorysites(db,userManager, user_id).Where(w => w.department_id == id).ToList();
             return View(factorySites);
         }
 
@@ -46,9 +46,9 @@ namespace cerberus.Controllers
 
             var user_id = User.Identity.GetUserId();
             
-            var group_ids = await userManager.GetRolesAsync(user_id);
+            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
 
-            FactorySite factorySite = GroupFactorySiteClaim.get_group_factorysites(db,group_ids).Where(fs => fs.id == id).First();
+            FactorySite factorySite = GroupFactorySiteClaim.get_group_factorysites(db,userManager, user_id).Where(fs => fs.id == id).First();
             ViewBag.ReportList = await FactorySiteReport.get_reports(db, factorySite.id);
             ViewBag.State = await FactorySite.get_state(db, id);
             ViewBag.Users = (await userManager.Users.ToListAsync()).ToDictionary(user => user.Id);
@@ -63,9 +63,9 @@ namespace cerberus.Controllers
         {
             var user_id = User.Identity.GetUserId();
             
-            var group_ids = await userManager.GetRolesAsync(user_id);
+            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
 
-            var departments_list = GroupDepartmentClaim.get_group_departments(db, group_ids, GroupDepartmentClaim.Levels.Full);
+            var departments_list = GroupDepartmentClaim.get_group_departments(db, userManager, user_id, GroupDepartmentClaim.Levels.Full);
 
             ViewBag.ReturnUrl = HttpContext.Request.QueryString["returnUrl"];
             ViewBag.department_id = new SelectList(departments_list, "id", "name");
@@ -111,12 +111,12 @@ namespace cerberus.Controllers
         {
             var user_id = User.Identity.GetUserId();
             
-            var group_ids = await userManager.GetRolesAsync(user_id);
+            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
 
-            FactorySite factorySite = GroupFactorySiteClaim.get_group_factorysites(db, group_ids).Where(fs => fs.id == id).First();
+            FactorySite factorySite = GroupFactorySiteClaim.get_group_factorysites(db, userManager, user_id).Where(fs => fs.id == id).First();
 
             ViewBag.ReturnUrl = HttpContext.Request.QueryString["returnUrl"];
-            ViewBag.department_id = new SelectList(GroupDepartmentClaim.get_group_departments(db, group_ids, GroupDepartmentClaim.Levels.Full), "id", "name", factorySite.department_id);
+            ViewBag.department_id = new SelectList(GroupDepartmentClaim.get_group_departments(db, userManager, user_id, GroupDepartmentClaim.Levels.Full), "id", "name", factorySite.department_id);
             return View(factorySite);
         }
 
@@ -129,7 +129,7 @@ namespace cerberus.Controllers
         {
             var user_id = User.Identity.GetUserId();
             
-            var group_ids = await userManager.GetRolesAsync(user_id);
+            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
 
             if (ModelState.IsValid)
             {
@@ -140,7 +140,7 @@ namespace cerberus.Controllers
                 else
                     return RedirectToAction("Index", "Home");
             }
-            ViewBag.department_id = new SelectList(GroupDepartmentClaim.get_group_departments(db, group_ids, GroupDepartmentClaim.Levels.Full), "id", "name", factorySite.department_id);
+            ViewBag.department_id = new SelectList(GroupDepartmentClaim.get_group_departments(db, userManager, user_id, GroupDepartmentClaim.Levels.Full), "id", "name", factorySite.department_id);
             return View(factorySite);
         }
 
@@ -150,11 +150,11 @@ namespace cerberus.Controllers
         {
             var user_id = User.Identity.GetUserId();
             
-            var group_ids = await userManager.GetRolesAsync(user_id);
+            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
 
             ViewBag.ReturnUrl = HttpContext.Request.QueryString["returnUrl"];
 
-            FactorySite factorySite = GroupFactorySiteClaim.get_group_factorysites(db, group_ids).Where(fs => fs.id == id).First();
+            FactorySite factorySite = GroupFactorySiteClaim.get_group_factorysites(db, userManager, user_id).Where(fs => fs.id == id).First();
 
             return View(factorySite);
         }
@@ -168,9 +168,9 @@ namespace cerberus.Controllers
             ViewBag.ReturnUrl = HttpContext.Request.QueryString["returnUrl"];
             var user_id = User.Identity.GetUserId();
             
-            var group_ids = await userManager.GetRolesAsync(user_id);
+            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
 
-            FactorySite factorySite = GroupFactorySiteClaim.get_group_factorysites(db, group_ids).Where(fs => fs.id == id).First();
+            FactorySite factorySite = GroupFactorySiteClaim.get_group_factorysites(db, userManager, user_id).Where(fs => fs.id == id).First();
             db.FactorySites.Remove(factorySite);
             await db.SaveChangesAsync();
             if (!String.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
@@ -185,9 +185,9 @@ namespace cerberus.Controllers
         public async Task<ActionResult> ManageAccess(int id)
         {
             var user_id = User.Identity.GetUserId();
-            var group_ids = await userManager.GetRolesAsync(user_id);
+            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
 
-            var factorySite = GroupFactorySiteClaim.get_group_factorysites(db, group_ids).FirstOrDefault(p => p.id == id);
+            var factorySite = GroupFactorySiteClaim.get_group_factorysites(db, userManager, user_id).FirstOrDefault(p => p.id == id);
 
             ViewBag.Roles = roleManager.Roles.ToList();
 
@@ -210,9 +210,9 @@ namespace cerberus.Controllers
         public async Task<ActionResult> ManageAccess(int id, Dictionary<string, string> Roles)
         {
             var user_id = User.Identity.GetUserId();
-            var group_ids = await userManager.GetRolesAsync(user_id);
+            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
 
-            var factorySite = GroupFactorySiteClaim.get_group_factorysites(db, group_ids).FirstOrDefault(p => p.id == id);
+            var factorySite = GroupFactorySiteClaim.get_group_factorysites(db, userManager, user_id).FirstOrDefault(p => p.id == id);
 
             db.GroupFactorySiteClaims.RemoveRange(db.GroupFactorySiteClaims.Where(p => p.factorysite_id == id));
 
@@ -236,11 +236,11 @@ namespace cerberus.Controllers
         public async Task<ActionResult> ManageSupply(int id)
         {
             var user_id = User.Identity.GetUserId();
-            var group_ids = await userManager.GetRolesAsync(user_id);
+            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
 
-            var factorySite = GroupFactorySiteClaim.get_group_factorysites(db, group_ids).FirstOrDefault(p => p.id == id);
+            var factorySite = GroupFactorySiteClaim.get_group_factorysites(db, userManager, user_id).FirstOrDefault(p => p.id == id);
 
-            var department = await GroupDepartmentClaim.get_group_departments(db, group_ids, GroupDepartmentClaim.Levels.Full).Where(e => e.id == factorySite.department_id).FirstOrDefaultAsync();
+            var department = await GroupDepartmentClaim.get_group_departments(db, userManager, user_id, GroupDepartmentClaim.Levels.Full).Where(e => e.id == factorySite.department_id).FirstOrDefaultAsync();
 
             ViewBag.WareHouses = db.WareHouses.Where(e => e.department_id == department.id).ToList();
 
@@ -259,11 +259,11 @@ namespace cerberus.Controllers
         public async Task<ActionResult> ManageSupply(int id, Dictionary<string, string> warehouse_ids)
         {
             var user_id = User.Identity.GetUserId();
-            var group_ids = await userManager.GetRolesAsync(user_id);
+            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
 
-            var factorySite = GroupFactorySiteClaim.get_group_factorysites(db, group_ids).FirstOrDefault(p => p.id == id);
+            var factorySite = GroupFactorySiteClaim.get_group_factorysites(db, userManager, user_id).FirstOrDefault(p => p.id == id);
 
-            var department = await GroupDepartmentClaim.get_group_departments(db, group_ids, GroupDepartmentClaim.Levels.Full).Where(e => e.id == factorySite.department_id).FirstOrDefaultAsync();
+            var department = await GroupDepartmentClaim.get_group_departments(db, userManager, user_id, GroupDepartmentClaim.Levels.Full).Where(e => e.id == factorySite.department_id).FirstOrDefaultAsync();
 
 
             db.FactorySiteWareHouseClaims.RemoveRange(db.FactorySiteWareHouseClaims.Where(e => e.factorysite_id == id));

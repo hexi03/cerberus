@@ -120,15 +120,40 @@ namespace cerberus.Models.edmx
 
         public static IQueryable<Report> time_filter_last_day(IQueryable<Report> q)
         {
-            //var ts = DateTime.Today.AddDays(0);
-            return q;//q.Where(e => e.timestamp <= ts);
+            var ts = DateTime.Today.AddDays(0);
+            return q.Where(e => e.timestamp <= ts);
         }
 
         public static IList<Report> time_filter_last_day(IList<Report> q)
         {
-            //var ts = DateTime.Today.AddDays(0);
-            return q;//q.Where(e => e.timestamp <= ts).ToList();
+            var ts = DateTime.Today.AddDays(0);
+            return q.Where(e => e.timestamp <= ts).ToList();
         }
+
+
+        public string get_type_as_string()
+        {
+            switch ((Types)Enum.Parse(typeof(Types), report_type))
+            {
+                case Types.FSSupplyRequirement:
+                    return "Отчет о запросе снабжения";
+                case Types.FSWorkShift:
+                    return "Отчет о рабочей смене";
+                case Types.WHWorkShiftReplenishment:
+                    return "Отчет о приемке ПП смены";
+                case Types.WHReplenishment:
+                    return "Отчет о приемке";
+                case Types.WHShipment:
+                    return "Отчет об отгрузках";
+                case Types.WHRelease:
+                    return "Отчет о предоставлении РМ";
+                case Types.WHInventarisation:
+                    return "Отчет об инвентаризации";
+                default:
+                    return "Неизветный отчет";
+            }
+        }
+
 
 
     }

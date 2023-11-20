@@ -3,12 +3,12 @@
 
 
     <p>
-        @Html.ActionLink("Create New", "Create")
+        @Html.ActionLink("Добавить", "Create")
     </p>
     <table class="table">
         <tr>
             <th>
-                Name
+                <p>Наименование</p>
             </th>
 
             <th></th>
@@ -20,9 +20,9 @@
                 @Html.DisplayFor(modelItem => item.production_item.name)
             </td>
             <td>
-                @Html.ActionLink("Edit", "Edit", new { id=item.production_item.id }) |
-                @Html.ActionLink("Details", "Details", new { id=item.production_item.id }) |
-                @Html.ActionLink("Delete", "Delete", new { id=item.production_item.id })
+                @Html.ActionLink("Редактировать", "Edit", new { id = item.production_item.id }, new { @class = "btn btn-warning" }) |
+                @Html.ActionLink("Детали", "Details", new { id = item.production_item.id }, new { @class = "btn btn-info" }) |
+                @Html.ActionLink("Удалить", "Delete", new { id = item.production_item.id }, new { @class = "btn btn-danger" })
             </td>
         </tr>
     }

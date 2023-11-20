@@ -109,6 +109,12 @@ namespace cerberus.Models.Reports
                 .Find(report_id);
             var r = (FSWorkShiftReport)(r_raw.from_generic());
 
+            var aaa0 = db.Reports
+                    .Where(p => p.report_type == Report.Types.WHWorkShiftReplenishment.ToString() && p.department_id == r.department_id).ToList();
+
+            var aaa = db.Reports
+                    .Where(p => p.report_type == Report.Types.WHWorkShiftReplenishment.ToString() && p.timestamp > r.timestamp && p.department_id == r.department_id).ToList()
+                    .Select(p => (WHWorkShiftReplenishmentReport)p.from_generic()).Where(p => (p.workshift_id == r.id) && (p.warehouse_id == r.target_warehouse_id)).ToList();
             return misc.MergeDictionariesWithSum(
                 db.Reports
                     .Where(p => p.report_type == Report.Types.WHWorkShiftReplenishment.ToString() && p.timestamp > r.timestamp && p.department_id == r.department_id).ToList()

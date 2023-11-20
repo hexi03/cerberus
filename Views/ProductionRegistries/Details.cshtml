@@ -6,34 +6,36 @@
         <hr />
         <dl class="dl-horizontal">
             <dt>
-                @Html.DisplayNameFor(model => model.production_item.name)
+
+                <p>Продукция</p>
             </dt>
 
             <dd>
                 @Html.DisplayFor(model => model.production_item.name)
             </dd>
-            @foreach (var req in Model.requirement_items)
-            {
-                <dt>
-                    @Html.DisplayNameFor(model => req.Key.name)
-                </dt>
-
-                <dd>
-                    @Html.DisplayFor(model => req.Key.name)
-                </dd>
-
-                <dt>
-                    Количество
-                </dt>
-
-                <dd>
-                    @Html.DisplayFor(model => req.Value)
-                </dd>
-            }
         </dl>
+
+        <table>
+
+                <tr>
+                    <th colspan="2">Затраты</th>
+                    <th colspan="2">Количество</th>
+                </tr>
+
+
+                @foreach (var req in Model.requirement_items)
+                {
+
+                    <tr>
+                        <td>@Html.DisplayFor(model => req.Key.name)</td>
+                        <td>@Html.DisplayFor(model => req.Value)</td>
+                    </tr>
+
+                }
+        </table>
     </div>
     <p>
-        @Html.ActionLink("Edit", "Edit", new { id = Model.production_item.id }) |
-        @Html.ActionLink("Back to List", "Index")
+        @Html.ActionLink("Изменить", "Edit", new { id = Model.production_item.id }) |
+        @Html.ActionLink("Обратно", "Index")
     </p>
 

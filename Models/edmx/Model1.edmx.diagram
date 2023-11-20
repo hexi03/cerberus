@@ -22,7 +22,7 @@
         <AssociationConnector Association="CerberusDBModel.group_factorysite_factorysite_id_fkey" />
         <AssociationConnector Association="CerberusDBModel.factorysite_warehouse_warehouse_id_fkey" />
         <AssociationConnector Association="CerberusDBModel.group_warehouse_warehouse_id_fkey" />
-        <EntityTypeShape EntityType="CerberusDBModel.ProductionRegistry" Width="1.5" PointX="9.625" PointY="1" />
+        <EntityTypeShape EntityType="CerberusDBModel.ProductionRegistry" Width="1.5" PointX="9.625" PointY="0.875" />
         <AssociationConnector Association="CerberusDBModel.ProductionRegistry_production_id_fkey" />
         <AssociationConnector Association="CerberusDBModel.ProductionRegistry_requirement_id_fkey" />
         </Diagram>

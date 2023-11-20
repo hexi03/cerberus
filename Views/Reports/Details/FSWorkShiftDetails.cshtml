@@ -1,0 +1,67 @@
+﻿@model cerberus.Models.Reports.FSWorkShiftReport
+
+
+
+<div class="container">
+    <h2>Отчет о рабочей смене</h2>
+    <hr />
+
+
+    <p>Участок: @ViewBag.FactorySites[Model.factorysite_id].name</p>
+    <p>Целевой склад: @ViewBag.WareHouses[Model.target_warehouse_id].name</p>
+
+    <h5>Произведенная продукция:</h5>
+    @if (Model.produced.Count() == 0)
+    {
+        <div>
+            <p>Ничего</p>
+        </div>
+    }
+
+    @foreach (var item in Model.produced)
+    {
+        <div>
+            <p>@ViewBag.Items[item.Key].name : @item.Value</p>
+        </div>
+    }
+
+
+
+    <h5>Потери:</h5>
+    @if (Model.losses.Count() == 0)
+    {
+        <div>
+            <p>Ничего</p>
+        </div>
+    }
+
+    @foreach (var item in Model.losses)
+    {
+        <div>
+            <p>@ViewBag.Items[item.Key].name : @item.Value</p>
+        </div>
+
+    }
+
+
+
+    <h5>Остатки РМ:</h5>
+    @if (Model.remains.Count() == 0)
+    {
+        <div>
+            <p>Ничего</p>
+        </div>
+    }
+
+    @foreach (var item in Model.remains)
+    {
+        <div>
+            <p>@ViewBag.Items[item.Key].name : @item.Value</p>
+        </div>
+    }
+
+</div>
+
+
+
+

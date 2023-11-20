@@ -24,3 +24,33 @@
     </div>
     <button class="item-list-hide-btn">Скрыть</button>
 </div>
+
+
+<div class="grid-container production-list-container overlayMenu modal">
+    @{
+        var db = (new cerberus.Models.edmx.CerberusDBEntities());
+        var grid2 = new WebGrid(source: db.ItemsRegistries.Where(it => db.ProductionRegistries.Select(e => e.production_id).Contains(it.id)), canPage: true, rowsPerPage: 30, ajaxUpdateContainerId: "grid");
+    }
+    @grid2.GetHtml(tableStyle: "table table-bordered",
+                  headerStyle: "grid-header",
+                  alternatingRowStyle: "grid-alternating-row production-button-row",
+                  selectedRowStyle: "grid-selected-row",
+                  rowStyle: "grid-row production-button-row",
+                  mode: WebGridPagerModes.All,
+                  firstText: "<<",
+                  previousText: "<",
+                  nextText: ">",
+                  lastText: ">>",
+                  columns: grid2.Columns(
+                    grid2.Column(columnName: "Id", header: "ID", style: "production-list-id"),
+                    grid2.Column(columnName: "Name", header: "Наименование", style: "production-list-name"),
+                    grid2.Column(columnName: "Units", header: "Единицы"),
+                    grid2.Column(columnName: "Batch", header: "Партия")
+                  )
+                  )
+    <div id="gridPager" class="pager">
+        @grid2.Pager()
+    </div>
+    <button class="production-list-hide-btn">Скрыть</button>
+</div>
+

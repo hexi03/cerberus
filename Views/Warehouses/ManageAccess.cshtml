@@ -12,8 +12,9 @@
     <input type="hidden" name="id" value="@Model.warehouse.id" hidden>
 
     <div class="form-group">
-        <label class="control-label col-md-2" for="Roles">Роли пользователей:</label>
+        <label class="control-label col-md-2" for="Roles">Роли:</label>
         <div class="col-md-10" id="roleContainer">
+            <button type="button" id="addRoleButton" class="btn btn-primary">Добавить</button>
             @foreach (var selectedRole in Model.Roles)
             {
                 <div class="roleRow">
