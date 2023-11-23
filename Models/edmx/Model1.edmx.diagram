@@ -7,12 +7,12 @@
       <Diagram DiagramId="79b625d96438465f9b62c3e0b284c7ae" Name="Diagram1" ZoomLevel="83">
         <EntityTypeShape EntityType="CerberusDBModel.Department" Width="1.5" PointX="0.75" PointY="7" />
         <EntityTypeShape EntityType="CerberusDBModel.FactorySite" Width="1.5" PointX="3" PointY="5.625" />
-        <EntityTypeShape EntityType="CerberusDBModel.FactorySiteWareHouseClaim" Width="1.5" PointX="8.125" PointY="4.25" />
+        <EntityTypeShape EntityType="CerberusDBModel.FactorySiteWareHouseClaim" Width="1.5" PointX="8.25" PointY="3.25" />
         <EntityTypeShape EntityType="CerberusDBModel.GroupDepartmentClaim" Width="1.5" PointX="3" PointY="8.5" />
-        <EntityTypeShape EntityType="CerberusDBModel.GroupFactorySiteClaim" Width="1.5" PointX="5.25" PointY="8.5" />
+        <EntityTypeShape EntityType="CerberusDBModel.GroupFactorySiteClaim" Width="1.5" PointX="6.75" PointY="6.5" />
         <EntityTypeShape EntityType="CerberusDBModel.GroupWareHouseClaim" Width="1.5" PointX="5.25" PointY="2.875" />
-        <EntityTypeShape EntityType="CerberusDBModel.ItemsRegistry" PointX="7.375" PointY="0.875" Width="1.5" />
-        <EntityTypeShape EntityType="CerberusDBModel.Report" Width="1.5" PointX="3" PointY="11" />
+        <EntityTypeShape EntityType="CerberusDBModel.ItemsRegistry" PointX="10.125" PointY="6.375" Width="1.5" />
+        <EntityTypeShape EntityType="CerberusDBModel.Report" Width="1.5" PointX="6.125" PointY="8.5" />
         <EntityTypeShape EntityType="CerberusDBModel.Warehouse" Width="1.5" PointX="3" PointY="2.625" />
         <AssociationConnector Association="CerberusDBModel.department_id_fkey" />
         <AssociationConnector Association="CerberusDBModel.factorysites_department_id_fkey" />
@@ -22,7 +22,7 @@
         <AssociationConnector Association="CerberusDBModel.group_factorysite_factorysite_id_fkey" />
         <AssociationConnector Association="CerberusDBModel.factorysite_warehouse_warehouse_id_fkey" />
         <AssociationConnector Association="CerberusDBModel.group_warehouse_warehouse_id_fkey" />
-        <EntityTypeShape EntityType="CerberusDBModel.ProductionRegistry" Width="1.5" PointX="9.625" PointY="0.875" />
+        <EntityTypeShape EntityType="CerberusDBModel.ProductionRegistry" Width="1.5" PointX="12.375" PointY="6.5" />
         <AssociationConnector Association="CerberusDBModel.ProductionRegistry_production_id_fkey" />
         <AssociationConnector Association="CerberusDBModel.ProductionRegistry_requirement_id_fkey" />
         </Diagram>

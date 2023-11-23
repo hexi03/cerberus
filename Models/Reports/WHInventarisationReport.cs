@@ -114,14 +114,15 @@ namespace cerberus.Models.Reports
                     .Aggregate(new Dictionary<int, int>(), (acc, p) =>
                         misc.MergeDictionariesWithSum(acc, p.items)
                     );
+            var state = misc.MergeDictionariesWithSum(
+                    misc.MergeDictionariesWithSum(shipments, release).ToDictionary(kv => kv.Key, kv => -kv.Value),
+                    misc.MergeDictionariesWithSum(wh_replenishments, replenishments)
+                    ).ToDictionary(kv => kv.Key, kv => -kv.Value);
 
             return misc.MergeDictionariesWithSum(
-                misc.MergeDictionariesWithSum(
-                    misc.MergeDictionariesWithSum(shipments,release),
-                    misc.MergeDictionariesWithSum(wh_replenishments, replenishments).ToDictionary(kv => kv.Key, kv => -kv.Value)
-                    ),
+                state,
                 r.items
-            );
+            ).Where(e => e.Value != 0).ToDictionary(kv => kv.Key, kv => kv.Value);
 
         }
 
