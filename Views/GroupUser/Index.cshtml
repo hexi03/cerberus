@@ -13,7 +13,7 @@
                     <th>Наименование</th>
                     <th>Действия</th>
                 </tr>
-                @foreach (var role in ViewBag.Roles)
+                @foreach (var role in ViewBag.Groups)
                 {
                     <tr>
                         <td>@role.Name</td>
@@ -38,9 +38,9 @@
                     <tr>
                         <td>@user.UserName</td>
                         <td>
-                            @Html.ActionLink("Подробно", "UserDetails", new { id = user.UserName }) |
-                            @Html.ActionLink("Изменить", "UserEdit", new { id = user.UserName }) |
-                            @Html.ActionLink("Удалить", "UserDelete", new { id = user.UserName })
+                            @Html.ActionLink("Подробно", "UserDetails", new { id = user.Id }) |
+                            @Html.ActionLink("Изменить", "UserEdit", new { id = user.Id }) |
+                            @Html.ActionLink("Удалить", "UserDelete", new { id = user.Id })
                         </td>
                     </tr>
                 }

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using System.Collections.Generic;
 
 namespace cerberus
 {
@@ -33,12 +30,13 @@ namespace cerberus
     }
 
 
-    public interface IError{
+    public interface IError
+    {
 
         string get_message();
         string get_html();
 
-        
+
     }
 
     public interface IWarning

@@ -1,12 +1,10 @@
-﻿using cerberus.DTO.Reports;
-using cerberus.Models.edmx;
-using Microsoft.Owin.Security.Twitter.Messages;
+﻿using cerberus.Models.edmx;
+using cerberus.Models.ViewModels.Reports;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
-using System.Web;
 
 namespace cerberus.Models.Reports
 {
@@ -17,15 +15,14 @@ namespace cerberus.Models.Reports
         public Dictionary<int, int> items { get; set; }
 
 
-        public FSSupplyRequirementReport() : base(Types.FSSupplyRequirement) {
+        public FSSupplyRequirementReport() : base(Types.FSSupplyRequirement)
+        {
             items = new Dictionary<int, int>();
         }
 
-        public static FSSupplyRequirementReport from(FSSupplyRequirementReportFormDTO dto) {
+        public static FSSupplyRequirementReport from(FSSupplyRequirementReportFormViewModel dto)
+        {
             var res = new FSSupplyRequirementReport();
-            res.creator_id = dto.creator_id ;
-            res.department_id = dto.department_id;
-            res.timestamp = dto.timestamp;
 
             res.factorysite_id = dto.factorysite_id;
             res.target_warehouse_id = dto.target_warehouse_id;
@@ -37,10 +34,10 @@ namespace cerberus.Models.Reports
             {
                 res.items = new Dictionary<int, int>();
             }
-            
+
             return res;
 
-        } 
+        }
 
         public Report to_generic()
         {
@@ -185,7 +182,7 @@ namespace cerberus.Models.Reports
                 Report.time_filter(db.Reports
                     .Where(p => p.report_type == Report.Types.WHRelease.ToString() && p.timestamp >= r.timestamp && p.department_id == r.department_id)).ToList();
 
-            var aaa = 
+            var aaa =
                 Report.time_filter(db.Reports
                     .Where(p => p.report_type == Report.Types.WHRelease.ToString() && p.timestamp >= r.timestamp && p.department_id == r.department_id)).ToList()
                     .Select(p => (WHReleaseReport)p.from_generic()).Where(p => (p.supply_requirement_id == r.id) && (p.warehouse_id == r.target_warehouse_id)).ToList();
@@ -233,5 +230,5 @@ namespace cerberus.Models.Reports
 
 
     }
-    
+
 }

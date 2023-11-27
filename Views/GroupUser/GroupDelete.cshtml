@@ -1,5 +1,5 @@
 ﻿
-@model Microsoft.AspNet.Identity.EntityFramework.IdentityRole
+@model cerberus.Models.ViewModels.GroupViewModel
 
 @{
     ViewBag.Title = "Удалить группу";
@@ -16,7 +16,7 @@
 
 @using (Html.BeginForm("GroupDeleteConfirmed", "GroupUser", new { id = Model.Name }, FormMethod.Post))
 {
-    <input type="submit" value="Удалить" class="btn btn-danger"/>
+    <input type="submit" value="Удалить" class="btn btn-danger" />
 }
 
 @Html.ActionLink("Отмена", "Index")

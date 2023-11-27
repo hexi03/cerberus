@@ -1,11 +1,10 @@
-﻿using cerberus.DTO.Reports;
-using cerberus.Models.edmx;
+﻿using cerberus.Models.edmx;
+using cerberus.Models.ViewModels.Reports;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
-using System.Web;
 
 namespace cerberus.Models.Reports
 {
@@ -22,12 +21,9 @@ namespace cerberus.Models.Reports
             return new Report(this);
         }
 
-        public static WHInventarisationReport from(WHInventarisationReportFormDTO dto)
+        public static WHInventarisationReport from(WHInventarisationReportFormViewModel dto)
         {
             var res = new WHInventarisationReport();
-            res.creator_id = dto.creator_id;
-            res.department_id = dto.department_id;
-            res.timestamp = dto.timestamp;
 
             res.warehouse_id = dto.warehouse_id;
             if (dto.items != null)
@@ -129,7 +125,7 @@ namespace cerberus.Models.Reports
 
         public static IList<IError> get_errors(CerberusDBEntities db, int warehouse_id)
         {
-            return (IList<IError>)get_unsatisfied_wh(db,warehouse_id).Select(r => (IError)new UnsatisfiedError(r)).ToList();
+            return (IList<IError>)get_unsatisfied_wh(db, warehouse_id).Select(r => (IError)new UnsatisfiedError(r)).ToList();
 
         }
 
@@ -140,11 +136,12 @@ namespace cerberus.Models.Reports
         {
             string text_message;
             string html_message;
-            public UnsatisfiedError(WHInventarisationReport rep) {
+            public UnsatisfiedError(WHInventarisationReport rep)
+            {
                 text_message = "Состояние склада не соответствует отчету об инвентаризации " + rep.id.ToString();
                 html_message =
                     "<p>Состояние склада не соответствует <a href='/Reports/Details/" + rep.id + "'>отчету об инвентаризации</a> </p>";
-                    
+
             }
             public string get_html()
             {

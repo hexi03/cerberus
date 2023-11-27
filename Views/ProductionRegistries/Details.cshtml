@@ -1,41 +1,41 @@
-﻿@model cerberus.DTO.ProductionRegistryItem
+﻿@model cerberus.Models.ViewModels.ProductionItemViewModel
 
 
-    <div>
-        <h4>ProductionRegistry</h4>
-        <hr />
-        <dl class="dl-horizontal">
-            <dt>
+<div>
+    <h4>ProductionRegistry</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
 
-                <p>Продукция</p>
-            </dt>
+            <p>Продукция</p>
+        </dt>
 
-            <dd>
-                @Html.DisplayFor(model => model.production_item.name)
-            </dd>
-        </dl>
+        <dd>
+            @Html.DisplayFor(model => model.production_item.name)
+        </dd>
+    </dl>
 
-        <table>
+    <table>
 
-                <tr>
-                    <th colspan="2">Затраты</th>
-                    <th colspan="2">Количество</th>
-                </tr>
+        <tr>
+            <th colspan="2">Затраты</th>
+            <th colspan="2">Количество</th>
+        </tr>
 
 
-                @foreach (var req in Model.requirement_items)
-                {
+        @foreach (var req in Model.requirement_items)
+        {
 
-                    <tr>
-                        <td>@Html.DisplayFor(model => req.Key.name)</td>
-                        <td>@Html.DisplayFor(model => req.Value)</td>
-                    </tr>
+            <tr>
+                <td>@Html.DisplayFor(model => req.Key.name)</td>
+                <td>@Html.DisplayFor(model => req.Value)</td>
+            </tr>
 
-                }
-        </table>
-    </div>
-    <p>
-        @Html.ActionLink("Изменить", "Edit", new { id = Model.production_item.id }) |
-        @Html.ActionLink("Обратно", "Index")
-    </p>
+        }
+    </table>
+</div>
+<p>
+    @Html.ActionLink("Изменить", "Edit", new { id = Model.production_item.id }) |
+    @Html.ActionLink("Обратно", "Index")
+</p>
 

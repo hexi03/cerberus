@@ -1,11 +1,7 @@
 ﻿using cerberus.Models;
-using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.EntityFramework;
 using Owin;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 
 namespace cerberus.App_Start
 {
@@ -22,7 +18,7 @@ namespace cerberus.App_Start
                 adminUser = new ApplicationUser
                 {
                     UserName = "admin",
-                    
+
                 };
 
                 var result = userManager.Create(adminUser, "password");

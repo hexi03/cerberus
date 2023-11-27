@@ -1,51 +1,66 @@
-﻿using System;
+﻿using AutoMapper;
+using cerberus.Models;
+using cerberus.Models.edmx;
+using cerberus.Models.ViewModels;
+using cerberus.Services;
+using Microsoft.AspNet.Identity;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Net;
-using System.Web;
 using System.Web.Mvc;
-using cerberus.Models;
-using cerberus.Models.edmx;
-using System.Drawing;
-using Microsoft.AspNet.Identity;
-using Microsoft.AspNet.Identity.Owin;
-using Microsoft.AspNet.Identity.EntityFramework;
-using cerberus.DTO;
 
 namespace cerberus.Controllers
 {
     [ProvideMenu]
-    [Authorize403Attribute]
+    [Authorize403]
     public class DepartmentsController : Controller
     {
-        private CerberusDBEntities db = new CerberusDBEntities();
-        private ApplicationUserManager userManager = new ApplicationUserManager(new UserStore<ApplicationUser>(new ApplicationDbContext()));
-        private RoleManager<IdentityRole> roleManager = new RoleManager<IdentityRole>(new RoleStore<IdentityRole>(ApplicationDbContext.Create()));
-        // GET: Departments
+        private CerberusDBEntities _db;
+        private IUserService _userManager;
+        private IGroupService _roleManager;
+        private IMapper _mapper;
+        private IDepartmentAccessService _departmentAccessService;
+
+        public DepartmentsController(
+            CerberusDBEntities db,
+            IUserService userManager,
+            IGroupService roleManager,
+            IMapper mapper,
+            IDepartmentAccessService departmentAccessService
+            )
+        {
+            _mapper = mapper;
+            _db = db;
+            _userManager = userManager;
+            _roleManager = roleManager;
+            _departmentAccessService = departmentAccessService;
+        }
 
         public async Task<ActionResult> Index()
         {
             var user_id = User.Identity.GetUserId();
-            
-            var group_ids = (userManager.GetRoles(user_id)).Select(r => roleManager.FindByName(r)).ToList();
 
-            return View(GroupDepartmentClaim.get_group_departments(db,userManager, user_id, GroupDepartmentClaim.Levels.Full).ToList());
+            var group_ids = _userManager.GetUserGroupsByIdAsync(user_id);
+            List<DepartmentViewModel> model =
+                (await (await _departmentAccessService.get_user_departments_async(user_id, DepartmentAccessLevels.Full)).ToListAsync())
+                .Select(d => _mapper.Map<DepartmentViewModel>(d))
+                .ToList();
+            return View(model);
         }
 
         // GET: Departments/Details/5
-        [DepartmentAuthorize(level = GroupDepartmentClaim.Levels.Full)]
-        public async Task<ActionResult> Details(int? id)
+        [DepartmentAuthorize(level = DepartmentAccessLevels.Full)]
+        public async Task<ActionResult> Details(int id)
         {
             var user_id = User.Identity.GetUserId();
-            
-            var group_ids = (userManager.GetRoles(user_id)).Select(r => roleManager.FindByName(r)).ToList();
 
-            Department department = GroupDepartmentClaim.get_group_departments(db,userManager, user_id, GroupDepartmentClaim.Levels.Full).Where(e => e.id == id).First();
+            var group_ids = (await _userManager.GetUserGroupsByIdAsync(user_id)).Select(r => r.Id).ToList();
 
-            return View(department);
+            DepartmentViewModel model = _mapper.Map<DepartmentViewModel>(await _db.Departments.FindAsync(id));
+
+            return View(model);
         }
 
         // GET: Departments/Create
@@ -64,27 +79,27 @@ namespace cerberus.Controllers
         [ValidateAntiForgeryToken]
         [Authorize403(Roles = "Admin")]
 
-        public async Task<ActionResult> Create(Department department)
+        public async Task<ActionResult> Create(DepartmentCreateModel model)
         {
             if (ModelState.IsValid)
             {
-                db.Departments.Add(department);
+                _db.Departments.Add(_mapper.Map<Department>(model));
 
-                await db.SaveChangesAsync();
+                await _db.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
 
-            return View(department);
+            return View(model);
         }
 
         // GET: Departments/Edit/5
-        [DepartmentAuthorize(level = GroupDepartmentClaim.Levels.Full)]
+        [DepartmentAuthorize(level = DepartmentAccessLevels.Full)]
         public async Task<ActionResult> Edit(int? id)
         {
 
-            Department department = await db.Departments.FindAsync(id);
+            DepartmentEditModel model = _mapper.Map<DepartmentEditModel>(await _db.Departments.FindAsync(id));
 
-            return View(department);
+            return View(model);
         }
 
         // POST: Departments/Edit/5
@@ -92,102 +107,73 @@ namespace cerberus.Controllers
         // сведения см. в разделе https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [DepartmentAuthorize(level = GroupDepartmentClaim.Levels.Full)]
-        public async Task<ActionResult> Edit(Department department)
+        [DepartmentAuthorize(level = DepartmentAccessLevels.Full)]
+        public async Task<ActionResult> Edit(DepartmentEditModel model)
         {
             if (ModelState.IsValid)
             {
-                db.Entry(department).State = EntityState.Modified;
-                await db.SaveChangesAsync();
+                _db.Entry(_mapper.Map<Department>(model)).State = EntityState.Modified;
+                await _db.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
-            return View(department);
+            return View(model);
         }
 
         // GET: Departments/Delete/5
         [Authorize403(Roles = "Admin")]
-        [DepartmentAuthorize(level = GroupDepartmentClaim.Levels.Full)]
+        [DepartmentAuthorize(level = DepartmentAccessLevels.Full)]
         public async Task<ActionResult> Delete(int? id)
         {
 
-            Department department = await db.Departments.FindAsync(id);
+            DepartmentViewModel model = _mapper.Map<DepartmentViewModel>(await _db.Departments.FindAsync(id));
 
-            return View(department);
+            return View(model);
         }
 
         // POST: Departments/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        [Authorize403(Roles ="Admin")]
-        [DepartmentAuthorize(level = GroupDepartmentClaim.Levels.Full)]
+        [Authorize403(Roles = "Admin")]
+        [DepartmentAuthorize(level = DepartmentAccessLevels.Full)]
         public async Task<ActionResult> DeleteConfirmed(int id)
         {
-            Department department = await db.Departments.FindAsync(id);
-            db.Departments.Remove(department);
-            await db.SaveChangesAsync();
+            Department department = await _db.Departments.FindAsync(id);
+            _db.Departments.Remove(department);
+            await _db.SaveChangesAsync();
             return RedirectToAction("Index");
         }
 
         [Authorize403(Roles = "Admin")]
-        [DepartmentAuthorize(level = GroupDepartmentClaim.Levels.Full)]
+        [DepartmentAuthorize(level = DepartmentAccessLevels.Full)]
         public async Task<ActionResult> ManageAccess(int id)
         {
-            var user_id = User.Identity.GetUserId();
-            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
-
-            var department = GroupDepartmentClaim.get_group_departments(db, userManager, user_id, GroupDepartmentClaim.Levels.Full).FirstOrDefault(p => p.id == id);
+            var department = await _db.Departments.FindAsync(id);
 
 
-            ViewBag.Roles = roleManager.Roles.ToList();
+            ViewBag.Groups = (await _roleManager.GetAllGroupsAsync()).Select(r => _mapper.Map<GroupViewModel>(r)).ToList();
+            DepartmentRolesEditModel model = _mapper.Map<DepartmentRolesEditModel>(department);
 
-            return View(new DepartmentRolesDTO
-            {
-                department = department,
-                Roles = db.GroupDepartmentClaims
-                    .Where(p => p.department_id == id)
-                    .ToList()
-                    .Select(p => roleManager.FindById(p.group_id).Name)
-                    .ToDictionary(kv => kv, kv => Guid.NewGuid().ToString()),
-            });
+            return View(model);
         }
 
         [Authorize403(Roles = "Admin")]
-        [DepartmentAuthorize(level = GroupDepartmentClaim.Levels.Full)]
+        [DepartmentAuthorize(level = DepartmentAccessLevels.Full)]
         [ValidateAntiForgeryToken]
         [HttpPost]
-        public async Task<ActionResult> ManageAccess(int id, Dictionary<string, string> Roles)
+        public async Task<ActionResult> ManageAccess(DepartmentRolesEditModel model)
         {
-            var user_id = User.Identity.GetUserId();
-            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
-
-            var department = GroupDepartmentClaim.get_group_departments(db, userManager, user_id, GroupDepartmentClaim.Levels.Full).FirstOrDefault(p => p.id == id);
-
-
-            db.GroupDepartmentClaims.RemoveRange(db.GroupDepartmentClaims.Where(p => p.department_id == id));
-
-            if (Roles != null)
+            if (ModelState.IsValid)
             {
-                foreach (var r in Roles)
-                {
-                    db.GroupDepartmentClaims.Add(new GroupDepartmentClaim
-                    {
-                        department_id = id,
-                        group_id = (await roleManager.FindByNameAsync(r.Value)).Id,
-                        
-                    });
-                }
-            }
+                await _departmentAccessService.updatePreviligedGroups(model);
 
-            await db.SaveChangesAsync();
-            return RedirectToAction("Index");
+                return RedirectToAction("Index");
+            }
+            return View(model);
+
         }
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing)
-            {
-                db.Dispose();
-            }
             base.Dispose(disposing);
         }
     }

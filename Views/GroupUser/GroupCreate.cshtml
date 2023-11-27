@@ -1,4 +1,4 @@
-﻿
+﻿@model cerberus.Models.ViewModels.GroupCreateModel
 @{
     ViewBag.Title = "Создать группу";
 }
@@ -12,7 +12,7 @@
         @Html.TextBox("id")
     </div>
     <input type="submit" value="Создать" class="btn btn-primary" />
-    
+
 }
 
 @Html.ActionLink("Обратно", "Index")

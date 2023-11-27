@@ -1,56 +1,56 @@
-﻿@model cerberus.DTO.WareHouseRolesDTO
-
-@{
-    ViewBag.Title = "Edit User";
+﻿@{
+    ViewBag.Title = "Редактирование доступа к производственному участку";
 }
 
-<h2>Группы</h2>
+<div class="container">
+    <h2>Группы</h2>
 
-@using (Html.BeginForm("ManageAccess", "Warehouses", FormMethod.Post, new { @class = "form-horizontal" }))
-{
-    @Html.AntiForgeryToken()
-    <input type="hidden" name="id" value="@Model.warehouse.id" hidden>
-
-    <div class="form-group">
-        <label class="control-label col-md-2" for="Roles">Роли:</label>
-        <div class="col-md-10" id="roleContainer">
-            <button type="button" id="addRoleButton" class="btn btn-primary">Добавить</button>
-            @foreach (var selectedRole in Model.Roles)
-            {
-                <div class="roleRow">
-                    <select class="form-control" name="Roles[@selectedRole.Key]">
-                        <option value="">Выберите роли</option>
-                        @foreach (var role in ViewBag.Roles)
-                        {
-                            <option value="@role.Name" @(role.Name == selectedRole.Value ? "selected" : "")>@role.Name</option>
-                        }
-                    </select>
-                    <button class="removeRole btn btn-danger">Удалить</button>
-                </div>
-            }
-        </div>
-    </div>
-
-    <div class="form-group">
-        <div class="col-md-offset-2 col-md-10">
-            <button type="button" id="addRoleButton" class="btn btn-primary">Добавить роль</button>
-        </div>
-    </div>
-
-    <div class="form-group">
-        <div class="col-md-offset-2 col-md-10">
-            <input type="submit" value="Сохранить" class="btn btn-success" />
-        </div>
-    </div>
-}
-
-
-
-<div class="roleVariantStorage visually-hidden">
-    @foreach (var role in ViewBag.Roles)
+    @using (Html.BeginForm("ManageAccess", "Warehouses", FormMethod.Post))
     {
-        <option value="@role.Name">@role.Name</option>
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@Model.id" hidden>
+
+        <div class="row">
+            <div class="col-md-8">
+                <label for="Roles">Роли:</label>
+                <div id="roleContainer">
+                    <button type="button" id="addRoleButton" class="btn btn-primary">Добавить</button>
+                    @foreach (var selectedRole in Model.Roles)
+                    {
+                        <div class="roleRow">
+                            <select class="form-control" name="Roles[@selectedRole.Key]">
+                                <option value="">Выберите роль</option>
+                                @foreach (var role in ViewBag.Roles)
+                                {
+                                    <option value="@role.Id" @(role.Id == selectedRole.Value ? "selected" : "")>@role.Name</option>
+                                }
+                            </select>
+                            <button class="removeRole btn btn-danger">Удалить</button>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-md-8">
+                <button type="submit" class="btn btn-success">Сохранить</button>
+            </div>
+        </div>
     }
+
+    <div class="row mt-3">
+        <div class="col-md-8">
+
+        </div>
+    </div>
+
+    <div class="roleVariantStorage visually-hidden">
+        @foreach (var role in ViewBag.Roles)
+        {
+            <option value="@role.Id">@role.Name</option>
+        }
+    </div>
 </div>
 
 @section scripts {

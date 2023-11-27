@@ -1,4 +1,4 @@
-﻿@model cerberus.DTO.Reports.WHInventarisationReportFormDTO
+﻿@model cerberus.Models.ViewModels.Reports.WHInventarisationReportFormViewModel
 
 @{
     string action;
@@ -16,37 +16,37 @@
 {
     @Html.AntiForgeryToken()
 
-<div class="container">
-    <h2>Отчет об инвентаризации</h2>
-    <hr />
+    <div class="container">
+        <h2>Отчет об инвентаризации</h2>
+        <hr />
 
-    <input name="warehouse_id" type="hidden" value="@ViewBag.warehouse_id">
+        <input name="warehouse_id" type="hidden" value="@ViewBag.warehouse_id">
 
-    <div class="keyValuePairs item-list-controlable-container" data-dname="items">
-        <button type="button" class="btn btn-success addKeyValuePair" data-ltype="item">Добавить</button>
+        <div class="keyValuePairs item-list-controlable-container" data-dname="items">
+            <button type="button" class="btn btn-success addKeyValuePair" data-ltype="item">Добавить</button>
 
-        @if (Model != null)
-        {
-            foreach (var item in Model.items)
+            @if (Model != null)
             {
-                <div class="keyValuePairContainer item-list-controlable-section">
-                    <input type="text" placeholder="Наименование" class="item-list-target-content item-list-show showMenu" value="@ViewBag.Items[item.Key].name" readonly />
-                    <input type="hidden" class="key item-list-target-value" value="@ViewBag.Items[item.Key].id" />
-                    <input type="text" placeholder="Количество" class="value" value="@item.Value" />
-                    <button class="btn btn-danger removeKeyValuePair">Удалить</button>
-                    <input type="hidden" class="hiddenKV" name="items[@ViewBag.Items[item.Key].id]" value="@item.Value" />
-                </div>
+                foreach (var item in Model.items)
+                {
+                    <div class="keyValuePairContainer item-list-controlable-section">
+                        <input type="text" placeholder="Наименование" class="item-list-target-content item-list-show showMenu" value="@ViewBag.Items[item.Key].name" readonly />
+                        <input type="hidden" class="key item-list-target-value" value="@ViewBag.Items[item.Key].id" />
+                        <input type="text" placeholder="Количество" class="value" value="@item.Value" />
+                        <button class="btn btn-danger removeKeyValuePair">Удалить</button>
+                        <input type="hidden" class="hiddenKV" name="items[@ViewBag.Items[item.Key].id]" value="@item.Value" />
+                    </div>
+                }
             }
-        }
-        @Html.ValidationMessageFor(model => model.items, "", new { @class = "text-danger" })
-    </div>
-    <hr />
-    <div class="form-group">
-        <div class="col-md-offset-2 col-md-10">
-            <button type="submit" class="btn btn-primary">Создать</button>
+            @Html.ValidationMessageFor(model => model.items, "", new { @class = "text-danger" })
+        </div>
+        <hr />
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <button type="submit" class="btn btn-primary">Создать</button>
+            </div>
         </div>
     </div>
-</div>
 }
 
 <div class="container">

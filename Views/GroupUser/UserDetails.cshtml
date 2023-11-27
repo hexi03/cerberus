@@ -1,5 +1,5 @@
 ﻿
-@model cerberus.Models.ApplicationUser
+@model cerberus.Models.ViewModels.ApplicationUserViewModel
 
 @{
     ViewBag.Title = "Подробно";
@@ -12,12 +12,9 @@
         <dd>@Model.UserName</dd>
         <dt>Роли:</dt>
         <dd>
-            @foreach (var role in Model.Roles)
+            @foreach (var role in Model.Groups)
             {
-                
-                var identityRoles = (ICollection<Microsoft.AspNet.Identity.EntityFramework.IdentityRole>)ViewBag.Roles;
-                
-                @identityRoles.Where(r => r.Id == role.RoleId).First().Name
+                @role.Name
             }
         </dd>
     </dl>

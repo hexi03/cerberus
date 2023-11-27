@@ -1,10 +1,9 @@
-﻿using cerberus.DTO.Reports;
-using cerberus.Models.edmx;
+﻿using cerberus.Models.edmx;
+using cerberus.Models.ViewModels.Reports;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
-using System.Web;
 
 namespace cerberus.Models.Reports
 {
@@ -22,15 +21,12 @@ namespace cerberus.Models.Reports
             return new Report(this);
         }
 
-        public static WHReleaseReport from(WHReleaseReportFormDTO dto)
+        public static WHReleaseReport from(WHReleaseReportFormViewModel dto)
         {
             var res = new WHReleaseReport();
-            res.creator_id = dto.creator_id;
-            res.department_id = dto.department_id;
-            res.timestamp = dto.timestamp;
 
             res.warehouse_id = dto.warehouse_id;
-            res.supply_requirement_id = dto.supply_requirement_id;  
+            res.supply_requirement_id = dto.supply_requirement_id;
             if (dto.items != null)
             {
                 res.items = dto.items.ToDictionary(kv => Convert.ToInt32(kv.Key), kv => Convert.ToInt32(kv.Value));

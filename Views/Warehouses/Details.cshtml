@@ -1,6 +1,6 @@
-﻿@model cerberus.Models.edmx.Warehouse
+﻿@model cerberus.Models.ViewModels.WarehouseViewModel
 @{
-    var users = ((Dictionary<string, cerberus.Models.ApplicationUser>)ViewBag.Users);
+    var users = ((Dictionary<string, cerberus.Models.ViewModels.ApplicationUserViewModel>)ViewBag.Users);
 }
 
 <div class="container">
@@ -30,7 +30,7 @@
                     <th></th>
                 </tr>
 
-                @foreach (var r in ((IList<cerberus.Models.Reports.WareHouseReport>)ViewBag.ReportList))
+                @foreach (var r in ((IList<cerberus.Models.ViewModels.Reports.ReportViewModel>)ViewBag.ReportList))
                 {
                     <tr>
                         <td><p>@r.get_type_as_string()</p></td>
@@ -51,11 +51,11 @@
             <div class="mx-5 my-2">
                 <h5>Содержимое склада</h5>
                 <div class="mx-5">
-                    @if (((IList<(cerberus.Models.edmx.ItemsRegistry, int)>)ViewBag.StorageState).Count() == 0)
+                    @if (((IList<(cerberus.Models.ViewModels.ItemViewModel, int)>)ViewBag.StorageState).Count() == 0)
                     {
                         <p>Ничего</p>
                     }
-                    @foreach (var item in ((IList<(cerberus.Models.edmx.ItemsRegistry, int)>)ViewBag.StorageState))
+                    @foreach (var item in ((IList<(cerberus.Models.ViewModels.ItemViewModel, int)>)ViewBag.StorageState))
                     {
                         <p>@Html.DisplayFor(model => item.Item1.name):  @Html.DisplayFor(model => item.Item2)</p>
                     }

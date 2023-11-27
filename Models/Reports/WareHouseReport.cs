@@ -1,12 +1,8 @@
-﻿using cerberus.DTO.Reports;
-using cerberus.Models.edmx;
-using System;
+﻿using cerberus.Models.edmx;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Web;
-using System.Web.Mvc;
 
 namespace cerberus.Models.Reports
 {
@@ -16,7 +12,8 @@ namespace cerberus.Models.Reports
 
         public WareHouseReport(Types type) : base(type) { }
 
-        public static async Task<IList<WareHouseReport>> get_reports(CerberusDBEntities db, int warehouse_id) {
+        public static async Task<IList<WareHouseReport>> get_reports(CerberusDBEntities db, int warehouse_id)
+        {
             return
                 (await time_filter(
                     db.Reports

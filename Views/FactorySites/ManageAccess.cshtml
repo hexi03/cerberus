@@ -1,7 +1,7 @@
-﻿@model cerberus.DTO.FactorySiteRolesDTO
+﻿@model cerberus.Models.ViewModels.FactorySiteRolesEditModel
 
 @{
-    ViewBag.Title = "Редактирование пользователя";
+    ViewBag.Title = "Редактирование доступа к производственному участку";
 }
 
 <div class="container">
@@ -10,7 +10,7 @@
     @using (Html.BeginForm("ManageAccess", "FactorySites", FormMethod.Post))
     {
         @Html.AntiForgeryToken()
-        <input type="hidden" name="id" value="@Model.factorySite.id" hidden>
+        <input type="hidden" name="id" value="@Model.id" hidden>
 
         <div class="row">
             <div class="col-md-8">
@@ -24,7 +24,7 @@
                                 <option value="">Выберите роль</option>
                                 @foreach (var role in ViewBag.Roles)
                                 {
-                                    <option value="@role.Name" @(role.Name == selectedRole.Value ? "selected" : "")>@role.Name</option>
+                                    <option value="@role.Id" @(role.Id == selectedRole.Value ? "selected" : "")>@role.Name</option>
                                 }
                             </select>
                             <button class="removeRole btn btn-danger">Удалить</button>
@@ -50,7 +50,7 @@
     <div class="roleVariantStorage visually-hidden">
         @foreach (var role in ViewBag.Roles)
         {
-            <option value="@role.Name">@role.Name</option>
+            <option value="@role.Id">@role.Name</option>
         }
     </div>
 </div>

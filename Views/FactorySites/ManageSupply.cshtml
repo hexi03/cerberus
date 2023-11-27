@@ -1,4 +1,4 @@
-﻿@model cerberus.DTO.FactorySiteSupplyDTO
+﻿@model  cerberus.Models.ViewModels.FactorySiteSupplyEditModel
 
 @{
     ViewBag.Title = "Редактирование пользователя";
@@ -10,7 +10,7 @@
     @using (Html.BeginForm("ManageSupply", "FactorySites", FormMethod.Post))
     {
         @Html.AntiForgeryToken()
-        <input type="hidden" name="id" value="@Model.factorySite.id" hidden>
+        <input type="hidden" name="id" value="@Model.id" hidden>
 
         <div class="row">
             <div class="col-md-8">
@@ -18,15 +18,15 @@
                 <div id="warehouseContainer">
                     <button type="button" id="addWarehouseButton" class="btn btn-primary">Добавить склад</button>
 
-                    @for (var i = 0; i < Model.warehouses.Count(); i++)
+                    @foreach (var curr_wh in Model.warehouse_ids)
                     {
-                        var curr_wh = Model.warehouses[i];
+
                         <div class="whRow">
-                            <select class="form-control" name="warehouse_ids[@i]">
+                            <select class="form-control" name="warehouse_ids[@Guid.NewGuid()]">
                                 <option value="">Выберите склад</option>
                                 @foreach (var wareHouse in ViewBag.WareHouses)
                                 {
-                                    <option value="@wareHouse.id" @(wareHouse.id == curr_wh.id ? "selected" : "")>@wareHouse.name</option>
+                                    <option value="@wareHouse.id" @(wareHouse.id.ToString() == curr_wh.Value ? "selected" : "")>@wareHouse.name</option>
                                 }
                             </select>
                             <button class="removeWarehouse btn btn-danger">Удалить</button>

@@ -1,10 +1,8 @@
 ﻿using cerberus.Models.edmx;
-using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Web;
 
 namespace cerberus.Models.Reports
 {
@@ -28,8 +26,8 @@ namespace cerberus.Models.Reports
                 ).ToListAsync()).Select(r => (FactorySiteReport)r.from_generic()).Where(r => r.factorysite_id == factorysite_id).ToList();
         }
 
-        
 
-        
+
+
     }
 }

@@ -1,40 +1,63 @@
-﻿using System;
+﻿using AutoMapper;
+using cerberus.Models;
+using cerberus.Models.edmx;
+using cerberus.Models.Reports;
+using cerberus.Models.ViewModels;
+using cerberus.Models.ViewModels.Reports;
+using cerberus.Services;
+using Microsoft.AspNet.Identity;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
+using System.Data.Entity.Migrations;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Net;
-using System.Web;
 using System.Web.Mvc;
-using cerberus.Models;
-using cerberus.Models.edmx;
-using Microsoft.AspNet.Identity.Owin;
-using Microsoft.AspNet.Identity;
-using Microsoft.AspNet.Identity.EntityFramework;
-using cerberus.DTO;
-using cerberus.Models.Reports;
 
 namespace cerberus.Controllers
 {
     [ProvideMenu]
-    [Authorize403Attribute]
+    [Authorize403]
     public class FactorySitesController : Controller
     {
-        private CerberusDBEntities db = new CerberusDBEntities();
-        private RoleManager<IdentityRole> roleManager = new RoleManager<IdentityRole>(new RoleStore<IdentityRole>(ApplicationDbContext.Create()));
-        private ApplicationUserManager userManager = new ApplicationUserManager(new UserStore<ApplicationUser>(new ApplicationDbContext()));
+        private CerberusDBEntities _db;
+        private IUserService _userManager;
+        private IGroupService _roleManager;
+        private IMapper _mapper;
+        private IFactorySiteAccessService _updateFactorySiteRolesService;
+        IFactorySiteSupplyManagementService _updateFactorySiteSupplySourcesService;
+        IFactorySiteService _factorySiteService;
+        public FactorySitesController(
+            CerberusDBEntities db,
+            IUserService userManager,
+            IGroupService roleManager,
+            IMapper mapper,
+            IFactorySiteService factorySiteService,
+            IFactorySiteAccessService updateFactorySiteRolesService,
+            IFactorySiteSupplyManagementService updateFactorySiteSupplySourcesService
+            )
+        {
+            _mapper = mapper;
+            _db = db;
+            _userManager = userManager;
+            _roleManager = roleManager;
+            _factorySiteService = factorySiteService;
+            _updateFactorySiteRolesService = updateFactorySiteRolesService;
+            _updateFactorySiteSupplySourcesService = updateFactorySiteSupplySourcesService;
+        }
         // GET: FactorySites
         [HttpGet]
-        [DepartmentAuthorize(level = GroupDepartmentClaim.Levels.Partial)]
+        [DepartmentAuthorize(level = DepartmentAccessLevels.Partial)]
         public async Task<ActionResult> Index(int id)
         {
             var user_id = User.Identity.GetUserId();
-            
-            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
 
-            ViewBag.ReturnUrl = @Request.Url.PathAndQuery;
-            var factorySites = GroupFactorySiteClaim.get_group_factorysites(db,userManager, user_id).Where(w => w.department_id == id).ToList();
+
+            List<FactorySiteViewModel> factorySites =
+                (await (await _updateFactorySiteRolesService.get_user_factorysites_async(user_id))
+                .Where(fs => fs.department_id == id).ToListAsync())
+                .Select(w => _mapper.Map<FactorySiteViewModel>(w)).ToList();
             return View(factorySites);
         }
 
@@ -42,141 +65,114 @@ namespace cerberus.Controllers
         [FactorySiteAuthorize]
         public async Task<ActionResult> Details(int id)
         {
-            ViewBag.ReturnUrl = @Request.Url.PathAndQuery;
-
             var user_id = User.Identity.GetUserId();
-            
-            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
 
-            FactorySite factorySite = GroupFactorySiteClaim.get_group_factorysites(db,userManager, user_id).Where(fs => fs.id == id).First();
-            ViewBag.ReportList = await FactorySiteReport.get_reports(db, factorySite.id);
-            ViewBag.State = await FactorySite.get_state(db, id);
-            ViewBag.Users = (await userManager.Users.ToListAsync()).ToDictionary(user => user.Id);
 
-            return View(factorySite);
+            FactorySiteViewModel model = _mapper.Map<FactorySiteViewModel>(await _db.FactorySites.FindAsync(id));
+            ViewBag.ReportList = ( await FactorySiteReport.get_reports(_db, model.id)).ToList().Select(r => _mapper.Map<ReportViewModel>(r)).ToList();
+            ViewBag.State = await _factorySiteService.get_state(id);
+            ViewBag.Users = (await _userManager.GetAllUsersAsync()).ToDictionary(user => user.Id, user => _mapper.Map<ApplicationUserViewModel>(user));
+
+            return View(model);
         }
 
         // GET: FactorySites/Create
         [HttpGet]
-        [DepartmentAuthorize(level = GroupDepartmentClaim.Levels.Full)]
+        [DepartmentAuthorize(level = DepartmentAccessLevels.Full)]
         public async Task<ActionResult> Create(int id)
         {
-            var user_id = User.Identity.GetUserId();
-            
-            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
 
-            var departments_list = GroupDepartmentClaim.get_group_departments(db, userManager, user_id, GroupDepartmentClaim.Levels.Full);
-
-            ViewBag.ReturnUrl = HttpContext.Request.QueryString["returnUrl"];
-            ViewBag.department_id = new SelectList(departments_list, "id", "name");
             return View();
         }
 
         // POST: FactorySites/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [DepartmentAuthorize(level = GroupDepartmentClaim.Levels.Full, Parameter = "department_id")]
-        public async Task<ActionResult> Create([Bind(Include = "name,department_id")] FactorySite factorySite, string returnUrl)
+        [DepartmentAuthorize(level = DepartmentAccessLevels.Full, Parameter = "department_id")]
+        public async Task<ActionResult> Create(FactorySiteCreateModel model)
         {
             var user_id = User.Identity.GetUserId();
-            
-            var group_ids = await userManager.GetRolesAsync(user_id);
+
+
 
             if (ModelState.IsValid)
             {
-                factorySite = db.FactorySites.Add(factorySite);
-                
-                var group_name = db.GroupDepartmentClaims.Where(e => e.department_id == factorySite.department_id).Select(e => e.group_id).Prepend("Admin").Where(e => group_ids.Contains(e)).First();
-                var group_id = (await roleManager.FindByNameAsync(group_name)).Id;
-                db.GroupFactorySiteClaims.Add(new GroupFactorySiteClaim()
+                var adminID = (await _roleManager.GetGroupByNameAsync("Admin")).Id;
+
+                var group_ids = (await _userManager.GetUserGroupsByIdAsync(user_id)).Select(group => group.Id);
+                var factorySite = _db.FactorySites.Add(_mapper.Map<FactorySite>(model));
+
+                var group_id = _db.GroupDepartmentClaims.Where(e => e.department_id == factorySite.department_id).Select(e => e.group_id).Prepend(adminID).Where(e => group_ids.Contains(e)).First();
+
+                _db.GroupFactorySiteClaims.Add(new GroupFactorySiteClaim()
                 {
                     group_id = group_id,
                     factorysite_id = factorySite.id
                 });
-                
-                await db.SaveChangesAsync();
 
-                if (!String.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-                    return Redirect(returnUrl);
-                else
-                    return RedirectToAction("Index", "Home");
+                await _db.SaveChangesAsync();
+
+                return RedirectToAction("Index", "Home");
             }
 
-            return View(factorySite);
+            return View(model);
         }
 
         // GET: FactorySites/Edit/5
         [FactorySiteAuthorize]
         public async Task<ActionResult> Edit(int id)
         {
-            var user_id = User.Identity.GetUserId();
-            
-            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
+            FactorySiteEditModel model = _mapper.Map<FactorySiteEditModel>(await _db.FactorySites.FindAsync(id));
 
-            FactorySite factorySite = GroupFactorySiteClaim.get_group_factorysites(db, userManager, user_id).Where(fs => fs.id == id).First();
 
-            ViewBag.ReturnUrl = HttpContext.Request.QueryString["returnUrl"];
-            ViewBag.department_id = new SelectList(GroupDepartmentClaim.get_group_departments(db, userManager, user_id, GroupDepartmentClaim.Levels.Full), "id", "name", factorySite.department_id);
-            return View(factorySite);
+            return View(model);
         }
 
         // POST: FactorySites/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         [FactorySiteAuthorize]
-        [DepartmentAuthorize(level = GroupDepartmentClaim.Levels.Full, Parameter = "department_id")]
-        public async Task<ActionResult> Edit([Bind(Include = "id, name,department_id")] FactorySite factorySite, string returnUrl)
+        //[DepartmentAuthorize(level = DepartmentAccessLevels.Full, Parameter = "department_id")]
+        public async Task<ActionResult> Edit(FactorySiteEditModel model)
         {
-            var user_id = User.Identity.GetUserId();
-            
-            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
 
             if (ModelState.IsValid)
             {
-                db.Entry(factorySite).State = EntityState.Modified;
-                await db.SaveChangesAsync();
-                if (!String.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-                    return Redirect(returnUrl);
-                else
-                    return RedirectToAction("Index", "Home");
+                var department = (await _db.FactorySites.FindAsync(model.id)).Department;
+                var factorySite = _mapper.Map<FactorySite>(model);
+                factorySite.department_id = department.id;
+
+                _db.FactorySites.AddOrUpdate(factorySite);
+
+                await _db.SaveChangesAsync();
+
+                return RedirectToAction("Index", "Home");
             }
-            ViewBag.department_id = new SelectList(GroupDepartmentClaim.get_group_departments(db, userManager, user_id, GroupDepartmentClaim.Levels.Full), "id", "name", factorySite.department_id);
-            return View(factorySite);
+            return View(model);
         }
 
         // GET: FactorySites/Delete/5
         [FactorySiteAuthorize]
-        public async Task<ActionResult> Delete(int? id)
+        public async Task<ActionResult> Delete(int id)
         {
-            var user_id = User.Identity.GetUserId();
-            
-            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
+            FactorySiteViewModel model = _mapper.Map<FactorySiteViewModel>(await _db.FactorySites.FindAsync(id));
 
-            ViewBag.ReturnUrl = HttpContext.Request.QueryString["returnUrl"];
-
-            FactorySite factorySite = GroupFactorySiteClaim.get_group_factorysites(db, userManager, user_id).Where(fs => fs.id == id).First();
-
-            return View(factorySite);
+            return View(model);
         }
 
         // POST: FactorySites/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [FactorySiteAuthorize]
-        public async Task<ActionResult> DeleteConfirmed(int id, string returnUrl)
+        public async Task<ActionResult> DeleteConfirmed(int id)
         {
             ViewBag.ReturnUrl = HttpContext.Request.QueryString["returnUrl"];
-            var user_id = User.Identity.GetUserId();
-            
-            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
 
-            FactorySite factorySite = GroupFactorySiteClaim.get_group_factorysites(db, userManager, user_id).Where(fs => fs.id == id).First();
-            db.FactorySites.Remove(factorySite);
-            await db.SaveChangesAsync();
-            if (!String.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-                return Redirect(returnUrl);
-            else
-                return RedirectToAction("Index", "Home");
+            FactorySite factorySite = await _db.FactorySites.FindAsync(id);
+            _db.FactorySites.Remove(factorySite);
+            await _db.SaveChangesAsync();
+
+            return RedirectToAction("Index", "Home");
         }
 
 
@@ -184,22 +180,13 @@ namespace cerberus.Controllers
         [FactorySiteAuthorize]
         public async Task<ActionResult> ManageAccess(int id)
         {
-            var user_id = User.Identity.GetUserId();
-            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
 
-            var factorySite = GroupFactorySiteClaim.get_group_factorysites(db, userManager, user_id).FirstOrDefault(p => p.id == id);
+            var factorySite = await _db.FactorySites.FindAsync(id);
 
-            ViewBag.Roles = roleManager.Roles.ToList();
+            ViewBag.Roles = (await _roleManager.GetAllGroupsAsync()).ToList();
 
-            return View(new FactorySiteRolesDTO
-            {
-                factorySite = factorySite,
-                Roles = db.GroupFactorySiteClaims
-                    .Where(p => p.factorysite_id == id)
-                    .ToList()
-                    .Select(p => ( Value: roleManager.FindById(p.group_id).Name, Key: Guid.NewGuid()))
-                    .ToDictionary(kv => kv.Key.ToString(), kv => kv.Value),
-            });
+            FactorySiteRolesEditModel model = _mapper.Map<FactorySiteRolesEditModel>(factorySite);
+            return View(model);
         }
 
 
@@ -207,48 +194,29 @@ namespace cerberus.Controllers
         [FactorySiteAuthorize]
         [ValidateAntiForgeryToken]
         [HttpPost]
-        public async Task<ActionResult> ManageAccess(int id, Dictionary<string, string> Roles)
+        public async Task<ActionResult> ManageAccess(FactorySiteRolesEditModel model)
         {
-            var user_id = User.Identity.GetUserId();
-            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
-
-            var factorySite = GroupFactorySiteClaim.get_group_factorysites(db, userManager, user_id).FirstOrDefault(p => p.id == id);
-
-            db.GroupFactorySiteClaims.RemoveRange(db.GroupFactorySiteClaims.Where(p => p.factorysite_id == id));
-
-            if (Roles != null)
+            if (ModelState.IsValid)
             {
-                foreach (var r in Roles)
-                {
-                    db.GroupFactorySiteClaims.Add(new GroupFactorySiteClaim
-                    {
-                        factorysite_id = id,
-                        group_id = (await roleManager.FindByNameAsync(r.Value)).Id
-                    });
-                }
+                await _updateFactorySiteRolesService.updatePreviligedGroups(model);
+                return RedirectToAction("Index", "Home");
             }
+            return View(model);
 
-            await db.SaveChangesAsync();
-            return RedirectToAction("Index", new { id = factorySite.department_id });
         }
 
         [FactorySiteAuthorize]
         public async Task<ActionResult> ManageSupply(int id)
         {
-            var user_id = User.Identity.GetUserId();
-            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
 
-            var factorySite = GroupFactorySiteClaim.get_group_factorysites(db, userManager, user_id).FirstOrDefault(p => p.id == id);
+            var factorySite = await _db.FactorySites.FindAsync(id);
 
-            var department = await GroupDepartmentClaim.get_group_departments(db, userManager, user_id, GroupDepartmentClaim.Levels.Full).Where(e => e.id == factorySite.department_id).FirstOrDefaultAsync();
+            var department = factorySite.Department;
 
-            ViewBag.WareHouses = db.WareHouses.Where(e => e.department_id == department.id).ToList();
+            ViewBag.WareHouses = _db.WareHouses.Where(e => e.department_id == department.id).ToList();
 
-
-            return View(new FactorySiteSupplyDTO {
-                factorySite = factorySite,
-                warehouses = db.FactorySiteWareHouseClaims.Where(e => e.factorysite_id == factorySite.id).Select(e => e.Warehouse).ToList(),
-            });
+            FactorySiteSupplyEditModel model = _mapper.Map<FactorySiteSupplyEditModel>(factorySite);
+            return View(model);
         }
 
 
@@ -256,37 +224,20 @@ namespace cerberus.Controllers
         [FactorySiteAuthorize]
         [ValidateAntiForgeryToken]
         [HttpPost]
-        public async Task<ActionResult> ManageSupply(int id, Dictionary<string, string> warehouse_ids)
+        public async Task<ActionResult> ManageSupply(FactorySiteSupplyEditModel model)
         {
-            var user_id = User.Identity.GetUserId();
-            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
-
-            var factorySite = GroupFactorySiteClaim.get_group_factorysites(db, userManager, user_id).FirstOrDefault(p => p.id == id);
-
-            var department = await GroupDepartmentClaim.get_group_departments(db, userManager, user_id, GroupDepartmentClaim.Levels.Full).Where(e => e.id == factorySite.department_id).FirstOrDefaultAsync();
-
-
-            db.FactorySiteWareHouseClaims.RemoveRange(db.FactorySiteWareHouseClaims.Where(e => e.factorysite_id == id));
-
-            foreach (var wh_id in warehouse_ids) {
-                db.FactorySiteWareHouseClaims.Add(new FactorySiteWareHouseClaim()
-                {
-                    warehouse_id = Convert.ToInt32(wh_id.Value),
-                    factorysite_id = id
-                });
+            if (ModelState.IsValid)
+            {
+                await _updateFactorySiteSupplySourcesService.updateSupplySources(model);
+                return RedirectToAction("Index", "Home");
             }
-            await db.SaveChangesAsync();
-            
-            return RedirectToAction("Index", new { id = factorySite.department_id });
+            return View(model);
+
         }
 
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing)
-            {
-                db.Dispose();
-            }
             base.Dispose(disposing);
         }
     }

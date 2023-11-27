@@ -1,4 +1,4 @@
-﻿@model cerberus.DTO.Reports.WHReplenishmentReportFormDTO
+﻿@model cerberus.Models.ViewModels.Reports.WHReplenishmentReportFormViewModel
 
 @{
     string action;
@@ -25,7 +25,7 @@
         <div class="keyValuePairs item-list-controlable-container" data-dname="items">
             <button type="button" class="btn btn-success addKeyValuePair" data-ltype="item">Добавить</button>
 
-            @if (Model != null)
+            @if (Model != null && Model.items != null)
             {
                 foreach (var item in Model.items)
                 {

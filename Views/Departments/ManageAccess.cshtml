@@ -1,4 +1,4 @@
-﻿@model cerberus.DTO.DepartmentRolesDTO
+﻿@model cerberus.Models.ViewModels.DepartmentRolesEditModel
 
 @{
     ViewBag.Title = "Edit User";
@@ -10,20 +10,20 @@
     @using (Html.BeginForm("ManageAccess", "Departments", FormMethod.Post, new { @class = "form-horizontal" }))
     {
         @Html.AntiForgeryToken()
-        <input type="hidden" name="id" value="@Model.department.id">
+        <input type="hidden" name="id" value="@Model.id">
 
         <div id="roleContainer">
             <label for="Roles" class="control-label">Роли:</label>
             <button type="button" id="addRoleButton" class="btn btn-primary">Добавить</button>
 
-            @foreach (var selectedRole in Model.Roles)
+            @foreach (var selectedRole in Model.Groups)
             {
                 <div class="roleRow form-group">
-                    <select class="form-control" name="Roles[@selectedRole.Key]">
+                    <select class="form-control" name="Groups[@selectedRole.Key]">
                         <option value="">Выберите роль</option>
-                        @foreach (var role in ViewBag.Roles)
+                        @foreach (var role in ViewBag.Groups)
                         {
-                            <option value="@role.Name" @(role.Name == selectedRole.Value ? "selected" : "")>@role.Name</option>
+                            <option value="@role.Id" @(role.Id == selectedRole.Value ? "selected" : "")>@role.Name</option>
                         }
                     </select>
                     <button class="btn btn-danger removeRole">Удалить</button>
@@ -41,9 +41,9 @@
 
 
     <div class="roleVariantStorage visually-hidden">
-        @foreach (var role in ViewBag.Roles)
+        @foreach (var role in ViewBag.Groups)
         {
-            <option value="@role.Name">@role.Name</option>
+            <option value="@role.Id">@role.Name</option>
         }
     </div>
 </div>
@@ -53,7 +53,7 @@
         $(function () {
             $("#addRoleButton").click(function () {
                 var roleRow = '<div class="roleRow form-group">' +
-                    '<select class="form-control" name="Roles[' + generateRandomUUID() + ']">' +
+                    '<select class="form-control" name="Groups[' + generateRandomUUID() + ']">' +
                     $('.roleVariantStorage').html() +
                     '</select>' +
                     '<button class="btn btn-danger removeRole">Удалить</button>' +

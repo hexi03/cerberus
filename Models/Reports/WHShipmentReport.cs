@@ -1,10 +1,9 @@
-﻿using cerberus.DTO.Reports;
-using cerberus.Models.edmx;
+﻿using cerberus.Models.edmx;
+using cerberus.Models.ViewModels.Reports;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
-using System.Web;
 
 namespace cerberus.Models.Reports
 {
@@ -20,12 +19,9 @@ namespace cerberus.Models.Reports
             return new Report(this);
         }
 
-        public static WHShipmentReport from(WHShipmentReportFormDTO dto)
+        public static WHShipmentReport from(WHShipmentReportFormViewModel dto)
         {
             var res = new WHShipmentReport();
-            res.creator_id = dto.creator_id;
-            res.department_id = dto.department_id;
-            res.timestamp = dto.timestamp;
 
             res.warehouse_id = dto.warehouse_id;
             if (dto.items != null)

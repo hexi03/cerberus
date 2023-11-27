@@ -1,4 +1,4 @@
-﻿@model cerberus.DTO.Reports.WHWorkShiftReplenishmentReportFormDTO
+﻿@model cerberus.Models.ViewModels.Reports.WHWorkShiftReplenishmentReportFormViewModel
 
 @{
     string action;
@@ -16,59 +16,59 @@
 {
     @Html.AntiForgeryToken()
 
-<div class="container">
-    <h2>Отчет о приемке ПП</h2>
-    <hr />
+    <div class="container">
+        <h2>Отчет о приемке ПП</h2>
+        <hr />
 
-    <input name="warehouse_id" type="hidden" value="@ViewBag.warehouse_id">
+        <input name="warehouse_id" type="hidden" value="@ViewBag.warehouse_id">
 
-    @if (ViewBag.mode != "edit")
-    {
-        <div class="form-group">
-            <label for="workshift_id" class="control-label col-md-2">Смена:</label>
-            <div class="col-md-10">
-                @Html.DropDownList("workshift_id", new SelectList(ViewBag.WorkShiftReportVariants, "id", "timestamp"), htmlAttributes: new { @class = "form-control fswhrr-report-selector" })
-            </div>
-        </div>
-    }
-    else
-    {
-        <div class="form-group">
-            <label for="workshift_id" class="control-label col-md-2">Смена:</label>
-            <div class="col-md-10">
-                <input name="workshift_id" value="@Model.workshift_id" readonly class="form-control">
-            </div>
-        </div>
-    }
-
-    <div class="fswhrr-item-list">
-        <!-- Content loaded dynamically with AJAX -->
-    </div>
-
-    <div class="keyValuePairs production-list-controlable-container" data-dname="items">
-        <button type="button" class="btn btn-success addKeyValuePair"  data-ltype="production">+</button>
-        @if (Model != null)
+        @if (ViewBag.mode != "edit")
         {
-            foreach (var item in Model.items)
-            {
-                <div class="keyValuePairContainer production-list-controlable-section ">
-                    <input type="text" placeholder="Наименование" class="production-list-target-content production-list-show showMenu" value="@ViewBag.Items[item.Key].name" readonly />
-                    <input type="hidden" class="key production-list-target-value" value="@ViewBag.Items[item.Key].id" />
-                    <input type="text" placeholder="Количество" class="value " value="@item.Value" />
-                    <button class="btn btn-danger removeKeyValuePair">Удалить</button>
-                    <input type="hidden" class="hiddenKV" name="items[@ViewBag.Items[item.Key].id]" value="@item.Value" />
+            <div class="form-group">
+                <label for="workshift_id" class="control-label col-md-2">Смена:</label>
+                <div class="col-md-10">
+                    @Html.DropDownList("workshift_id", new SelectList(ViewBag.WorkShiftReportVariants, "id", "timestamp"), htmlAttributes: new { @class = "form-control fswhrr-report-selector" })
                 </div>
-            }
+            </div>
         }
-        @Html.ValidationMessageFor(model => model.items, "", new { @class = "text-danger" })
-    </div>
-    <hr />
-    <div class="form-group">
-        <div class="col-md-offset-2 col-md-10">
-            <button type="submit" class="btn btn-primary">Создать</button>
+        else
+        {
+            <div class="form-group">
+                <label for="workshift_id" class="control-label col-md-2">Смена:</label>
+                <div class="col-md-10">
+                    <input name="workshift_id" value="@Model.workshift_id" readonly class="form-control">
+                </div>
+            </div>
+        }
+
+        <div class="fswhrr-item-list">
+            <!-- Content loaded dynamically with AJAX -->
+        </div>
+
+        <div class="keyValuePairs production-list-controlable-container" data-dname="items">
+            <button type="button" class="btn btn-success addKeyValuePair" data-ltype="production">+</button>
+            @if (Model != null && Model.items != null)
+            {
+                foreach (var item in Model.items)
+                {
+                    <div class="keyValuePairContainer production-list-controlable-section ">
+                        <input type="text" placeholder="Наименование" class="production-list-target-content production-list-show showMenu" value="@ViewBag.Items[item.Key].name" readonly />
+                        <input type="hidden" class="key production-list-target-value" value="@ViewBag.Items[item.Key].id" />
+                        <input type="text" placeholder="Количество" class="value " value="@item.Value" />
+                        <button class="btn btn-danger removeKeyValuePair">Удалить</button>
+                        <input type="hidden" class="hiddenKV" name="items[@ViewBag.Items[item.Key].id]" value="@item.Value" />
+                    </div>
+                }
+            }
+            @Html.ValidationMessageFor(model => model.items, "", new { @class = "text-danger" })
+        </div>
+        <hr />
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <button type="submit" class="btn btn-primary">Создать</button>
+            </div>
         </div>
     </div>
-</div>
 }
 
 <div class="container">

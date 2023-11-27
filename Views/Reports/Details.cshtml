@@ -1,39 +1,31 @@
-﻿@model cerberus.Models.edmx.Report
-
- 
+﻿@model cerberus.Models.ViewModels.Reports.ReportViewModel
 
 
-    <div>
-        <h4>Report</h4>
-        <hr />
-        <dl class="dl-horizontal">
-            <dt>
-                @Html.DisplayNameFor(model => model.report_type)
-            </dt>
-    
-            <dd>
-                @Html.DisplayFor(model => model.report_type)
-            </dd>
-    
-            <dt>
-                @Html.DisplayNameFor(model => model.creator_id)
-            </dt>
-    
-            <dd>
-                @Html.DisplayFor(model => model.creator_id)
-            </dd>
-    
-            <dt>
-                @Html.DisplayNameFor(model => model.serialized)
-            </dt>
-    
-            <dd>
-                @Html.DisplayFor(model => model.serialized)
-            </dd>
-    
-        </dl>
-    </div>
-    <p>
-        @Html.ActionLink("Edit", "Edit", new { id = Model.id })
 
-    </p>
+
+<div>
+    <h4>Report</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.report_type)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.report_type)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.creator_id)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.creator_id)
+        </dd>
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.id })
+
+</p>

@@ -1,250 +1,205 @@
-﻿using System;
+﻿using AutoMapper;
+using cerberus.Models;
+using cerberus.Models.edmx;
+using cerberus.Models.Reports;
+using cerberus.Models.ViewModels;
+using cerberus.Models.ViewModels.Reports;
+using cerberus.Services;
+using Microsoft.AspNet.Identity;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
+using System.Data.Entity.Migrations;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Net;
-using System.Web;
 using System.Web.Mvc;
-using cerberus.Models;
-using cerberus.Models.edmx;
-using Microsoft.AspNet.Identity.Owin;
-using Microsoft.AspNet.Identity;
-using Microsoft.AspNet.Identity.EntityFramework;
-using cerberus.DTO;
-using cerberus.Models.Reports;
 
 namespace cerberus.Controllers
 {
     [ProvideMenu]
-    [Authorize403Attribute]
+    [Authorize403]
     public class WarehousesController : Controller
     {
-        private CerberusDBEntities db = new CerberusDBEntities();
-        private RoleManager<IdentityRole> roleManager = new RoleManager<IdentityRole>(new RoleStore<IdentityRole>(ApplicationDbContext.Create()));
-        private ApplicationUserManager userManager = new ApplicationUserManager(new UserStore<ApplicationUser>(new ApplicationDbContext()));
+        private CerberusDBEntities _db;
+        private IUserService _userManager;
+        private IGroupService _roleManager;
+        private IMapper _mapper;
+        private IWareHouseAccessService _updateWareHouseRolesService;
+        private IItemsRegistryService _itemRegistryService;
+        private IWarehouseService _warehouseService;
+        public WarehousesController(
+            CerberusDBEntities db,
+            IUserService userManager,
+            IGroupService roleManager,
+            IMapper mapper,
+            IWareHouseAccessService updateWareHouseRolesService,
+            IItemsRegistryService itemRegistryService,
+            IWarehouseService warehouseService
+            )
+        {
+            _mapper = mapper;
+            _db = db;
+            _userManager = userManager;
+            _roleManager = roleManager;
+            _updateWareHouseRolesService = updateWareHouseRolesService;
+            _itemRegistryService = itemRegistryService;
+            _warehouseService = warehouseService;
+        }
 
-
-        // GET: Warehouses
         [HttpGet]
-        [DepartmentAuthorize(level = GroupDepartmentClaim.Levels.Partial)]
+        [DepartmentAuthorize(level = DepartmentAccessLevels.Partial)]
         public async Task<ActionResult> Index(int id)
         {
             var user_id = User.Identity.GetUserId();
-            
-            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
 
-            ViewBag.ReturnUrl = @Request.Url.PathAndQuery;
-            
-            var wareHouses = GroupWareHouseClaim.get_group_warehouses(db, userManager, user_id).Where(w => w.department_id == id).ToList();
+            List<WarehouseViewModel> wareHouses =
+                (await (await _updateWareHouseRolesService.get_user_warehouses_async(user_id))
+                .Where(wh => wh.department_id == id).ToListAsync())
+                .Select(w => _mapper.Map<WarehouseViewModel>(w)).ToList();
+
             return View(wareHouses);
         }
 
-        // GET: Warehouses/Details/5
         [WareHouseAuthorize]
         public async Task<ActionResult> Details(int id)
         {
-
-
-            ViewBag.ReturnUrl = @Request.Url.PathAndQuery;
-
             var user_id = User.Identity.GetUserId();
-            
-            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
 
-            Warehouse warehouse = GroupWareHouseClaim.get_group_warehouses(db, userManager, user_id).Where(wh => wh.id == id).ToList().First();
-            ViewBag.StorageState = ItemsRegistry.get_list(db,Warehouse.get_storage_state(db, warehouse.id));
-            ViewBag.ReportList = await WareHouseReport.get_reports(db, warehouse.id);
-            ViewBag.Users = (await userManager.Users.ToListAsync()).ToDictionary(user => user.Id);
-            ViewBag.State = Warehouse.get_state(db, id);
-            return View(warehouse);
+            WarehouseViewModel model = _mapper.Map<WarehouseViewModel>(await _db.WareHouses.FindAsync(id));
+
+            ViewBag.ReportList = (await WareHouseReport.get_reports(_db, model.id)).ToList().Select(r => _mapper.Map<ReportViewModel>(r)).ToList();
+            ViewBag.State = _warehouseService.get_state(id);
+            ViewBag.StorageState = _itemRegistryService.get_list(_warehouseService.get_storage_state(id)).Select(i => (_mapper.Map<ItemViewModel>(i.Item1), i.Item2 )).ToList();
+            ViewBag.Users = (await _userManager.GetAllUsersAsync()).ToDictionary(user => user.Id, user => _mapper.Map<ApplicationUserViewModel>(user));
+
+            return View(model);
         }
 
-        // GET: Warehouses/Create
         [HttpGet]
-        [DepartmentAuthorize(level = GroupDepartmentClaim.Levels.Full)]
+        [DepartmentAuthorize(level = DepartmentAccessLevels.Full)]
         public async Task<ActionResult> Create(int id)
         {
-            var user_id = User.Identity.GetUserId();
-            
-            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
-
-            var departments_list = GroupDepartmentClaim.get_group_departments(db, userManager, user_id, GroupDepartmentClaim.Levels.Full);
-
-
-            ViewBag.ReturnUrl = HttpContext.Request.QueryString["returnUrl"];
-            ViewBag.department_id = new SelectList(departments_list, "id", "name");
             return View();
         }
 
-        // POST: Warehouses/Create
-        // Чтобы защититься от атак чрезмерной передачи данных, включите определенные свойства, для которых следует установить привязку. Дополнительные 
-        // сведения см. в разделе https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [DepartmentAuthorize(level = GroupDepartmentClaim.Levels.Full, Parameter = "department_id")]
-        public async Task<ActionResult> Create([Bind(Include = "id,name,department_id")] Warehouse warehouse, string returnUrl)
+        [DepartmentAuthorize(level = DepartmentAccessLevels.Full, Parameter = "department_id")]
+        public async Task<ActionResult> Create(WarehouseCreateModel model)
         {
             var user_id = User.Identity.GetUserId();
-            
-            var group_ids = await userManager.GetRolesAsync(user_id);
 
             if (ModelState.IsValid)
             {
-                warehouse = db.WareHouses.Add(warehouse);
-                
-                var group_name = db.GroupDepartmentClaims.Where(e => e.department_id == warehouse.department_id).Select(e => e.group_id).Prepend("Admin").Where(e => group_ids.Contains(e)).First();
-                var group_id = (await roleManager.FindByNameAsync(group_name)).Id;
-                db.GroupWareHouseClaims.Add(new GroupWareHouseClaim()
+                var adminID = (await _roleManager.GetGroupByNameAsync("Admin")).Id;
+
+                var group_ids = (await _userManager.GetUserGroupsByIdAsync(user_id)).Select(group => group.Id);
+                var wareHouse = _db.WareHouses.Add(_mapper.Map<Warehouse>(model));
+
+                var group_id = _db.GroupDepartmentClaims
+                    .Where(e => e.department_id == wareHouse.department_id)
+                    .Select(e => e.group_id)
+                    .Prepend(adminID)
+                    .Where(e => group_ids.Contains(e))
+                    .First();
+
+                _db.GroupWareHouseClaims.Add(new GroupWareHouseClaim()
                 {
                     group_id = group_id,
-                    warehouse_id = warehouse.id
+                    warehouse_id = wareHouse.id
                 });
-                
-                await db.SaveChangesAsync();
-                //return RedirectToAction("Index", "Warehouses", new { id = warehouse.department_id });
 
-                if (!String.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-                    return Redirect(returnUrl);
-                else
-                    return RedirectToAction("Index", "Home");
+                await _db.SaveChangesAsync();
+
+                return RedirectToAction("Index", "Home");
             }
 
-            //ViewBag.department_id = new SelectList(db.Departments, "id", "name", warehouse.department_id);
-            //return RedirectToAction("Index", "Warehouses", new { id = warehouse.department_id });
-            return View(warehouse);
+            return View(model);
         }
 
-        // GET: Warehouses/Edit/5
         [WareHouseAuthorize]
         public async Task<ActionResult> Edit(int id)
         {
-            var user_id = User.Identity.GetUserId();
-            
-            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
+            WarehouseEditModel model = _mapper.Map<WarehouseEditModel>(await _db.WareHouses.FindAsync(id));
 
-            Warehouse warehouse = GroupWareHouseClaim.get_group_warehouses(db, userManager, user_id).Where(wh => wh.id == id).First();
-
-            ViewBag.ReturnUrl = HttpContext.Request.QueryString["returnUrl"];
-            ViewBag.department_id = new SelectList(GroupDepartmentClaim.get_group_departments(db, userManager, user_id, GroupDepartmentClaim.Levels.Full), "id", "name", warehouse.department_id);
-            return View(warehouse);
+            return View(model);
         }
 
-        // POST: Warehouses/Edit/5
-        // Чтобы защититься от атак чрезмерной передачи данных, включите определенные свойства, для которых следует установить привязку. Дополнительные 
-        // сведения см. в разделе https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         [WareHouseAuthorize]
-        public async Task<ActionResult> Edit([Bind(Include = "id,name,department_id")] Warehouse warehouse, string returnUrl)
+        public async Task<ActionResult> Edit(WarehouseEditModel model)
         {
-
-            var user_id = User.Identity.GetUserId();
-            
-            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
-
             if (ModelState.IsValid)
             {
-                db.Entry(warehouse).State = EntityState.Modified;
-                await db.SaveChangesAsync();
-                if (!String.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-                    return Redirect(returnUrl);
-                else
-                    return RedirectToAction("Index", "Home");
+                var department = (await _db.WareHouses.FindAsync(model.id)).Department;
+                var wareHouse = _mapper.Map<Warehouse>(model);
+                wareHouse.department_id = department.id;
+
+                _db.WareHouses.AddOrUpdate(wareHouse);
+                await _db.SaveChangesAsync();
+
+                return RedirectToAction("Index", "Home");
             }
-            ViewBag.department_id = new SelectList(GroupDepartmentClaim.get_group_departments(db, userManager, user_id, GroupDepartmentClaim.Levels.Full), "id", "name", warehouse.department_id);
-            return View(warehouse);
+
+            return View(model);
         }
 
-        // GET: Warehouses/Delete/5
         [WareHouseAuthorize]
-        public async Task<ActionResult> Delete(int? id)
+        public async Task<ActionResult> Delete(int id)
         {
-            var user_id = User.Identity.GetUserId();
-            
-            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
+            WarehouseViewModel model = _mapper.Map<WarehouseViewModel>(await _db.WareHouses.FindAsync(id));
 
-            ViewBag.ReturnUrl = HttpContext.Request.QueryString["returnUrl"];
-
-
-            Warehouse warehouse = GroupWareHouseClaim.get_group_warehouses(db, userManager, user_id).Where(wh => wh.id == id).First();
-
-            return View(warehouse);
+            return View(model);
         }
 
-        // POST: Warehouses/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [WareHouseAuthorize]
-        public async Task<ActionResult> DeleteConfirmed(int id, string returnUrl)
+        public async Task<ActionResult> DeleteConfirmed(int id)
         {
             ViewBag.ReturnUrl = HttpContext.Request.QueryString["returnUrl"];
-            var user_id = User.Identity.GetUserId();
-            
-            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
 
-            Warehouse warehouse = GroupWareHouseClaim.get_group_warehouses(db, userManager, user_id).Where(wh => wh.id == id).First();
-            db.WareHouses.Remove(warehouse);
-            await db.SaveChangesAsync();
-            if (!String.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-                return Redirect(returnUrl);
-            else
-                return RedirectToAction("Index", "Home");
+            Warehouse wareHouse = await _db.WareHouses.FindAsync(id);
+            _db.WareHouses.Remove(wareHouse);
+            await _db.SaveChangesAsync();
+
+            return RedirectToAction("Index", "Home");
         }
-
 
         [Authorize403(Roles = "Admin")]
         [WareHouseAuthorize]
-        public async Task<ActionResult> ManageAccess(int id) {
-
-            var user_id = User.Identity.GetUserId();
-            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
-
-            var wh = GroupWareHouseClaim.get_group_warehouses(db, userManager, user_id).Where(p => p.id == id).First();
-
-            ViewBag.Roles = roleManager.Roles.ToList();
-
-            
-            return View(new WareHouseRolesDTO {
-                warehouse = wh,
-                Roles = db.GroupWareHouseClaims.Where(p => p.warehouse_id == id).ToList().Select(p => roleManager.FindById(p.group_id).Name).ToDictionary(kv => kv, kv => Guid.NewGuid().ToString()),
-            });
-        }
-        [Authorize403(Roles = "Admin")]
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        [WareHouseAuthorize]
-        public async Task<ActionResult> ManageAccess(int id, Dictionary<string, string> Roles)
+        public async Task<ActionResult> ManageAccess(int id)
         {
-            
-            var user_id = User.Identity.GetUserId();
-            var group_ids = (await userManager.GetRolesAsync(user_id)).Select(r => roleManager.FindByName(r)).ToList();
+            var wareHouse = await _db.WareHouses.FindAsync(id);
 
-            var wh = GroupWareHouseClaim.get_group_warehouses(db, userManager, user_id).Where(p => p.id == id).First();
+            ViewBag.Roles = (await _roleManager.GetAllGroupsAsync()).ToList();
 
-            db.GroupWareHouseClaims.RemoveRange(db.GroupWareHouseClaims.Where(p => p.warehouse_id == id));
+            WareHouseRolesEditModel model = _mapper.Map<WareHouseRolesEditModel>(wareHouse);
+            return View(model);
+        }
 
-            if (Roles != null)
+        [Authorize403(Roles = "Admin")]
+        [WareHouseAuthorize]
+        [ValidateAntiForgeryToken]
+        [HttpPost]
+        public async Task<ActionResult> ManageAccess(WareHouseRolesEditModel model)
+        {
+            if (ModelState.IsValid)
             {
-                foreach (var r in Roles)
-                {
-                    db.GroupWareHouseClaims.Add(new GroupWareHouseClaim()
-                    {
-                        warehouse_id = id,
-                        group_id = (await roleManager.FindByNameAsync(r.Value)).Id
-                    });
-                }
+                await _updateWareHouseRolesService.updatePreviligedGroups(model);
+                return RedirectToAction("Index", "Home");
             }
-            await db.SaveChangesAsync();
-            return RedirectToAction("Index", new { id = wh.department_id });
+
+            return View(model);
         }
 
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
-                db.Dispose();
+                //db.Dispose();
             }
             base.Dispose(disposing);
         }

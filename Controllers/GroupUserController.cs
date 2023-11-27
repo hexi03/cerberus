@@ -1,14 +1,13 @@
-﻿using cerberus.DTO;
+﻿using AutoMapper;
 using cerberus.Models;
 using cerberus.Models.edmx;
+using cerberus.Models.ViewModels;
+using cerberus.Services;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
-using Microsoft.AspNet.Identity.Owin;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Web;
 using System.Web.Mvc;
 
 namespace cerberus.Controllers
@@ -17,27 +16,39 @@ namespace cerberus.Controllers
     [Authorize403(Roles = "Admin")]
     public class GroupUserController : Controller
     {
-        private CerberusDBEntities db = new CerberusDBEntities();
-        private RoleManager<IdentityRole> roleManager = new RoleManager<IdentityRole>(new RoleStore<IdentityRole>(ApplicationDbContext.Create()));
-        private ApplicationUserManager userManager = new ApplicationUserManager(new UserStore<ApplicationUser>(new ApplicationDbContext()));
+        private CerberusDBEntities _db;
+        private IUserService _userManager;
+        private IGroupService _roleManager;
+        private IMapper _mapper;
 
+        public GroupUserController(
+            CerberusDBEntities db,
+            IUserService userManager,
+            IGroupService roleManager,
+            IMapper mapper
+            )
+        {
+            _mapper = mapper;
+            _db = db;
+            _userManager = userManager;
+            _roleManager = roleManager;
+        }
 
         // GET: GroupUser
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
-            ViewBag.Roles = roleManager.Roles.ToList();
-            ViewBag.Users = userManager.Users.ToList();
+            var userMapper = new ApplicationUserViewModel.Mapper();
+
+            ViewBag.Groups = (await _roleManager.GetAllGroupsAsync()).Select(r => _mapper.Map<GroupViewModel>(r)).ToList();
+            ViewBag.Users = (await _userManager.GetAllUsersAsync()).Select(r => userMapper.Convert((r, new List<IdentityRole>()), new ApplicationUserViewModel(), null)).ToList();
             return View();
         }
 
         // GET: GroupUser/Details/5
         public async Task<ActionResult> GroupDetails(string id)
         {
-            var group = await roleManager.FindByNameAsync(id);
-            if (group == null) {
-                return RedirectToAction("Index", "Home");
-            }
-            return View(group);
+            var model = _mapper.Map<GroupViewModel>(await _roleManager.GetGroupByNameAsync(id));
+            return View(model);
         }
 
         // GET: GroupUser/Create
@@ -48,14 +59,15 @@ namespace cerberus.Controllers
 
         // POST: GroupUser/Create
         [HttpPost]
-        public ActionResult GroupCreate(string id)
+        public async Task<ActionResult> GroupCreate(string id)
         {
             try
             {
-                if (id == null || id == "") {
+                if (id == null || id == "")
+                {
                     return RedirectToAction("Index", "Home");
                 }
-                roleManager.Create(new IdentityRole(id));
+                await _roleManager.CreateAsync(new IdentityRole(id));
                 return RedirectToAction("Index");
             }
             catch
@@ -68,20 +80,17 @@ namespace cerberus.Controllers
         // GET: GroupUser/Delete/5
         public async Task<ActionResult> GroupDelete(string id)
         {
-            var group = await roleManager.FindByNameAsync(id);
-            if (group == null)
-            {
-                return RedirectToAction("Index", "Home");
-            }
-            return View(group);
+            var model = _mapper.Map<GroupViewModel>(await _roleManager.GetGroupByNameAsync(id));
+
+            return View(model);
         }
 
         // POST: GroupUser/Delete/5
         [HttpPost]
         public async Task<ActionResult> GroupDeleteConfirmed(string id)
         {
-            await roleManager.DeleteAsync(await roleManager.FindByNameAsync(id));    
-            
+            await _roleManager.DeleteAsync(await _roleManager.GetGroupByNameAsync(id));
+
             return RedirectToAction("Index");
 
         }
@@ -90,127 +99,126 @@ namespace cerberus.Controllers
         // GET: GroupUser/Details/5
         public async Task<ActionResult> UserDetails(string id)
         {
-            var user = await userManager.FindByNameAsync(id);
-            if (user == null)
-            {
-                return RedirectToAction("Index", "Home");
-            }
-            ViewBag.Roles = roleManager.Roles.ToList();
-            return View(user);
+            
+            var model = new ApplicationUserViewModel.Mapper().Convert(
+                (await _userManager.GetUserByIdAsync(id), await _userManager.GetUserGroupsByIdAsync(id)),
+                new ApplicationUserViewModel(),
+                null
+                );
+
+            ViewBag.Groups = (await _roleManager.GetAllGroupsAsync()).Select(r => _mapper.Map<GroupViewModel>(r)).ToList();
+            return View(model);
         }
 
-        // GET: GroupUser/Create
-        public ActionResult Create()
-        {
-            ViewBag.Roles = roleManager.Roles.ToList();
-            return View();
-        }
 
         public async Task<ActionResult> UserCreate()
         {
-            ViewBag.Roles = roleManager.Roles.ToList();
+            ViewBag.Groups = (await _roleManager.GetAllGroupsAsync()).Select(r => _mapper.Map<GroupViewModel>(r)).ToList();
             return View();
         }
-            // POST: GroupUser/Create
+        // POST: GroupUser/Create
         [HttpPost]
-        public async Task<ActionResult> UserCreate(ApplicationUserDTO user)
+        public async Task<ActionResult> UserCreate(ApplicationUserCreateModel model)
         {
-            try
-            {
-                if (ModelState.IsValid && user.Password != null && user.Password != "")
-                {
-                    var res = await userManager.CreateAsync(new ApplicationUser(){
-                        UserName = user.Name
-                        },
-                        user.Password
-                    );
-                    if (!res.Succeeded) {
-                        return RedirectToAction("Index", "Home");
-                    }
-                    var newUser = await userManager.FindByNameAsync(user.Name);
-                    if (user.Roles != null) {
-                        foreach(var r in user.Roles)
-                        {
-                            await userManager.AddToRoleAsync(newUser.Id, r.Value);
-                        }
-                    }
 
-                    return RedirectToAction("Index");
-                }
-                return RedirectToAction("Index", "Home");
-            }
-            catch
+            if (ModelState.IsValid && model.Password != null && model.Password != "")
             {
-                return View();
+                var res = await _userManager.CreateAsync(new ApplicationUser()
+                {
+                    UserName = model.UserName
+                },
+                    model.Password
+                );
+                if (!res.Succeeded)
+                {
+                    return RedirectToAction("Index", "Home");
+                }
+                var newUser = await _userManager.GetUserByNameAsync(model.UserName);
+                if (model.getGroupIDs() != null)
+                {
+                    foreach (var r in model.getGroupIDs())
+                    {
+                        await _userManager.AddToRoleAsync(newUser.Id, r);
+                    }
+                }
+
+                return RedirectToAction("Index");
             }
+
+            ViewBag.Groups = (await _roleManager.GetAllGroupsAsync()).Select(r => _mapper.Map<GroupViewModel>(r)).ToList();
+            return View(model);
+
+
+
         }
 
         // GET: GroupUser/Edit/5
         public async Task<ActionResult> UserEdit(string id)
         {
-            var user = await userManager.FindByNameAsync(id);
-            if (user == null)
-            {
-                return RedirectToAction("Index", "Home");
-            }
-            ViewBag.Roles = roleManager.Roles.ToList();
-            return View(new ApplicationUserDTO (){
-                Name = user.UserName,
-                Roles = user.Roles.Select(r => roleManager.FindById(r.RoleId).Name).ToDictionary(kv => kv, kv => Guid.NewGuid().ToString())
-            });
+            var model = new ApplicationUserEditModel.Mapper().Convert(
+                (await _userManager.GetUserByIdAsync(id), await _userManager.GetUserGroupsByIdAsync(id)),
+                new ApplicationUserEditModel(),
+                null
+                );
+
+            ViewBag.Groups = (await _roleManager.GetAllGroupsAsync()).Select(r => _mapper.Map<GroupViewModel>(r)).ToList();
+
+            
+            return View(model);
         }
 
         // POST: GroupUser/Edit/5
         [HttpPost]
-        public async Task<ActionResult> UserEdit(ApplicationUserDTO user)
+        public async Task<ActionResult> UserEdit(ApplicationUserEditModel model)
         {
-            try
+            if (ModelState.IsValid)
             {
-                var user_entity = await userManager.FindByNameAsync(user.Name);
-                if (user_entity == null)
+                var user_entity = await _userManager.GetUserByIdAsync(model.Id);
+
+                foreach (var role in await _userManager.GetUserGroupsByIdAsync(user_entity.Id))
                 {
-                    return RedirectToAction("Index", "Home");
+                    await _userManager.RemoveFromRoleAsync(user_entity.Id, role);
                 }
 
-                if (user.Roles != null)
+                if (model.getGroupIDs() != null)
                 {
-                    foreach (var role in await userManager.GetRolesAsync(user_entity.Id))
+                    foreach (var r in model.getGroupIDs())
                     {
-                        await userManager.RemoveFromRoleAsync(user_entity.Id, role);
-                    }
-                
-                    foreach (var r in user.Roles)
-                    {
-                        await userManager.AddToRoleAsync(user_entity.Id, r.Value);
+                        await _userManager.AddToRoleAsync(user_entity.Id, r);
                     }
                 }
 
-                await userManager.UpdateAsync(user_entity);
+                user_entity.UserName = model.UserName;
+                await _userManager.UpdateAsync(user_entity);
 
-                if (user.Password != null)
+                if (model.Password != null)
                 {
-                    await userManager.RemovePasswordAsync(user_entity.Id);
-                    await userManager.AddPasswordAsync(user_entity.Id, user.Password);
+                    await _userManager.RemovePasswordAsync(user_entity.Id);
+                    await _userManager.AddPasswordAsync(user_entity.Id, model.Password);
                 }
 
                 return RedirectToAction("Index");
+
             }
-            catch
-            {
-                return View();
-            }
+            ViewBag.Groups = (await _roleManager.GetAllGroupsAsync()).Select(r => _mapper.Map<GroupViewModel>(r)).ToList();
+            return View(model);
+
         }
 
         // GET: GroupUser/Delete/5
         public async Task<ActionResult> UserDelete(string id)
         {
-            var user = await userManager.FindByNameAsync(id);
-            if (user == null)
-            {
-                return RedirectToAction("Index", "Home");
-            }
-            ViewBag.Roles = roleManager.Roles.ToList();
-            return View(user);
+            var model = new ApplicationUserViewModel.Mapper().Convert(
+                (await _userManager.GetUserByIdAsync(id), await _userManager.GetUserGroupsByIdAsync(id)),
+                new ApplicationUserViewModel(),
+                null
+                );
+
+
+            ViewBag.Groups = (await _roleManager.GetAllGroupsAsync()).Select(r => _mapper.Map<GroupViewModel>(r)).ToList();
+
+
+            return View(model);
         }
 
         // POST: GroupUser/Delete/5
@@ -218,14 +226,11 @@ namespace cerberus.Controllers
         public async Task<ActionResult> UserDeleteConfirmed(string id)
         {
 
-                var user = await userManager.FindByNameAsync(id);
-                if (user == null)
-                {
-                    return RedirectToAction("Index", "Home");
-                }
-                await userManager.DeleteAsync(user);
+            
 
-                return RedirectToAction("Index");
+            await _userManager.DeleteAsync(id);
+
+            return RedirectToAction("Index");
 
         }
     }

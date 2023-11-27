@@ -1,13 +1,9 @@
 ﻿using cerberus.Models.Reports;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity.Migrations;
 using System.Linq;
 using System.Text.Json;
-using System.Threading.Tasks;
-using System.Web;
-using System.Web.Services.Description;
 
 namespace cerberus.Models.edmx
 {
@@ -23,10 +19,6 @@ namespace cerberus.Models.edmx
             WHWorkShiftReplenishment,
             FSWorkShift,
             FSSupplyRequirement,
-//            MWorkPlan,
-  //          MProductments,
-    //        MSales,
-      //      MInventarisationPlan,
 
         }
         public Report(Types type)
@@ -68,7 +60,7 @@ namespace cerberus.Models.edmx
                 var e = db.Reports.Find(rep.id);
                 e.department_id = rep.department_id;
                 e.timestamp = rep.timestamp;
-                e.report_type   = rep.report_type;
+                e.report_type = rep.report_type;
                 e.creator_id = rep.creator_id;
                 e.serialized = rep.serialized;
                 db.Reports.AddOrUpdate(e);
@@ -76,7 +68,7 @@ namespace cerberus.Models.edmx
 
         }
 
-        
+
         public Report from_generic()
         {
             Report buf = null;
@@ -131,28 +123,7 @@ namespace cerberus.Models.edmx
         }
 
 
-        public string get_type_as_string()
-        {
-            switch ((Types)Enum.Parse(typeof(Types), report_type))
-            {
-                case Types.FSSupplyRequirement:
-                    return "Отчет о запросе снабжения";
-                case Types.FSWorkShift:
-                    return "Отчет о рабочей смене";
-                case Types.WHWorkShiftReplenishment:
-                    return "Отчет о приемке ПП смены";
-                case Types.WHReplenishment:
-                    return "Отчет о приемке";
-                case Types.WHShipment:
-                    return "Отчет об отгрузках";
-                case Types.WHRelease:
-                    return "Отчет о предоставлении РМ";
-                case Types.WHInventarisation:
-                    return "Отчет об инвентаризации";
-                default:
-                    return "Неизветный отчет";
-            }
-        }
+
 
 
 

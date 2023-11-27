@@ -1,4 +1,4 @@
-﻿@model cerberus.DTO.ApplicationUserDTO
+﻿@model cerberus.Models.ViewModels.ApplicationUserCreateModel
 
 @{
     ViewBag.Title = "Создать пользователя";
@@ -10,12 +10,12 @@
 {
     <div class="form-control container">
         @Html.Label("Имя пользователя")
-        @Html.TextBoxFor(model => model.Name, new { @class = "form-control" })
+        @Html.TextBoxFor(model => model.UserName, new { @class = "form-control" })
 
         @Html.Label("Пароль")
         @Html.PasswordFor(model => model.Password, new { @class = "form-control" })
 
-        @Html.Label("Роли")
+        @Html.Label("Группы")
         <div id="roleContainer">
             <button type="button" id="addRoleButton" class="btn btn-info">Добавить</button>
         </div>
@@ -28,9 +28,9 @@
 
 <div class="roleVariantStorage visually-hidden">
     <option value="">Выбрать роль</option>
-    @foreach (var role in ViewBag.Roles)
+    @foreach (var role in ViewBag.Groups)
     {
-        <option value="@role.Name">@role.Name</option>
+        <option value="@role.Id">@role.Name</option>
     }
 </div>
 @section scripts {
@@ -40,7 +40,7 @@
             $("#addRoleButton").click(function () {
                 var roleRow = '<div class="roleRow">' +
                     
-                    '<select class="form-control" name="Roles[' + ($(this).parent().length - 1) + ']">' +
+                    '<select class="form-control" name="Groups[' + ($(this).parent().length - 1) + ']">' +
                     $('.roleVariantStorage').html()
                 '</select>' +
                     '</div>';

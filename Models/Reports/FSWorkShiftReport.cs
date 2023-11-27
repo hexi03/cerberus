@@ -1,5 +1,5 @@
-﻿using cerberus.DTO.Reports;
-using cerberus.Models.edmx;
+﻿using cerberus.Models.edmx;
+using cerberus.Models.ViewModels.Reports;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,18 +16,16 @@ namespace cerberus.Models.Reports
         public Dictionary<int, int> losses { get; set; }
         public Dictionary<int, int> remains { get; set; }
 
-        public FSWorkShiftReport() : base(Types.FSWorkShift) {
+        public FSWorkShiftReport() : base(Types.FSWorkShift)
+        {
             produced = new Dictionary<int, int>();
             losses = new Dictionary<int, int>();
             remains = new Dictionary<int, int>();
         }
 
-        public static FSWorkShiftReport from(FSWorkShiftReportFormDTO dto)
+        public static FSWorkShiftReport from(FSWorkShiftReportFormViewModel dto)
         {
             var res = new FSWorkShiftReport();
-            res.creator_id = dto.creator_id;
-            res.department_id = dto.department_id;
-            res.timestamp = dto.timestamp;
 
             res.factorysite_id = dto.factorysite_id;
             res.target_warehouse_id = dto.target_warehouse_id;
@@ -35,7 +33,8 @@ namespace cerberus.Models.Reports
             {
                 res.produced = dto.produced.ToDictionary(kv => Convert.ToInt32(kv.Key), kv => Convert.ToInt32(kv.Value));
             }
-            else {
+            else
+            {
                 res.produced = new Dictionary<int, int>();
             }
 
@@ -56,8 +55,8 @@ namespace cerberus.Models.Reports
             {
                 res.remains = new Dictionary<int, int>();
             }
-            
-            
+
+
             return res;
 
         }
@@ -67,7 +66,8 @@ namespace cerberus.Models.Reports
             serialized = JsonSerializer.Serialize(this);
             return new Report(this);
         }
-        public static async Task<IList<FSWorkShiftReport>> get_unsatisfied(CerberusDBEntities db) {
+        public static async Task<IList<FSWorkShiftReport>> get_unsatisfied(CerberusDBEntities db)
+        {
             return Report.time_filter(db.Reports
                 .Where(r => r.report_type == Report.Types.FSWorkShift.ToString())).ToList()
                 .Select(r => (FSWorkShiftReport)r.from_generic()).ToList()
@@ -84,7 +84,7 @@ namespace cerberus.Models.Reports
                 .Select(r => (FSWorkShiftReport)r.from_generic()).ToList()
                 .Where(
                     r =>
-                    get_unsatisfied_item_list(db,r.id).Count() != 0
+                    get_unsatisfied_item_list(db, r.id).Count() != 0
                 ).ToList();
 
         }
@@ -103,7 +103,7 @@ namespace cerberus.Models.Reports
 
         }
 
-        public static IDictionary<int,int> get_unsatisfied_item_list(CerberusDBEntities db, int report_id)
+        public static IDictionary<int, int> get_unsatisfied_item_list(CerberusDBEntities db, int report_id)
         {
             var r_raw = db.Reports
                 .Find(report_id);
@@ -154,11 +154,12 @@ namespace cerberus.Models.Reports
         }
 
 
-        
 
 
 
-        public static IList<IWarning> get_warnings(CerberusDBEntities db, int factorysite_id) {
+
+        public static IList<IWarning> get_warnings(CerberusDBEntities db, int factorysite_id)
+        {
             var res = new List<IWarning>();
             res = res.Union((IList<IWarning>)get_reports_with_losses(db, factorysite_id).Select(r => (IWarning)new LossesWarning(r)).ToList()).ToList();
             //res = res.Union((IList<IWarning>)get_reports_with_remains(db, factorysite_id).Select(r => (IWarning)new RemainsWarning(r)).ToList()).ToList();

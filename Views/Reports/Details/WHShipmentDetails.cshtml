@@ -1,4 +1,4 @@
-﻿@model cerberus.Models.Reports.WHShipmentReport
+﻿@model cerberus.Models.ViewModels.Reports.WHShipmentReportFormViewModel
 
 
 <div class="container">
@@ -9,7 +9,8 @@
 
     <h5>Отгружено:</h5>
     <div>
-        @if(Model.items.Count() == 0) {
+        @if (Model.items.Count() == 0)
+        {
             <div>
                 <p>Ничего</p>
             </div>

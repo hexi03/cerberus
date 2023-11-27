@@ -1,5 +1,5 @@
 ﻿
-@model cerberus.DTO.ApplicationUserDTO
+@model cerberus.Models.ViewModels.ApplicationUserEditModel
 
 @{
     ViewBag.Title = "Изменить";
@@ -11,28 +11,30 @@
 {
     <div class="form-control">
         @Html.AntiForgeryToken()
-        @Html.HiddenFor(model => model.Name)
+        @Html.HiddenFor(model => model.UserName)
 
         @Html.Label("Пароль:")
-        @Html.PasswordFor(model => model.Password, new { @class = "form-control" , @placeholder = "неизменен"})
-    
-        <label for="Roles">Роли:</label>
+        @Html.PasswordFor(model => model.Password, new { @class = "form-control", @placeholder = "неизменен" })
+
+        <label for="Groups">Роли:</label>
         <div id="roleContainer">
 
             <button type="button" id="addRoleButton" class="btn btn-primary">Добавить</button>
-            @foreach (var selectedRole in Model.Roles)
-            {
-                <div class="roleRow">
+            @if(Model.Groups != null) {
+                foreach (var selectedRole in Model.Groups)
+                {
+                    <div class="roleRow">
 
-                    <select class="form-control" name="Roles[@selectedRole.Value]">
-                        <option value="">Выбрать роль</option>
-                        @foreach (var role in ViewBag.Roles)
-                        {
-                            <option value="@role.Name" @(role.Name == selectedRole.Key ? "selected" : "")>@role.Name</option>
-                        }
-                    </select>
-                    <button class="removeRole">Удалить</button>
-                </div>
+                        <select class="form-control" name="Groups[@selectedRole.Key]">
+                            <option value="">Выбрать роль</option>
+                            @foreach (var role in ViewBag.Groups)
+                            {
+                                <option value="@role.Id" @(role.Id == selectedRole.Value ? "selected" : "")>@role.Name</option>
+                            }
+                        </select>
+                        <button class="removeRole">Удалить</button>
+                    </div>
+                }
             }
         </div>
 
@@ -44,9 +46,9 @@
 @Html.ActionLink("Обратно", "Index")
 
 <div class="roleVariantStorage visually-hidden">
-    @foreach (var role in ViewBag.Roles)
+    @foreach (var role in ViewBag.Groups)
     {
-        <option value="@role.Name">@role.Name</option>
+        <option value="@role.Id">@role.Name</option>
     }
 </div>
 
@@ -55,7 +57,7 @@
         $(function () {
             $("#addRoleButton").click(function () {
                 var roleRow = '<div class="roleRow">' +
-                    '<select class="form-control" name="Roles[' + generateRandomUUID() + ']">' +
+                    '<select class="form-control" name="Groups[' + generateRandomUUID() + ']">' +
                     $('.roleVariantStorage').html() +
                     '</select>' +
                     '<button class="removeRole">Удалить</button>' +

@@ -1,5 +1,5 @@
 ﻿
-@model cerberus.Models.ApplicationUser
+@model cerberus.Models.ViewModels.ApplicationUserViewModel
 
 @{
     ViewBag.Title = "Удалить пользователя";
@@ -13,19 +13,19 @@
         <dd>@Model.UserName</dd>
         <dt>Роли:</dt>
         <dd>
-            @foreach (var role in Model.Roles)
-            {
-                var identityRoles = (ICollection<Microsoft.AspNet.Identity.EntityFramework.IdentityRole>)ViewBag.Roles;
-
-                @identityRoles.Where(r => r.Id == role.RoleId).First().Name
+            @if(Model.Groups != null) {
+                foreach (var role in Model.Groups)
+                {
+                    @role.Name
+                }
             }
         </dd>
     </dl>
 </div>
 
-@using (Html.BeginForm("UserDeleteConfirmed", "GroupUser", new { id = Model.UserName }, FormMethod.Post))
+@using (Html.BeginForm("UserDeleteConfirmed", "GroupUser", new { id = Model.Id }, FormMethod.Post))
 {
-    <input type="submit" value="Удалить"  class="btn btn-danger" />
+    <input type="submit" value="Удалить" class="btn btn-danger" />
 }
 
 @Html.ActionLink("Отмена", "Index")

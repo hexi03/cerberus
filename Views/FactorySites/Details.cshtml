@@ -1,7 +1,7 @@
-﻿@model cerberus.Models.edmx.FactorySite
+﻿@model cerberus.Models.ViewModels.FactorySiteViewModel
 
 @{
-    var users = ((Dictionary<string, cerberus.Models.ApplicationUser>)ViewBag.Users);
+    var users = ((Dictionary<string, cerberus.Models.ViewModels.ApplicationUserViewModel>)ViewBag.Users);
 }
 
 <div class="container">
@@ -35,7 +35,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var r in ((IList<cerberus.Models.Reports.FactorySiteReport>)ViewBag.ReportList))
+                    @foreach (var r in ((IList<cerberus.Models.ViewModels.Reports.ReportViewModel>)ViewBag.ReportList))
                     {
                         <tr>
                             <td>
@@ -58,18 +58,20 @@
         <div>
             <h4>Состояние</h4>
             <div>
-                @{ 
+                @{
                     var errors = (IList<IError>)ViewBag.State.Item1;
                     var warnings = (IList<IWarning>)ViewBag.State.Item2;
                 }
                 <div>
                     <h5>Ошибки</h5>
-                    @if (errors.Count() == 0) {
+                    @if (errors.Count() == 0)
+                    {
                         <p>Ничего</p>
                     }
-                    @foreach (var e in errors) {
+                    @foreach (var e in errors)
+                    {
                         @Html.Raw(e.get_html())
-                    } 
+                    }
                 </div>
                 <div>
                     <h5>Предупреждения</h5>
@@ -84,7 +86,7 @@
                 </div>
             </div>
         </div>
-        
+
     </div>
 </div>
 

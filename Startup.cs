@@ -1,8 +1,12 @@
 ﻿using cerberus.App_Start;
-using cerberus.Models;
+using cerberus.Mappers;
+using cerberus.Models.edmx;
+using cerberus.Services;
+using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.EntityFramework;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Owin;
 using Owin;
-using System.Web.Services.Description;
 
 [assembly: OwinStartupAttribute(typeof(cerberus.Startup))]
 namespace cerberus
@@ -14,6 +18,10 @@ namespace cerberus
             ConfigureAuth(app);
             RoleConfig.Configure(app);
             UserConfig.Configure(app);
+
+            
+
         }
+
     }
 }

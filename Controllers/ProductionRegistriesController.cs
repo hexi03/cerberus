@@ -1,18 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using AutoMapper;
+using cerberus.Models;
+using cerberus.Models.edmx;
+using cerberus.Models.ViewModels;
+using cerberus.Services;
+using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.EntityFramework;
+using Npgsql;
+using System;
 using System.Data;
 using System.Data.Entity;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Net;
-using System.Web;
+using System.Threading.Tasks;
 using System.Web.Mvc;
-using cerberus.Models;
-using cerberus.Models.edmx;
-using cerberus.DTO;
-using Microsoft.Ajax.Utilities;
-using System.Security.Cryptography;
-using Npgsql;
 
 namespace cerberus.Controllers
 {
@@ -22,19 +22,38 @@ namespace cerberus.Controllers
 
     public class ProductionRegistriesController : Controller
     {
-        private CerberusDBEntities db = new CerberusDBEntities();
+        private CerberusDBEntities _db;
+        private ApplicationUserManager _userManager;
+        private RoleManager<IdentityRole> _roleManager;
+        private IMapper _mapper;
+        private IItemsRegistryService _itemRegistryService;
+
+        public ProductionRegistriesController(
+            CerberusDBEntities db,
+            ApplicationUserManager userManager,
+            RoleManager<IdentityRole> roleManager,
+            IMapper mapper,
+            IItemsRegistryService itemRegistryService
+            )
+        {
+            _mapper = mapper;
+            _db = db;
+            _userManager = userManager;
+            _roleManager = roleManager;
+            _itemRegistryService = itemRegistryService;
+        }
 
         // GET: ProductionRegistries
         public async Task<ActionResult> Index()
         {
-            var products = db.ProductionRegistries
+            var products = _db.ProductionRegistries
                 .Include(p => p.ItemsRegistry)
-                .Include(p => p.ItemsRegistry1).GroupBy(p => p.ItemsRegistry).ToList().Select(pr => new ProductionRegistryItem
+                .Include(p => p.ItemsRegistry1).GroupBy(p => p.ItemsRegistry).ToList().Select(pr => new ProductionItemViewModel
                 {
-                    production_item = pr.Key,
-                    requirement_items = pr.Select(p => new { p.ItemsRegistry1, p.count }).ToDictionary(p => p.ItemsRegistry1, p => p.count)
+                    production_item = _mapper.Map<ItemViewModel>(pr.Key),
+                    requirement_items = pr.Select(p => new { p.ItemsRegistry1, p.count }).ToDictionary(p => _mapper.Map<ItemViewModel>(p.ItemsRegistry1), p => p.count)
                 }).ToList();
-                
+
 
             return View(products);
         }
@@ -47,14 +66,14 @@ namespace cerberus.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
 
-            if (!db.ItemsRegistries.Any(p => p.id == id)) { return RedirectToAction("Index"); }
+            if (!_db.ItemsRegistries.Any(p => p.id == id)) { return RedirectToAction("Index"); }
 
-            ProductionRegistryItem item = db.ProductionRegistries
+            ProductionItemViewModel item = _db.ProductionRegistries
                 .Include(p => p.ItemsRegistry)
-                .Include(p => p.ItemsRegistry1).Where(p => p.production_id == id).GroupBy(p => p.ItemsRegistry).ToList().Select(pr => new ProductionRegistryItem
+                .Include(p => p.ItemsRegistry1).Where(p => p.production_id == id).GroupBy(p => p.ItemsRegistry).ToList().Select(pr => new ProductionItemViewModel
                 {
-                    production_item = pr.Key,
-                    requirement_items = pr.Select(p => new { p.ItemsRegistry1, p.count }).ToDictionary(p => p.ItemsRegistry1, p => p.count)
+                    production_item = _mapper.Map<ItemViewModel>(pr.Key),
+                    requirement_items = pr.Select(p => new { p.ItemsRegistry1, p.count }).ToDictionary(p => _mapper.Map<ItemViewModel>(p.ItemsRegistry1), p => p.count)
                 }).First();
 
 
@@ -65,9 +84,8 @@ namespace cerberus.Controllers
         [HttpGet]
         public ActionResult Create()
         {
-            return View(new ProductionRegistryItem { 
-                
-            });
+            ViewBag.ItemVariants = new SelectList(_itemRegistryService.get_variants(), "id", "name");
+            return View();
         }
 
         // POST: ProductionRegistries/Create
@@ -75,46 +93,42 @@ namespace cerberus.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Create(ProductionRegistryItem productionRegistryItem)
+        public async Task<ActionResult> Create(ProductionItemCreateModel model)
         {
             if (ModelState.IsValid)
             {
-                if (!(db.ItemsRegistries
-                    .Any(p => p.id == productionRegistryItem.production_id))) {
-                    return RedirectToAction("Index");
-                }
-                var conn = (NpgsqlConnection)db.Database.Connection;
+
+                var conn = (NpgsqlConnection)_db.Database.Connection;
                 conn.Open();
 
-                if (!productionRegistryItem.requirement_ids.Select(p => (Key: Convert.ToInt32(p.Key),Value: Convert.ToInt32(p.Value))).All(p1 => db.ItemsRegistries.Any(p => p.id == p1.Key))) { return RedirectToAction("Index"); }
-                foreach (var p1 in productionRegistryItem.requirement_ids)
+
+                foreach (var p1 in model.requirement_ids)
                 {
                     ProductionRegistry item = new ProductionRegistry();
 
-                    item.production_id = productionRegistryItem.production_id;
+                    item.production_id = model.production_id;
                     item.requirement_id = Convert.ToInt32(p1.Key);
                     item.count = Convert.ToInt32(p1.Value);
 
-                    //db.ProductionRegistries.Add(item);
-                    
                     using (var cmd = new NpgsqlCommand("INSERT INTO \"public\".\"ProductionRegistry\" (\"production_id\", \"requirement_id\", \"count\") VALUES (@ProductionId, @RequirementId, @Count) RETURNING \"id\"", conn))
                     {
-                        cmd.Parameters.AddWithValue("ProductionId", productionRegistryItem.production_id);
+                        cmd.Parameters.AddWithValue("ProductionId", model.production_id);
                         cmd.Parameters.AddWithValue("RequirementId", Convert.ToInt32(p1.Key));
                         cmd.Parameters.AddWithValue("Count", Convert.ToInt32(p1.Value));
 
                         var insertedId = cmd.ExecuteScalar();
-                        
+
                     }
 
                 }
                 conn.Close();
-                //await db.SaveChangesAsync();
-                return RedirectToAction("Index");
+
+                ViewBag.ItemVariants = new SelectList(_itemRegistryService.get_variants(), "id", "name");
+                return RedirectToAction("Index", "Home");
             }
 
-            productionRegistryItem.requirement_items = db.ItemsRegistries.ToDictionary(p => p, p => 1);
-            return View(productionRegistryItem);
+
+            return View(model);
         }
 
         // GET: ProductionRegistries/Edit/5
@@ -124,13 +138,13 @@ namespace cerberus.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            if (!db.ItemsRegistries.Any(p => p.id == id)) { return RedirectToAction("Index"); }
-            ProductionRegistryItem item = db.ProductionRegistries
+            if (!_db.ItemsRegistries.Any(p => p.id == id)) { return RedirectToAction("Index"); }
+            ProductionItemEditModel item = _db.ProductionRegistries
                 .Include(p => p.ItemsRegistry)
-                .Include(p => p.ItemsRegistry1).Where(p => p.production_id == id).GroupBy(p => p.ItemsRegistry).ToList().Select(pr => new ProductionRegistryItem
+                .Include(p => p.ItemsRegistry1).Where(p => p.production_id == id).GroupBy(p => p.ItemsRegistry).ToList().Select(pr => new ProductionItemEditModel
                 {
-                    production_item = pr.Key,
-                    requirement_items = pr.Select(p => new { p.ItemsRegistry1, p.count }).ToDictionary(p => p.ItemsRegistry1, p => p.count)
+                    production_item = _mapper.Map<ItemViewModel>(pr.Key),
+                    requirement_items = pr.Select(p => new { p.ItemsRegistry1, p.count }).ToDictionary(p => _mapper.Map<ItemViewModel>(p.ItemsRegistry1), p => p.count)
                 }).First();
             return View(item);
         }
@@ -138,47 +152,33 @@ namespace cerberus.Controllers
         // POST: ProductionRegistries/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit(ProductionRegistryItem productionRegistryItem)
+        public async Task<ActionResult> Edit(ProductionItemEditModel model)
         {
             if (ModelState.IsValid)
             {
-                if (!db.ItemsRegistries.Any(p => p.id == productionRegistryItem.production_id)) { return RedirectToAction("Index"); }
-                if (!productionRegistryItem.requirement_ids.Select(p => (Key: Convert.ToInt32(p.Key), Value: Convert.ToInt32(p.Value))).All(p1 => db.ItemsRegistries.Any(p => p.id == p1.Key))) { return RedirectToAction("Index"); }
 
-                /*db.ProductionRegistries.Where(p => p.production_id == productionRegistryItem.production_id).ForEach(p =>
-                {
-                    db.ProductionRegistries.Remove(p);
-                });
-                await db.SaveChangesAsync();
-
-*/
-
-
-                var conn = (NpgsqlConnection)db.Database.Connection;
+                var conn = (NpgsqlConnection)_db.Database.Connection;
                 conn.Open();
 
                 using (var cmd = new NpgsqlCommand("DELETE FROM \"public\".\"ProductionRegistry\" WHERE \"production_id\" = @ProductionId", conn))
                 {
-                    cmd.Parameters.AddWithValue("ProductionId", productionRegistryItem.production_id);
+                    cmd.Parameters.AddWithValue("ProductionId", model.production_id);
 
                     var insertedId = cmd.ExecuteNonQuery();
 
                 }
 
-
-                foreach (var p1 in productionRegistryItem.requirement_ids)
+                foreach (var p1 in model.requirement_ids)
                 {
                     ProductionRegistry item = new ProductionRegistry();
 
-                    item.production_id = productionRegistryItem.production_id;
+                    item.production_id = model.production_id;
                     item.requirement_id = Convert.ToInt32(p1.Key);
                     item.count = Convert.ToInt32(p1.Value);
 
-                    //db.ProductionRegistries.Add(item);
-
                     using (var cmd = new NpgsqlCommand("INSERT INTO \"public\".\"ProductionRegistry\" (\"production_id\", \"requirement_id\", \"count\") VALUES (@ProductionId, @RequirementId, @Count) RETURNING \"id\"", conn))
                     {
-                        cmd.Parameters.AddWithValue("ProductionId", productionRegistryItem.production_id);
+                        cmd.Parameters.AddWithValue("ProductionId", model.production_id);
                         cmd.Parameters.AddWithValue("RequirementId", Convert.ToInt32(p1.Key));
                         cmd.Parameters.AddWithValue("Count", Convert.ToInt32(p1.Value));
 
@@ -188,19 +188,11 @@ namespace cerberus.Controllers
 
                 }
                 conn.Close();
-                /*productionRegistryItem.requirement_ids.Select(p => (Key: Convert.ToInt32(p.Key), Value: Convert.ToInt32(p.Value))).ForEach(p1 =>
-                    db.ProductionRegistries.Add(new ProductionRegistry
-                    {
-                        production_id = productionRegistryItem.production_id,
-                        requirement_id = p1.Key,
-                        count = Convert.ToInt32(p1.Value)
-                    })
-                );
-                await db.SaveChangesAsync();*/
+
                 return RedirectToAction("Index");
             }
 
-            return View(productionRegistryItem);
+            return View(model);
         }
 
         // GET: ProductionRegistries/Delete/5
@@ -210,13 +202,13 @@ namespace cerberus.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            if (!db.ItemsRegistries.Any(p => p.id == id)) { return RedirectToAction("Index"); }
-            ProductionRegistryItem item = db.ProductionRegistries
+            if (!_db.ItemsRegistries.Any(p => p.id == id)) { return RedirectToAction("Index"); }
+            ProductionItemViewModel item = _db.ProductionRegistries
                 .Include(p => p.ItemsRegistry)
-                .Include(p => p.ItemsRegistry1).Where(p => p.production_id == id).GroupBy(p => p.ItemsRegistry).ToList().Select(pr => new ProductionRegistryItem
+                .Include(p => p.ItemsRegistry1).Where(p => p.production_id == id).GroupBy(p => p.ItemsRegistry).ToList().Select(pr => new ProductionItemViewModel
                 {
-                    production_item = pr.Key,
-                    requirement_items = pr.Select(p => new { p.ItemsRegistry1, p.count }).ToDictionary(p => p.ItemsRegistry1, p => p.count)
+                    production_item = _mapper.Map<ItemViewModel>(pr.Key),
+                    requirement_items = pr.Select(p => new { p.ItemsRegistry1, p.count }).ToDictionary(p => _mapper.Map<ItemViewModel>(p.ItemsRegistry1), p => p.count)
                 }).First();
             return View(item);
         }
@@ -226,14 +218,9 @@ namespace cerberus.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> DeleteConfirmed(int id)
         {
-            if (!db.ItemsRegistries.Any(p => p.id == id)) { return RedirectToAction("Index"); }
-            /*
-            db.ProductionRegistries.Where(p => p.production_id == id).ForEach(p =>
-            {
-                db.ProductionRegistries.Remove(p);
-            });
-            await db.SaveChangesAsync();*/
-            var conn = (NpgsqlConnection)db.Database.Connection;
+            if (!_db.ItemsRegistries.Any(p => p.id == id)) { return RedirectToAction("Index"); }
+
+            var conn = (NpgsqlConnection)_db.Database.Connection;
             conn.Open();
 
             using (var cmd = new NpgsqlCommand("DELETE FROM \"public\".\"ProductionRegistry\" WHERE \"production_id\" = @ProductionId", conn))
@@ -249,10 +236,6 @@ namespace cerberus.Controllers
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing)
-            {
-                db.Dispose();
-            }
             base.Dispose(disposing);
         }
     }
